@@ -109,7 +109,16 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
         break;
     }
     
-    return sortOrder === "asc" ? comparison : -comparison;
+    // Aplicar ordem principal
+    const primaryComparison = sortOrder === "asc" ? comparison : -comparison;
+    
+    // Se houver empate, usar Natureza como critério secundário (Entrada antes de Saída)
+    if (primaryComparison === 0 && sortField !== "nature") {
+      // "Entrada" vem antes de "Saída" alfabeticamente, então usamos localeCompare diretamente
+      return a.nature.localeCompare(b.nature);
+    }
+    
+    return primaryComparison;
   });
 
   // Calcular saldo acumulado

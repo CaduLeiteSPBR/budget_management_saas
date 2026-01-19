@@ -114,3 +114,7 @@
 - [x] Implementar ordenação por data, descrição, valor e natureza
 - [x] Adicionar coluna de saldo acumulado após cada transação
 - [x] Calcular saldo progressivo considerando ordem cronológica
+
+## 15. Ordenação Secundária por Natureza
+- [x] Modificar lógica de ordenação para usar Natureza como critério secundário
+- [x] Priorizar Entradas antes de Saídas em caso de empate no critério principal
