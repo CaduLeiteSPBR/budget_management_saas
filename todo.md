@@ -182,3 +182,8 @@
 - [x] Salvar lançamentos confirmados individualmente
 - [x] Testes unitários para processamento de CSV e OFX
 - [x] Correção de bug de parsing de valores decimais
+
+## Bug Reportado (Importação de PDF)
+- [x] Corrigir erro "Dynamic require of pdf-parse is not supported" ao processar PDF
+- [x] Substituir pdf-parse por processamento direto com IA multimodal (file_url)
+- [x] IA agora lê PDF visualmente usando data URL base64

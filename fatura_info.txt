@@ -1,0 +1,17 @@
+Fatura C6 Bank - Carlos Eduardo
+Valor total: R$ 21.706,54
+Vencimento: 20 de Dezembro
+Banco: C6 Bank
+Cartão: Mastercard
+
+As transações individuais devem estar nas páginas seguintes do PDF.
+A IA precisa extrair cada compra/transação individual, ignorando:
+- Totais e resumos
+- Opções de pagamento
+- Encargos e taxas
+- Informações de cabeçalho/rodapé
+
+Formato esperado de saída:
+- Descrição da compra
+- Valor individual
+- Natureza: "Saída" (compras normais) ou "Entrada" (estornos/créditos)

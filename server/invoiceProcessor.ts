@@ -1,5 +1,4 @@
 import { invokeLLM } from "./_core/llm";
-const pdfParse = require("pdf-parse");
 import Papa from "papaparse";
 
 export interface ExtractedTransaction {
@@ -18,17 +17,17 @@ export async function processPDFInvoice(
   fileBuffer: Buffer,
   bankName: string
 ): Promise<ExtractedTransaction[]> {
-  // Extrair texto do PDF
-  const pdfData = await pdfParse(fileBuffer);
-  const text = pdfData.text;
+  // Converter buffer para base64
+  const base64Pdf = fileBuffer.toString('base64');
+  const dataUrl = `data:application/pdf;base64,${base64Pdf}`;
 
-  // Usar IA para extrair transações do texto
+  // Usar IA para extrair transações diretamente do PDF
   const response = await invokeLLM({
     messages: [
       {
         role: "system",
         content: `Você é um assistente especializado em extrair transações de faturas de cartão de crédito.
-Analise o texto da fatura e extraia TODAS as transações encontradas.
+Analise o PDF da fatura e extraia TODAS as transações encontradas.
 Para cada transação, identifique:
 - Descrição (limpa e sem caracteres especiais desnecessários)
 - Valor (sempre positivo, número decimal)
@@ -39,7 +38,19 @@ Extraia APENAS as transações individuais.`,
       },
       {
         role: "user",
-        content: `Extraia todas as transações desta fatura do banco ${bankName}:\n\n${text}`,
+        content: [
+          {
+            type: "text",
+            text: `Extraia todas as transações desta fatura do banco ${bankName}`,
+          },
+          {
+            type: "file_url",
+            file_url: {
+              url: dataUrl,
+              mime_type: "application/pdf",
+            },
+          },
+        ],
       },
     ],
     response_format: {
