@@ -129,3 +129,8 @@
 - [x] Adicionar card de Saldo Inicial do período
 - [x] Adicionar card de Saldo Final do período
 - [x] Calcular saldos baseados no período filtrado
+
+## Bugs Reportados (Novos)
+- [x] Ajustar cores dos gráficos para ficarem visíveis no tema dark
+- [x] Adicionar cores vibrantes e contrastantes nos gráficos de rosca
+- [x] Melhorar visibilidade do gráfico de linha de projeção

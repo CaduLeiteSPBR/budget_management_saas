@@ -27,9 +27,9 @@ export default function OverviewDashboard() {
 
   // Distribuição por Divisão (Gráfico de Rosca)
   const divisionData = [
-    { name: "Pessoal", value: 0, color: "hsl(var(--chart-1))" },
-    { name: "Familiar", value: 0, color: "hsl(var(--chart-2))" },
-    { name: "Investimento", value: 0, color: "hsl(var(--chart-3))" }
+    { name: "Pessoal", value: 0, color: "#3b82f6" }, // Azul vibrante
+    { name: "Familiar", value: 0, color: "#8b5cf6" }, // Roxo vibrante
+    { name: "Investimento", value: 0, color: "#10b981" } // Verde vibrante
   ];
 
   monthTransactions.forEach(t => {
@@ -41,10 +41,10 @@ export default function OverviewDashboard() {
 
   // Distribuição por Tipo (Gráfico de Rosca)
   const typeData = [
-    { name: "Essencial", value: 0, color: "hsl(var(--chart-1))" },
-    { name: "Importante", value: 0, color: "hsl(var(--chart-2))" },
-    { name: "Conforto", value: 0, color: "hsl(var(--chart-3))" },
-    { name: "Investimento", value: 0, color: "hsl(var(--chart-4))" }
+    { name: "Essencial", value: 0, color: "#ef4444" }, // Vermelho vibrante
+    { name: "Importante", value: 0, color: "#f59e0b" }, // Laranja vibrante
+    { name: "Conforto", value: 0, color: "#06b6d4" }, // Ciano vibrante
+    { name: "Investimento", value: 0, color: "#10b981" } // Verde vibrante
   ];
 
   monthTransactions.forEach(t => {
@@ -233,14 +233,16 @@ export default function OverviewDashboard() {
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={projectionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
                 dataKey="month" 
-                stroke="hsl(var(--muted-foreground))"
+                stroke="#9ca3af"
+                style={{ fontSize: '12px' }}
               />
               <YAxis 
-                stroke="hsl(var(--muted-foreground))"
+                stroke="#9ca3af"
                 tickFormatter={(value) => formatCurrency(value)}
+                style={{ fontSize: '12px' }}
               />
               <Tooltip 
                 formatter={(value: number) => formatCurrency(value)}
@@ -254,23 +256,23 @@ export default function OverviewDashboard() {
               <Line 
                 type="monotone" 
                 dataKey="Entradas" 
-                stroke="hsl(var(--income))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--income))' }}
+                stroke="#10b981" 
+                strokeWidth={3}
+                dot={{ fill: '#10b981', r: 4 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="Saídas" 
-                stroke="hsl(var(--expense))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--expense))' }}
+                stroke="#ef4444" 
+                strokeWidth={3}
+                dot={{ fill: '#ef4444', r: 4 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="Saldo" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))' }}
+                stroke="#3b82f6" 
+                strokeWidth={3}
+                dot={{ fill: '#3b82f6', r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
