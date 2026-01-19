@@ -17,7 +17,7 @@ import {
   Users
 } from "lucide-react";
 import { Link } from "wouter";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FolderOpen } from "lucide-react";
 import OverviewDashboard from "@/components/OverviewDashboard";
 
 export default function Dashboard() {
@@ -79,6 +79,12 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/categories">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <FolderOpen className="w-4 h-4" />
+                  <span className="hidden md:inline">Categorias</span>
+                </Button>
+              </Link>
               {user?.role === 'admin' && (
                 <Link href="/admin">
                   <Button variant="outline" size="sm">

@@ -84,3 +84,13 @@
 - [x] Ações de editar e excluir transações
 - [x] Modal de confirmação de exclusão
 - [x] Indicadores visuais de entradas (verde) e saídas (vermelho)
+
+## 12. Página de Categorias
+- [x] Formulário de criação de categoria com validação
+- [x] Campos: nome, divisão, tipo, cor e ícone
+- [x] Listagem de categorias organizada
+- [x] Agrupamento por divisão e tipo
+- [x] Ações de editar e excluir categorias
+- [x] Modal de confirmação de exclusão
+- [x] Seletor de cores visual
+- [x] Preview da categoria com cor e ícone
