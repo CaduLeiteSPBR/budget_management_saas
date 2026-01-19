@@ -37,7 +37,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Ordem ascendente (cronológica)
   
   // Filtros de período
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
@@ -105,7 +105,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     return true;
   });
 
-  // Ordenar transações
+  // Ordenar transações com múltiplos critérios
   const sortedTransactions = [...(filteredTransactions || [])].sort((a, b) => {
     let comparison = 0;
     
@@ -126,14 +126,33 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     
     // Aplicar ordem principal
     const primaryComparison = sortOrder === "asc" ? comparison : -comparison;
+    if (primaryComparison !== 0) return primaryComparison;
     
-    // Se houver empate, usar Natureza como critério secundário (Entrada antes de Saída)
-    if (primaryComparison === 0 && sortField !== "nature") {
-      // "Entrada" vem antes de "Saída" alfabeticamente, então usamos localeCompare diretamente
-      return a.nature.localeCompare(b.nature);
+    // Critérios secundários (sempre ascendente): Data → Natureza → Divisão → Tipo → Categoria
+    
+    // 1. Data
+    if (sortField !== "date") {
+      const dateComp = a.date - b.date;
+      if (dateComp !== 0) return dateComp;
     }
     
-    return primaryComparison;
+    // 2. Natureza (Entrada antes de Saída)
+    if (sortField !== "nature") {
+      const natureComp = a.nature.localeCompare(b.nature);
+      if (natureComp !== 0) return natureComp;
+    }
+    
+    // 3. Divisão
+    const divisionComp = (a.division || "").localeCompare(b.division || "");
+    if (divisionComp !== 0) return divisionComp;
+    
+    // 4. Tipo
+    const typeComp = (a.type || "").localeCompare(b.type || "");
+    if (typeComp !== 0) return typeComp;
+    
+    // 5. Categoria
+    const categoryComp = (a.categoryName || "").localeCompare(b.categoryName || "");
+    return categoryComp;
   });
 
   // Calcular saldo acumulado
@@ -388,8 +407,31 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactionsWithBalance.map((transaction) => (
-                    <TableRow key={transaction.id}>
+                  {transactionsWithBalance.map((transaction, index) => {
+                    // Determinar cor alternada baseada em mudança de data
+                    let isNewDateGroup = false;
+                    if (index === 0) {
+                      isNewDateGroup = true;
+                    } else {
+                      const prevDate = new Date(transactionsWithBalance[index - 1].date).toDateString();
+                      const currentDate = new Date(transaction.date).toDateString();
+                      isNewDateGroup = prevDate !== currentDate;
+                    }
+                    
+                    // Contar quantos grupos de data já passaram
+                    let dateGroupIndex = 0;
+                    for (let i = 0; i < index; i++) {
+                      const prevDate = new Date(transactionsWithBalance[i].date).toDateString();
+                      const currentDate = new Date(transactionsWithBalance[i + 1]?.date || transaction.date).toDateString();
+                      if (prevDate !== currentDate) {
+                        dateGroupIndex++;
+                      }
+                    }
+                    
+                    const rowBgClass = dateGroupIndex % 2 === 0 ? "" : "bg-muted/30";
+                    
+                    return (
+                    <TableRow key={transaction.id} className={rowBgClass}>
                       <TableCell className="font-medium">
                         {formatDate(transaction.date)}
                       </TableCell>
@@ -467,7 +509,8 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

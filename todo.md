@@ -134,3 +134,11 @@
 - [x] Ajustar cores dos gráficos para ficarem visíveis no tema dark
 - [x] Adicionar cores vibrantes e contrastantes nos gráficos de rosca
 - [x] Melhorar visibilidade do gráfico de linha de projeção
+
+## 17. Melhorias de Ordenação e Visualização
+- [x] Alterar ordenação padrão para ascendente (ordem cronológica)
+- [x] Implementar ordenação multi-nível: Data → Natureza → Divisão → Tipo → Categoria
+- [x] Aplicar ordenação padrão ao carregar pela primeira vez
+- [x] Manter ordenação após salvar novo lançamento
+- [x] Adicionar cores alternadas nas linhas agrupadas por data
+- [x] Facilitar distinção visual de lançamentos de dias diferentes
