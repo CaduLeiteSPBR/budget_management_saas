@@ -73,4 +73,14 @@
 - [x] Documentação de acesso ao sistema
 - [x] Credenciais do usuário admin inicial
 - [x] Guia de uso das funcionalidades
-- [ ] Checkpoint final do projeto
+- [x] Checkpoint final do projeto
+
+## 11. Página de Lançamentos
+- [x] Formulário de criação de lançamento com validação
+- [x] Integração com IA para sugestões automáticas
+- [x] Seleção de categorias existentes
+- [x] Listagem de transações com paginação
+- [x] Filtros por data, natureza, divisão e tipo
+- [x] Ações de editar e excluir transações
+- [x] Modal de confirmação de exclusão
+- [x] Indicadores visuais de entradas (verde) e saídas (vermelho)
