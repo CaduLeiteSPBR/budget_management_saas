@@ -150,3 +150,7 @@
 ## Bugs e Melhorias (Dashboard)
 - [x] Corrigir cálculo de Entradas no gráfico (removido filtro isPaid que excluía transações)
 - [x] Remover botão Parcelamentos da tela inicial (funcionalidade já integrada em Lançamentos)
+
+## Bug Crítico (Gráfico de Projeção)
+- [x] Corrigir cálculo do gráfico de projeção de 12 meses (não inclui todas as transações)
+- [x] Remover filtro isPaid do cálculo de projeção mensal

@@ -66,11 +66,11 @@ export default function OverviewDashboard() {
     ) || [];
 
     const income = monthTrans
-      .filter(t => t.nature === "Entrada" && t.isPaid)
+      .filter(t => t.nature === "Entrada")
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const expense = monthTrans
-      .filter(t => t.nature === "Saída" && t.isPaid)
+      .filter(t => t.nature === "Sa\u00edda")
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
     projectionData.push({
