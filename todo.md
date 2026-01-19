@@ -118,3 +118,14 @@
 ## 15. Ordenação Secundária por Natureza
 - [x] Modificar lógica de ordenação para usar Natureza como critério secundário
 - [x] Priorizar Entradas antes de Saídas em caso de empate no critério principal
+
+## 16. Melhorias na Tela de Lançamentos
+- [x] Adicionar coluna Categoria entre Tipo e Valor
+- [x] Implementar combo-box de mês no topo
+- [x] Implementar combo-box de ano no topo
+- [x] Adicionar botão Aplicar para filtros de mês/ano
+- [x] Inicializar filtros com mês e ano atuais
+- [x] Aplicar filtro automaticamente ao carregar
+- [x] Adicionar card de Saldo Inicial do período
+- [x] Adicionar card de Saldo Final do período
+- [x] Calcular saldos baseados no período filtrado

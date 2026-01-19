@@ -26,6 +26,11 @@ interface TransactionsListProps {
 export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const utils = trpc.useUtils();
   
+  // Obter mês e ano atuais
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentYear = now.getFullYear();
+  
   const [filterNature, setFilterNature] = useState<string>("all");
   const [filterDivision, setFilterDivision] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
@@ -33,8 +38,18 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  
+  // Filtros de período
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [appliedMonth, setAppliedMonth] = useState<number>(currentMonth);
+  const [appliedYear, setAppliedYear] = useState<number>(currentYear);
 
-  const { data: transactions, isLoading } = trpc.transactions.list.useQuery();
+  // Calcular startDate e endDate baseado no período aplicado
+  const startDate = Date.UTC(appliedYear, appliedMonth - 1, 1);
+  const endDate = Date.UTC(appliedYear, appliedMonth, 0, 23, 59, 59, 999);
+
+  const { data: transactions, isLoading } = trpc.transactions.list.useQuery({ startDate, endDate });
 
   const deleteMutation = trpc.transactions.delete.useMutation({
     onSuccess: () => {
@@ -151,24 +166,113 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     );
   }
 
+  const applyPeriodFilter = () => {
+    setAppliedMonth(selectedMonth);
+    setAppliedYear(selectedYear);
+  };
+
+  // Calcular saldo inicial e final do período
+  const initialBalance = 0; // TODO: buscar saldo anterior ao período
+  let periodBalance = initialBalance;
+  transactionsWithBalance.forEach((t) => {
+    const amount = Number(t.amount);
+    periodBalance += t.nature === "Entrada" ? amount : -amount;
+  });
+  const finalBalance = periodBalance;
+
+  const months = [
+    { value: 1, label: "Janeiro" },
+    { value: 2, label: "Fevereiro" },
+    { value: 3, label: "Março" },
+    { value: 4, label: "Abril" },
+    { value: 5, label: "Maio" },
+    { value: 6, label: "Junho" },
+    { value: 7, label: "Julho" },
+    { value: 8, label: "Agosto" },
+    { value: 9, label: "Setembro" },
+    { value: 10, label: "Outubro" },
+    { value: 11, label: "Novembro" },
+    { value: 12, label: "Dezembro" },
+  ];
+
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
+
   return (
     <>
+      {/* Cards de Saldo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <Card className="glass border-border">
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-1">Saldo Inicial</div>
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(initialBalance)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="glass border-border">
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground mb-1">Saldo Final</div>
+            <div className={`text-2xl font-bold ${finalBalance >= 0 ? 'text-income' : 'text-expense'}`}>
+              {formatCurrency(finalBalance)}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="glass border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <CardTitle>Lançamentos</CardTitle>
               <CardDescription>
-                {filteredTransactions?.length || 0} transação(ões) encontrada(s)
+                {transactionsWithBalance?.length || 0} transação(ões) encontrada(s)
               </CardDescription>
             </div>
+          </div>
+
+          {/* Filtros de Período */}
+          <div className="flex flex-wrap items-end gap-3 mb-4">
+            <div className="flex-1 min-w-[150px]">
+              <label className="text-sm font-medium mb-2 block">Mês</label>
+              <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(Number(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((m) => (
+                    <SelectItem key={m.value} value={m.value.toString()}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1 min-w-[120px]">
+              <label className="text-sm font-medium mb-2 block">Ano</label>
+              <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y} value={y.toString()}>
+                      {y}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={applyPeriodFilter} className="mb-0">
+              Aplicar
+            </Button>
             {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 mb-0">
                 <X className="w-4 h-4" />
                 Limpar Filtros
               </Button>
             )}
           </div>
+
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filtros */}
@@ -265,6 +369,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                     </TableHead>
                     <TableHead>Divisão</TableHead>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Categoria</TableHead>
                     <TableHead 
                       className="text-right cursor-pointer select-none hover:bg-accent/50"
                       onClick={() => handleSort("amount")}
@@ -321,6 +426,13 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                       <TableCell>
                         {transaction.type ? (
                           <Badge variant="outline">{transaction.type}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {transaction.categoryName ? (
+                          <Badge variant="secondary">{transaction.categoryName}</Badge>
                         ) : (
                           <span className="text-muted-foreground text-sm">-</span>
                         )}

@@ -221,23 +221,46 @@ export async function createTransaction(data: InsertTransaction): Promise<Transa
   return newTransaction;
 }
 
-export async function getUserTransactions(userId: number, startDate?: number, endDate?: number): Promise<Transaction[]> {
+export async function getUserTransactions(userId: number, startDate?: number, endDate?: number) {
   const db = await getDb();
   if (!db) return [];
   
-  let query = db.select().from(transactions).where(eq(transactions.userId, userId));
+  let baseConditions = [eq(transactions.userId, userId)];
   
   if (startDate && endDate) {
-    query = db.select().from(transactions).where(
-      and(
-        eq(transactions.userId, userId),
-        gte(transactions.date, startDate),
-        lte(transactions.date, endDate)
-      )
-    );
+    baseConditions.push(gte(transactions.date, startDate));
+    baseConditions.push(lte(transactions.date, endDate));
   }
   
-  return await query.orderBy(desc(transactions.date));
+  const results = await db
+    .select({
+      id: transactions.id,
+      userId: transactions.userId,
+      description: transactions.description,
+      amount: transactions.amount,
+      nature: transactions.nature,
+      categoryId: transactions.categoryId,
+      categoryName: categories.name,
+      division: transactions.division,
+      type: transactions.type,
+      date: transactions.date,
+      notes: transactions.notes,
+      createdAt: transactions.createdAt,
+      updatedAt: transactions.updatedAt,
+      isRecurring: transactions.isRecurring,
+      recurringId: transactions.recurringId,
+      isInstallment: transactions.isInstallment,
+      installmentId: transactions.installmentId,
+      installmentNumber: transactions.installmentNumber,
+      totalInstallments: transactions.totalInstallments,
+      isPaid: transactions.isPaid,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(...baseConditions))
+    .orderBy(desc(transactions.date));
+  
+  return results;
 }
 
 export async function updateTransaction(id: number, userId: number, data: Partial<InsertTransaction>) {
