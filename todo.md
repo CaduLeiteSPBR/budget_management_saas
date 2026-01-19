@@ -94,3 +94,6 @@
 - [x] Modal de confirmação de exclusão
 - [x] Seletor de cores visual
 - [x] Preview da categoria com cor e ícone
+
+## Bugs Reportados
+- [x] Corrigir erro de insertId ao criar categoria (status 500)

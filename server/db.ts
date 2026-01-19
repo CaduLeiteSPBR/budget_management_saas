@@ -132,12 +132,36 @@ export async function createCategory(data: InsertCategory): Promise<Category> {
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(categories).values(data);
-  const insertId = Number((result as any).insertId);
-  if (isNaN(insertId)) {
-    throw new Error("Failed to get insertId after creating category");
+  
+  // Get insertId from result
+  let insertId: number;
+  if (typeof result === 'object' && result !== null) {
+    if ('insertId' in result && typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if ('insertId' in result && typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else {
+      // Fallback: query the last inserted record
+      const [lastCategory] = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.userId, data.userId))
+        .orderBy(desc(categories.id))
+        .limit(1);
+      if (!lastCategory) throw new Error("Failed to retrieve created category");
+      return lastCategory;
+    }
+  } else {
+    throw new Error("Unexpected result format from insert operation");
   }
+  
+  if (isNaN(insertId)) {
+    throw new Error("Failed to get valid insertId after creating category");
+  }
+  
   const [newCategory] = await db.select().from(categories).where(eq(categories.id, insertId));
-  return newCategory!;
+  if (!newCategory) throw new Error("Failed to retrieve created category");
+  return newCategory;
 }
 
 export async function getUserCategories(userId: number): Promise<Category[]> {
