@@ -97,3 +97,5 @@
 
 ## Bugs Reportados
 - [x] Corrigir erro de insertId ao criar categoria (status 500)
+- [x] Corrigir erro de insertId ao criar transação (status 500)
+- [x] Aplicar correção em todos os métodos de criação (subscriptions, installments, budgets, aiLearning)

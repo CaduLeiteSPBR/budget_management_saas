@@ -189,12 +189,36 @@ export async function createTransaction(data: InsertTransaction): Promise<Transa
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(transactions).values(data);
-  const insertId = Number((result as any).insertId);
-  if (isNaN(insertId)) {
-    throw new Error("Failed to get insertId after creating transaction");
+  
+  // Get insertId from result
+  let insertId: number;
+  if (typeof result === 'object' && result !== null) {
+    if ('insertId' in result && typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if ('insertId' in result && typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else {
+      // Fallback: query the last inserted record
+      const [lastTransaction] = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.userId, data.userId))
+        .orderBy(desc(transactions.id))
+        .limit(1);
+      if (!lastTransaction) throw new Error("Failed to retrieve created transaction");
+      return lastTransaction;
+    }
+  } else {
+    throw new Error("Unexpected result format from insert operation");
   }
+  
+  if (isNaN(insertId)) {
+    throw new Error("Failed to get valid insertId after creating transaction");
+  }
+  
   const [newTransaction] = await db.select().from(transactions).where(eq(transactions.id, insertId));
-  return newTransaction!;
+  if (!newTransaction) throw new Error("Failed to retrieve created transaction");
+  return newTransaction;
 }
 
 export async function getUserTransactions(userId: number, startDate?: number, endDate?: number): Promise<Transaction[]> {
@@ -249,11 +273,43 @@ export async function createSubscription(data: InsertSubscription): Promise<Subs
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(subscriptions).values(data);
-  const insertId = Number((result as any).insertId);
-  if (isNaN(insertId)) {
-    throw new Error("Failed to get insertId after creating subscription");
+  
+  // Get insertId from result
+  let insertId: number;
+  if (typeof result === 'object' && result !== null) {
+    if ('insertId' in result && typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if ('insertId' in result && typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else {
+      // Fallback: query the last inserted record
+      const [lastSubscription] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, data.userId))
+        .orderBy(desc(subscriptions.id))
+        .limit(1);
+      if (!lastSubscription) throw new Error("Failed to retrieve created subscription");
+      
+      // Criar histórico inicial
+      await db.insert(subscriptionHistory).values({
+        subscriptionId: lastSubscription.id,
+        amount: data.currentAmount,
+        effectiveDate: data.startDate,
+      });
+      
+      return lastSubscription;
+    }
+  } else {
+    throw new Error("Unexpected result format from insert operation");
   }
+  
+  if (isNaN(insertId)) {
+    throw new Error("Failed to get valid insertId after creating subscription");
+  }
+  
   const [newSubscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, insertId));
+  if (!newSubscription) throw new Error("Failed to retrieve created subscription");
   
   // Criar histórico inicial
   await db.insert(subscriptionHistory).values({
@@ -305,11 +361,35 @@ export async function createInstallment(data: InsertInstallment): Promise<Instal
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(installments).values(data);
-  const insertId = Number((result as any).insertId);
-  if (isNaN(insertId)) {
-    throw new Error("Failed to get insertId after creating installment");
+  
+  // Get insertId from result
+  let insertId: number;
+  if (typeof result === 'object' && result !== null) {
+    if ('insertId' in result && typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if ('insertId' in result && typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else {
+      // Fallback: query the last inserted record
+      const [lastInstallment] = await db
+        .select()
+        .from(installments)
+        .where(eq(installments.userId, data.userId))
+        .orderBy(desc(installments.id))
+        .limit(1);
+      if (!lastInstallment) throw new Error("Failed to retrieve created installment");
+      return lastInstallment;
+    }
+  } else {
+    throw new Error("Unexpected result format from insert operation");
   }
+  
+  if (isNaN(insertId)) {
+    throw new Error("Failed to get valid insertId after creating installment");
+  }
+  
   const [newInstallment] = await db.select().from(installments).where(eq(installments.id, insertId));
+  if (!newInstallment) throw new Error("Failed to retrieve created installment");
   
   // Criar transações para cada parcela
   const installmentId = newInstallment!.id;
