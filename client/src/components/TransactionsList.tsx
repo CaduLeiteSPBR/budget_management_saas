@@ -31,6 +31,8 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: transactions, isLoading } = trpc.transactions.list.useQuery();
 
@@ -69,6 +71,16 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     }
   };
 
+  // Função para alternar ordenação
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
   // Filtrar transações
   const filteredTransactions = transactions?.filter((t) => {
     if (filterNature !== "all" && t.nature !== filterNature) return false;
@@ -76,6 +88,39 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     if (filterType !== "all" && t.type !== filterType) return false;
     if (searchTerm && !t.description.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
+  });
+
+  // Ordenar transações
+  const sortedTransactions = [...(filteredTransactions || [])].sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortField) {
+      case "date":
+        comparison = a.date - b.date;
+        break;
+      case "description":
+        comparison = a.description.localeCompare(b.description);
+        break;
+      case "amount":
+        comparison = Number(a.amount) - Number(b.amount);
+        break;
+      case "nature":
+        comparison = a.nature.localeCompare(b.nature);
+        break;
+    }
+    
+    return sortOrder === "asc" ? comparison : -comparison;
+  });
+
+  // Calcular saldo acumulado
+  let runningBalance = 0;
+  const transactionsWithBalance = sortedTransactions.map((t) => {
+    const amount = Number(t.amount);
+    runningBalance += t.nature === "Entrada" ? amount : -amount;
+    return {
+      ...t,
+      balance: runningBalance,
+    };
   });
 
   const hasActiveFilters = filterNature !== "all" || filterDivision !== "all" || filterType !== "all" || searchTerm;
@@ -165,22 +210,71 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
           </div>
 
           {/* Tabela */}
-          {filteredTransactions && filteredTransactions.length > 0 ? (
+          {transactionsWithBalance && transactionsWithBalance.length > 0 ? (
             <div className="rounded-md border border-border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Natureza</TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("date")}
+                    >
+                      <div className="flex items-center gap-2">
+                        Data
+                        {sortField === "date" && (
+                          sortOrder === "asc" ? 
+                            <span className="text-primary">↑</span> : 
+                            <span className="text-primary">↓</span>
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("description")}
+                    >
+                      <div className="flex items-center gap-2">
+                        Descrição
+                        {sortField === "description" && (
+                          sortOrder === "asc" ? 
+                            <span className="text-primary">↑</span> : 
+                            <span className="text-primary">↓</span>
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("nature")}
+                    >
+                      <div className="flex items-center gap-2">
+                        Natureza
+                        {sortField === "nature" && (
+                          sortOrder === "asc" ? 
+                            <span className="text-primary">↑</span> : 
+                            <span className="text-primary">↓</span>
+                        )}
+                      </div>
+                    </TableHead>
                     <TableHead>Divisão</TableHead>
                     <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer select-none hover:bg-accent/50"
+                      onClick={() => handleSort("amount")}
+                    >
+                      <div className="flex items-center justify-end gap-2">
+                        Valor
+                        {sortField === "amount" && (
+                          sortOrder === "asc" ? 
+                            <span className="text-primary">↑</span> : 
+                            <span className="text-primary">↓</span>
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-right">Saldo</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTransactions.map((transaction) => (
+                  {transactionsWithBalance.map((transaction) => (
                     <TableRow key={transaction.id}>
                       <TableCell className="font-medium">
                         {formatDate(transaction.date)}
@@ -225,6 +319,11 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                       <TableCell className="text-right font-semibold">
                         <span className={transaction.nature === "Entrada" ? "text-income" : "text-expense"}>
                           {formatCurrency(transaction.amount)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right font-bold">
+                        <span className={transaction.balance >= 0 ? "text-income" : "text-expense"}>
+                          {formatCurrency(transaction.balance)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">

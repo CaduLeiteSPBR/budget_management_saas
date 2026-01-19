@@ -108,3 +108,9 @@
 - [x] Lógica de criação automática de parcelas futuras (mesmo dia do mês)
 - [x] Lógica de criação automática de recorrências mensais
 - [ ] Indicador visual de lançamentos parcelados/recorrentes na listagem
+
+## 14. Melhorias na Listagem de Lançamentos
+- [x] Adicionar ícone de ordenação clicável nas colunas (asc/desc)
+- [x] Implementar ordenação por data, descrição, valor e natureza
+- [x] Adicionar coluna de saldo acumulado após cada transação
+- [x] Calcular saldo progressivo considerando ordem cronológica
