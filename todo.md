@@ -154,3 +154,8 @@
 ## Bug Crítico (Gráfico de Projeção)
 - [x] Corrigir cálculo do gráfico de projeção de 12 meses (não inclui todas as transações)
 - [x] Remover filtro isPaid do cálculo de projeção mensal
+
+## Bug Persistente (Gráfico Dezembro)
+- [x] Investigar por que dezembro ainda mostra apenas R$800 de Entradas
+- [x] Verificar lógica de monthStart e monthEnd no loop de projeção
+- [x] Corrigido: problema era timezone - agora usa Date.UTC para consistência

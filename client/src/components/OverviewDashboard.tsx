@@ -58,8 +58,9 @@ export default function OverviewDashboard() {
   const projectionData = [];
   for (let i = 0; i < 12; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const monthStart = date.getTime();
-    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59).getTime();
+    // Usar UTC para consistência com as datas das transações
+    const monthStart = Date.UTC(date.getFullYear(), date.getMonth(), 1);
+    const monthEnd = Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
 
     const monthTrans = transactions?.filter(
       t => t.date >= monthStart && t.date <= monthEnd
