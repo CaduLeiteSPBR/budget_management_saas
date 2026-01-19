@@ -101,3 +101,10 @@
 - [x] Aplicar correção em todos os métodos de criação (subscriptions, installments, budgets, aiLearning)
 - [x] Corrigir formulário de edição que abre em branco ao invés de carregar dados da transação
 - [x] Corrigir exibição de datas (01/01/2026 aparece como 31/12/2025 - problema de timezone)
+
+## 13. Parcelamento e Recorrência no Formulário de Lançamentos
+- [x] Adicionar campo de tipo de pagamento (Parcela Única, Dividido, Recorrente)
+- [x] Campo condicional para número de parcelas quando "Dividido" selecionado
+- [x] Lógica de criação automática de parcelas futuras (mesmo dia do mês)
+- [x] Lógica de criação automática de recorrências mensais
+- [ ] Indicador visual de lançamentos parcelados/recorrentes na listagem

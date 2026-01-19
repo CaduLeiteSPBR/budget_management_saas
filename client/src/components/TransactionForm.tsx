@@ -26,6 +26,8 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
   const [categoryId, setCategoryId] = useState<string>("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
+  const [paymentType, setPaymentType] = useState<"single" | "installment" | "recurring">("single");
+  const [installments, setInstallments] = useState("2");
   const [aiSuggesting, setAiSuggesting] = useState(false);
 
   const { data: categories } = trpc.categories.list.useQuery();
@@ -90,6 +92,8 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
     setCategoryId("");
     setDate(new Date().toISOString().slice(0, 10));
     setNotes("");
+    setPaymentType("single");
+    setInstallments("2");
   };
 
   const handleAiSuggest = async () => {
@@ -135,6 +139,14 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
     const [year, month, day] = date.split('-').map(Number);
     const dateTimestamp = Date.UTC(year, month - 1, day);
 
+    if (paymentType === "installment") {
+      const numInstallments = Number(installments);
+      if (!numInstallments || numInstallments < 2) {
+        toast.error("Número de parcelas deve ser maior ou igual a 2");
+        return;
+      }
+    }
+
     const data = {
       description: description.trim(),
       amount: Number(amount).toFixed(2),
@@ -144,6 +156,8 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
       categoryId: categoryId ? Number(categoryId) : undefined,
       date: dateTimestamp,
       notes: notes.trim() || undefined,
+      paymentType,
+      installments: paymentType === "installment" ? Number(installments) : undefined,
     };
 
     if (transactionId) {
@@ -291,9 +305,52 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
             )}
           </div>
 
+          {/* Tipo de Pagamento */}
+          <div className="space-y-2">
+            <Label htmlFor="paymentType">Tipo de Pagamento *</Label>
+            <Select value={paymentType} onValueChange={(v) => setPaymentType(v as any)}>
+              <SelectTrigger id="paymentType">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Parcela Única</SelectItem>
+                <SelectItem value="installment">Dividido em X vezes</SelectItem>
+                <SelectItem value="recurring">Recorrente (Mensal)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Número de Parcelas (condicional) */}
+          {paymentType === "installment" && (
+            <div className="space-y-2">
+              <Label htmlFor="installments">Número de Parcelas *</Label>
+              <Input
+                id="installments"
+                type="number"
+                min="2"
+                value={installments}
+                onChange={(e) => setInstallments(e.target.value)}
+                placeholder="2"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Serão criados {installments} lançamentos de R$ {amount ? (Number(amount) / Number(installments)).toFixed(2) : "0.00"} cada
+              </p>
+            </div>
+          )}
+
+          {/* Aviso de Recorrência */}
+          {paymentType === "recurring" && (
+            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-sm text-blue-400">
+                🔁 Este lançamento será criado automaticamente todos os meses neste mesmo dia
+              </p>
+            </div>
+          )}
+
           {/* Data */}
           <div className="space-y-2">
-            <Label htmlFor="date">Data *</Label>
+            <Label htmlFor="date">Data {paymentType === "single" ? "*" : "(Primeira ocorrência) *"}</Label>
             <Input
               id="date"
               type="date"

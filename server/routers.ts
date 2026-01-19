@@ -111,12 +111,64 @@ export const appRouter = router({
         type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
         date: z.number(),
         notes: z.string().optional(),
+        paymentType: z.enum(["single", "installment", "recurring"]),
+        installments: z.number().min(2).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        const { paymentType, installments, ...transactionData } = input;
+
+        // Criar transação principal
         const transaction = await db.createTransaction({
           userId: ctx.user.id,
-          ...input,
+          ...transactionData,
         });
+
+        // Se for parcelado, criar as parcelas futuras
+        if (paymentType === "installment" && installments) {
+          const installmentAmount = (Number(input.amount) / installments).toFixed(2);
+          const baseDate = new Date(input.date);
+          
+          // Criar parcelas futuras (começa do mês seguinte)
+          for (let i = 1; i < installments; i++) {
+            const futureDate = new Date(baseDate);
+            futureDate.setUTCMonth(futureDate.getUTCMonth() + i);
+            
+            await db.createTransaction({
+              userId: ctx.user.id,
+              description: `${input.description} (${i + 1}/${installments})`,
+              amount: installmentAmount,
+              nature: input.nature,
+              categoryId: input.categoryId,
+              division: input.division,
+              type: input.type,
+              date: futureDate.getTime(),
+              notes: input.notes ? `${input.notes} | Parcela ${i + 1}/${installments}` : `Parcela ${i + 1}/${installments}`,
+            });
+          }
+
+          // Atualizar primeira transação com informação de parcela
+          await db.updateTransaction(transaction.id, ctx.user.id, {
+            description: `${input.description} (1/${installments})`,
+            amount: installmentAmount,
+            notes: input.notes ? `${input.notes} | Parcela 1/${installments}` : `Parcela 1/${installments}`,
+          });
+        }
+
+        // Se for recorrente, criar assinatura
+        if (paymentType === "recurring") {
+          const baseDate = new Date(input.date);
+          await db.createSubscription({
+            userId: ctx.user.id,
+            description: input.description,
+            currentAmount: input.amount,
+            dayOfMonth: baseDate.getUTCDate(),
+            categoryId: input.categoryId,
+            division: input.division,
+            type: input.type,
+            startDate: input.date,
+            notes: input.notes,
+          });
+        }
 
         // Registrar padrão para IA
         if (input.categoryId || input.division || input.type) {
