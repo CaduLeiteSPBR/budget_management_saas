@@ -54,7 +54,9 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('pt-BR');
+    // Use UTC to avoid timezone issues
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   };
 
   const handleDelete = (id: number) => {

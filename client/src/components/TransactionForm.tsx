@@ -29,10 +29,32 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
   const [aiSuggesting, setAiSuggesting] = useState(false);
 
   const { data: categories } = trpc.categories.list.useQuery();
+  const { data: transactions } = trpc.transactions.list.useQuery();
   const { data: aiSuggestion, refetch: getAiSuggestion } = trpc.ai.suggest.useQuery(
     { description },
     { enabled: false }
   );
+
+  // Load transaction data when editing
+  const existingTransaction = transactions?.find(t => t.id === transactionId);
+
+  useEffect(() => {
+    if (existingTransaction) {
+      setDescription(existingTransaction.description);
+      setAmount(existingTransaction.amount.toString());
+      setNature(existingTransaction.nature);
+      setDivision(existingTransaction.division || "");
+      setType(existingTransaction.type || "");
+      setCategoryId(existingTransaction.categoryId?.toString() || "");
+      // Format date as YYYY-MM-DD in UTC
+      const date = new Date(existingTransaction.date);
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      setDate(`${year}-${month}-${day}`);
+      setNotes(existingTransaction.notes || "");
+    }
+  }, [existingTransaction]);
 
   const createMutation = trpc.transactions.create.useMutation({
     onSuccess: () => {
@@ -109,7 +131,9 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
       return;
     }
 
-    const dateTimestamp = new Date(date).getTime();
+    // Parse date as UTC to avoid timezone issues
+    const [year, month, day] = date.split('-').map(Number);
+    const dateTimestamp = Date.UTC(year, month - 1, day);
 
     const data = {
       description: description.trim(),

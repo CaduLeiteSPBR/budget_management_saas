@@ -99,3 +99,5 @@
 - [x] Corrigir erro de insertId ao criar categoria (status 500)
 - [x] Corrigir erro de insertId ao criar transação (status 500)
 - [x] Aplicar correção em todos os métodos de criação (subscriptions, installments, budgets, aiLearning)
+- [x] Corrigir formulário de edição que abre em branco ao invés de carregar dados da transação
+- [x] Corrigir exibição de datas (01/01/2026 aparece como 31/12/2025 - problema de timezone)
