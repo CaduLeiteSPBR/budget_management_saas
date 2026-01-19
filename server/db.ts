@@ -534,3 +534,15 @@ export async function getAiLearningPatterns(userId: number, description: string)
   
   return patterns;
 }
+
+export async function getAiLearningHistory(userId: number): Promise<AiLearning[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar todo o histórico de aprendizado do usuário, ordenado por frequência
+  const history = await db.select().from(aiLearning).where(
+    eq(aiLearning.userId, userId)
+  ).orderBy(desc(aiLearning.frequency), desc(aiLearning.lastUsed)).limit(50);
+  
+  return history;
+}

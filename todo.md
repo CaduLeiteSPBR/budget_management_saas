@@ -187,3 +187,15 @@
 - [x] Corrigir erro "Dynamic require of pdf-parse is not supported" ao processar PDF
 - [x] Substituir pdf-parse por processamento direto com IA multimodal (file_url)
 - [x] IA agora lê PDF visualmente usando data URL base64
+
+## Bugs Reportados (Importação de Fatura)
+- [x] Parser de CSV não consegue encontrar lançamentos no arquivo real
+- [x] Detectar delimitador automaticamente (vírgula ou ponto e vírgula)
+- [x] Suportar nomes de colunas do C6 Bank ("Valor (em R$)", "Descrição")
+- [x] Detectar estornos por valores negativos e palavras-chave
+- [x] IA não pré-categoriza o campo Categoria (apenas Divisão e Tipo)
+- [x] IA agora sugere categoryId baseado nas categorias disponíveis
+- [x] IA não aprende com histórico de categorizações anteriores
+- [x] Implementar aprendizado baseado em descrições similares
+- [x] Buscar padrões no histórico antes de chamar IA (otimização)
+- [x] Adicionar histórico ao contexto da IA para melhor precisão

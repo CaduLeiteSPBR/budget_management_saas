@@ -157,13 +157,25 @@ export async function processCSVInvoice(
             
             const amount = Math.abs(parseFloat(normalizedAmount) || 0);
 
-            // Detectar natureza baseado no sinal ou coluna específica
+            // Detectar natureza baseado no sinal, coluna específica ou descrição
             let nature: "Entrada" | "Saída" = "Saída";
-            if (amountStr.toString().includes("-") || amountStr < 0) {
-              nature = "Saída";
-            } else if (
+            const originalAmount = String(amountStr).trim();
+            const descLower = description.toLowerCase();
+            
+            // Verificar se o valor é negativo (estorno/crédito)
+            if (originalAmount.startsWith("-") || parseFloat(originalAmount.replace(/[^\d,.-]/g, "")) < 0) {
+              nature = "Entrada"; // Estorno/Crédito
+            }
+            
+            // Verificar palavras-chave de estorno na descrição ou tipo
+            if (
               row.tipo?.toLowerCase().includes("estorno") ||
-              row.type?.toLowerCase().includes("credit")
+              row.type?.toLowerCase().includes("credit") ||
+              descLower.includes("estorno") ||
+              descLower.includes("inclusao de pagamento") ||
+              descLower.includes("pagamento") ||
+              descLower.includes("reembolso") ||
+              descLower.includes("crédito")
             ) {
               nature = "Entrada";
             }
@@ -232,16 +244,42 @@ export async function processOFXInvoice(
 export async function precategorizeTransaction(
   description: string,
   amount: number,
-  nature: string,
-  userCategories: Array<{ id: number; name: string; division: string; type: string }>
+  nature: "Entrada" | "Saída",
+  userCategories: any[],
+  learningHistory: any[] = []
 ): Promise<{
   division: string;
   type: string;
   categoryId: number | null;
 }> {
+  // Buscar padrões similares no histórico de aprendizado
+  const descLower = description.toLowerCase();
+  const similarLearning = learningHistory.find((l) => {
+    const learnedDesc = l.description.toLowerCase();
+    // Match exato ou contido
+    return learnedDesc.includes(descLower) || descLower.includes(learnedDesc);
+  });
+
+  // Se encontrou padrão similar com alta frequência, usar diretamente
+  if (similarLearning && similarLearning.frequency >= 2) {
+    return {
+      division: similarLearning.division || "Pessoal",
+      type: similarLearning.type || "Importante",
+      categoryId: similarLearning.categoryId || null,
+    };
+  }
+
   const categoriesText = userCategories
     .map((c) => `ID ${c.id}: ${c.name} (${c.division} - ${c.type})`)
     .join("\n");
+
+  // Adicionar histórico ao contexto da IA
+  const learningContext = learningHistory.length > 0
+    ? `\n\nHistórico de categorizações anteriores (use como referência):\n${learningHistory
+        .slice(0, 10)
+        .map((l) => `"${l.description}" → ${l.division} - ${l.type} - Categoria ID ${l.categoryId || "nenhuma"} (usado ${l.frequency}x)`)
+        .join("\n")}`
+    : "";
 
   const response = await invokeLLM({
     messages: [
@@ -251,7 +289,9 @@ export async function precategorizeTransaction(
 Analise a transação e sugira a melhor categorização baseado nas categorias disponíveis do usuário.
 
 Divisões possíveis: Pessoal, Familiar, Investimento
-Tipos possíveis: Essencial, Importante, Conforto, Investimento`,
+Tipos possíveis: Essencial, Importante, Conforto, Investimento
+
+IMPORTANTE: Sempre sugira um categoryId quando houver categoria adequada disponível.${learningContext}`,
       },
       {
         role: "user",
@@ -262,7 +302,7 @@ Natureza: ${nature}
 Categorias disponíveis:
 ${categoriesText}
 
-Sugira a melhor categorização.`,
+Sugira a melhor categorização (Divisão, Tipo E Categoria).`,
       },
     ],
     response_format: {

@@ -244,17 +244,19 @@ export const appRouter = router({
       .input(z.object({
         description: z.string(),
         amount: z.number(),
-        nature: z.string(),
+        nature: z.enum(["Entrada", "Saída"]),
       }))
       .mutation(async ({ ctx, input }) => {
         const { precategorizeTransaction } = await import("./invoiceProcessor");
         const categories = await db.getUserCategories(ctx.user.id);
+        const learningHistory = await db.getAiLearningHistory(ctx.user.id);
         
         return await precategorizeTransaction(
           input.description,
           input.amount,
           input.nature,
-          categories
+          categories,
+          learningHistory
         );
       }),
   }),
