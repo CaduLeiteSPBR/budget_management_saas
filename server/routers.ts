@@ -214,6 +214,49 @@ export const appRouter = router({
     balance: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUserBalance(ctx.user.id);
     }),
+
+    // Processar arquivo de fatura
+    processInvoice: protectedProcedure
+      .input(z.object({
+        fileContent: z.string(), // Base64 ou texto
+        fileType: z.enum(["pdf", "csv", "ofx"]),
+        bankName: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { processPDFInvoice, processCSVInvoice, processOFXInvoice } = await import("./invoiceProcessor");
+        
+        let transactions;
+        
+        if (input.fileType === "pdf") {
+          const buffer = Buffer.from(input.fileContent, "base64");
+          transactions = await processPDFInvoice(buffer, input.bankName);
+        } else if (input.fileType === "csv") {
+          transactions = await processCSVInvoice(input.fileContent, input.bankName);
+        } else {
+          transactions = await processOFXInvoice(input.fileContent, input.bankName);
+        }
+        
+        return transactions;
+      }),
+
+    // Pré-categorizar transação com IA
+    precategorize: protectedProcedure
+      .input(z.object({
+        description: z.string(),
+        amount: z.number(),
+        nature: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { precategorizeTransaction } = await import("./invoiceProcessor");
+        const categories = await db.getUserCategories(ctx.user.id);
+        
+        return await precategorizeTransaction(
+          input.description,
+          input.amount,
+          input.nature,
+          categories
+        );
+      }),
   }),
 
   // ==================== SUBSCRIPTIONS ====================

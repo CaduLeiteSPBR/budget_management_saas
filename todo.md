@@ -159,3 +159,26 @@
 - [x] Investigar por que dezembro ainda mostra apenas R$800 de Entradas
 - [x] Verificar lógica de monthStart e monthEnd no loop de projeção
 - [x] Corrigido: problema era timezone - agora usa Date.UTC para consistência
+
+## 18. Integração de Lançamentos no Dashboard
+- [x] Mover conteúdo de Lançamentos para aba no Dashboard
+- [x] Remover rota /transactions separada (mantida para compatibilidade)
+- [x] Integrar TransactionsList como TabsContent
+
+## 19. Importação de Fatura com IA
+- [x] Botão "Importar Fatura" na tela de Lançamentos
+- [x] Upload de arquivos (PDF, CSV, OFX)
+- [x] Pop-up para coletar data de pagamento e nome do banco
+- [x] Backend para processar PDF com IA (extrair lançamentos)
+- [x] Backend para processar CSV (parsing estruturado com suporte a formatos BR e US)
+- [x] Backend para processar OFX (parsing estruturado)
+- [x] IA identifica natureza (Entrada para estornos, Saída para compras)
+- [x] Formatar descrição: "CC - [Banco] - [Descrição]"
+- [x] Pré-categorização por IA de cada lançamento
+- [x] Tela de validação um por um com modal overlay
+- [x] Campos editáveis: valor, descrição, categorização completa
+- [x] Checkbox "Não importar" por lançamento
+- [x] Navegação: Confirmar e Próximo / Pular / Finalizar
+- [x] Salvar lançamentos confirmados individualmente
+- [x] Testes unitários para processamento de CSV e OFX
+- [x] Correção de bug de parsing de valores decimais

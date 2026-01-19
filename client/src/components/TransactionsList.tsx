@@ -18,6 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { toast } from "sonner";
+import InvoiceImport from "@/components/InvoiceImport";
+import InvoiceValidation from "@/components/InvoiceValidation";
 
 interface TransactionsListProps {
   onEdit?: (transactionId: number) => void;
@@ -38,6 +40,12 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Ordem ascendente (cronológica)
+  
+  // Estados para importação de faturas
+  const [importedTransactions, setImportedTransactions] = useState<any[]>([]);
+  const [importPaymentDate, setImportPaymentDate] = useState<number>(0);
+  const [importBankName, setImportBankName] = useState<string>("");
+  const [showValidation, setShowValidation] = useState(false);
   
   // Filtros de período
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
@@ -84,6 +92,29 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     if (deleteId) {
       deleteMutation.mutate({ id: deleteId });
     }
+  };
+
+  const handleTransactionsExtracted = (transactions: any[], paymentDate: number, bankName: string) => {
+    setImportedTransactions(transactions);
+    setImportPaymentDate(paymentDate);
+    setImportBankName(bankName);
+    setShowValidation(true);
+  };
+
+  const handleImportComplete = () => {
+    setShowValidation(false);
+    setImportedTransactions([]);
+    setImportPaymentDate(0);
+    setImportBankName("");
+    utils.transactions.list.invalidate();
+    utils.transactions.balance.invalidate();
+  };
+
+  const handleImportCancel = () => {
+    setShowValidation(false);
+    setImportedTransactions([]);
+    setImportPaymentDate(0);
+    setImportBankName("");
   };
 
   // Função para alternar ordenação
@@ -247,6 +278,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                 {transactionsWithBalance?.length || 0} transação(ões) encontrada(s)
               </CardDescription>
             </div>
+            <InvoiceImport onTransactionsExtracted={handleTransactionsExtracted} />
           </div>
 
           {/* Filtros de Período */}
@@ -548,6 +580,17 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Validação de importação */}
+      {showValidation && importedTransactions.length > 0 && (
+        <InvoiceValidation
+          transactions={importedTransactions}
+          paymentDate={importPaymentDate}
+          bankName={importBankName}
+          onComplete={handleImportComplete}
+          onCancel={handleImportCancel}
+        />
+      )}
     </>
   );
 }

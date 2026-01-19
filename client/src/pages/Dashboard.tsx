@@ -18,6 +18,7 @@ import {
 import { Link } from "wouter";
 import { ArrowRight, FolderOpen } from "lucide-react";
 import OverviewDashboard from "@/components/OverviewDashboard";
+import TransactionsList from "@/components/TransactionsList";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -197,25 +198,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-6">
-            <Card className="glass border-border">
-              <CardHeader>
-                <CardTitle>Gestão de Lançamentos</CardTitle>
-                <CardDescription>
-                  Acesse a página completa para gerenciar suas transações
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Crie, edite e visualize todos os seus lançamentos financeiros com filtros avançados e sugestões da IA.
-                </p>
-                <Link href="/transactions">
-                  <Button className="gap-2 glow-primary">
-                    Gerenciar Lançamentos
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <TransactionsList />
           </TabsContent>
 
           <TabsContent value="budgets" className="space-y-6">
