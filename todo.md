@@ -142,3 +142,7 @@
 - [x] Manter ordenação após salvar novo lançamento
 - [x] Adicionar cores alternadas nas linhas agrupadas por data
 - [x] Facilitar distinção visual de lançamentos de dias diferentes
+
+## Bugs Reportados (Atualização)
+- [x] Corrigir atualização da tabela após editar lançamento (não reflete mudança de natureza)
+- [x] Adicionar campo nature ao schema de update de transação

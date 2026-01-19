@@ -190,6 +190,7 @@ export const appRouter = router({
         id: z.number(),
         description: z.string().min(1).optional(),
         amount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        nature: z.enum(["Entrada", "Sa\u00edda"]).optional(),
         categoryId: z.number().optional(),
         division: z.enum(["Pessoal", "Familiar", "Investimento"]).optional(),
         type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
