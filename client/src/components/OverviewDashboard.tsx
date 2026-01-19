@@ -22,7 +22,7 @@ export default function OverviewDashboard() {
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime();
 
   const monthTransactions = transactions?.filter(
-    t => t.date >= startOfMonth && t.date <= endOfMonth && t.isPaid
+    t => t.date >= startOfMonth && t.date <= endOfMonth
   ) || [];
 
   // Distribuição por Divisão (Gráfico de Rosca)

@@ -146,3 +146,7 @@
 ## Bugs Reportados (Atualização)
 - [x] Corrigir atualização da tabela após editar lançamento (não reflete mudança de natureza)
 - [x] Adicionar campo nature ao schema de update de transação
+
+## Bugs e Melhorias (Dashboard)
+- [x] Corrigir cálculo de Entradas no gráfico (removido filtro isPaid que excluía transações)
+- [x] Remover botão Parcelamentos da tela inicial (funcionalidade já integrada em Lançamentos)

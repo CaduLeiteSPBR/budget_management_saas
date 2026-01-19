@@ -12,7 +12,6 @@ import {
   Settings,
   LayoutDashboard,
   Receipt,
-  CreditCard,
   Target,
   Users
 } from "lucide-react";
@@ -187,10 +186,6 @@ export default function Dashboard() {
               <Receipt className="w-4 h-4 mr-2" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="installments">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Parcelamentos
-            </TabsTrigger>
             <TabsTrigger value="budgets">
               <Target className="w-4 h-4 mr-2" />
               Orçamentos
@@ -219,23 +214,6 @@ export default function Dashboard() {
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="installments" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Parcelamentos</h2>
-              <Button className="glow-primary">
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Parcelamento
-              </Button>
-            </div>
-            <Card className="glass border-border">
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground text-center">
-                  Página de parcelamentos será implementada em breve
-                </p>
               </CardContent>
             </Card>
           </TabsContent>
