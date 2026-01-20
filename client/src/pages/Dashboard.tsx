@@ -83,13 +83,11 @@ export default function Dashboard() {
   const currentBalance = transactions?.filter(t => t.isPaid && t.date <= Date.now())
     .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
   
-  // Calcular saldo no fim do mês (incluindo transações futuras do período)
-  const endOfPeriodBalance = transactions?.filter(t => {
-    const tDate = new Date(t.date);
-    const tMonth = tDate.getMonth() + 1;
-    const tYear = tDate.getFullYear();
-    return selectedMonths.includes(tMonth) && tYear === selectedYear;
-  }).reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), currentBalance) || currentBalance;
+  // Calcular saldo no fim do mês (todas as transações até o fim do período selecionado)
+  const maxSelectedMonth = Math.max(...selectedMonths);
+  const endOfPeriodDate = new Date(selectedYear, maxSelectedMonth, 0, 23, 59, 59).getTime(); // Último dia do maior mês selecionado
+  const endOfPeriodBalance = transactions?.filter(t => t.date <= endOfPeriodDate)
+    .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -303,10 +301,7 @@ export default function Dashboard() {
               <Receipt className="w-4 h-4 mr-2" />
               Lançamentos
             </TabsTrigger>
-            <TabsTrigger value="budgets">
-              <Target className="w-4 h-4 mr-2" />
-              Orçamentos
-            </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -336,22 +331,7 @@ export default function Dashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="budgets" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Orçamentos</h2>
-              <Button className="glow-primary">
-                <Plus className="w-4 h-4 mr-2" />
-                Definir Meta
-              </Button>
-            </div>
-            <Card className="glass border-border">
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground text-center">
-                  Página de orçamentos será implementada em breve
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
       </main>
     </div>

@@ -306,24 +306,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   return (
     <>
       {/* Cards de Saldo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <Card className="glass border-border">
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Saldo Inicial</div>
-            <div className="text-2xl font-bold text-primary">
-              {formatCurrency(initialBalance)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="glass border-border">
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Saldo Final</div>
-            <div className={`text-2xl font-bold ${finalBalance >= 0 ? 'text-income' : 'text-expense'}`}>
-              {formatCurrency(finalBalance)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
 
       <Card className="glass border-border">
         <CardHeader>

@@ -308,3 +308,12 @@
 - [x] Gráficos de Distribuição usam periodTransactions
 - [x] Burn Rate Diário ajustado para período selecionado
 - [x] Aderência ao Orçamento usa periodIncome e periodExpense
+
+## Bugs e Ajustes Reportados (Tela Principal)
+- [x] Corrigir cálculo de "Saldo no Fim do Mês" (deve ser R$ 1.975,99, igual ao Saldo Final da aba Lançamentos)
+- [x] Problema: estava somando transações do período ao currentBalance
+- [x] Corrigido: agora calcula todas as transações até o fim do período selecionado
+- [x] Remover cards "Saldo Inicial" e "Saldo Final" da aba Lançamentos
+- [x] Remover menu "Orçamentos" do Dashboard
+- [x] Remover TabsTrigger e TabsContent de Orçamentos
+- [x] Remover card "Aderência ao Orçamento" da Visão Geral

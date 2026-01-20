@@ -129,26 +129,7 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
           </CardContent>
         </Card>
 
-        <Card className="glass border-border">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Aderência ao Orçamento
-            </CardTitle>
-            {budgetAdherence <= 100 ? (
-              <TrendingUp className="w-4 h-4 text-income" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-expense" />
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${budgetAdherence <= 100 ? 'text-income' : 'text-expense'}`}>
-              {budgetAdherence.toFixed(1)}%
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {budgetAdherence <= 100 ? 'Dentro do planejado' : 'Acima do planejado'}
-            </p>
-          </CardContent>
-        </Card>
+
 
         <Card className="glass border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
