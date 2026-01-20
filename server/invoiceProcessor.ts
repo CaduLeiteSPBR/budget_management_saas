@@ -105,16 +105,21 @@ export async function processCSVInvoice(
   bankName: string
 ): Promise<ExtractedTransaction[]> {
   return new Promise((resolve, reject) => {
+    // Detectar delimitador (vírgula ou ponto e vírgula)
+    const delimiter = fileContent.includes(';') ? ';' : ',';
+    
     Papa.parse(fileContent, {
       header: true,
+      delimiter,
       skipEmptyLines: true,
       complete: (results) => {
         try {
           const transactions: ExtractedTransaction[] = results.data.map((row: any) => {
-            // Tentar identificar colunas comuns
+            // Tentar identificar colunas comuns (incluindo formato C6 Bank)
             const description =
               row.descricao ||
               row.Descricao ||
+              row["Descrição"] ||
               row.DESCRICAO ||
               row.description ||
               row.Description ||
@@ -124,6 +129,8 @@ export async function processCSVInvoice(
             const amountStr =
               row.valor ||
               row.Valor ||
+              row["Valor (em R$)"] ||
+              row["Valor (em US$)"] ||
               row.VALOR ||
               row.amount ||
               row.Amount ||

@@ -212,3 +212,9 @@
 - [x] Implementado estado showTransactionForm e editingTransactionId no Dashboard
 - [x] Adicionado TransactionForm com callbacks onSuccess e onCancel
 - [x] Botão agora abre formulário corretamente (id=0 para novo, id>0 para edição)
+
+## Bug: Parser CSV não encontra transações
+- [x] Parser retorna "nenhuma transação encontrada" para arquivo CSV válido
+- [x] Problema: delimitador não estava sendo detectado automaticamente
+- [x] Adicionada detecção automática de delimitador (`;` ou `,`)
+- [x] Adicionado suporte a colunas do C6 Bank: "Descrição", "Valor (em R$)"
