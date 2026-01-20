@@ -238,3 +238,15 @@
 - [x] Adicionado try-catch para parsear JSON
 - [x] Logs de erro detalhados para debug
 - [x] Retorno de valores padrão em caso de falha
+
+## Novas Features: Otimização de Importação
+- [x] Implementar cache de pré-categorizações
+- [x] Verificar se transação já tem suggestedDivision/Type/CategoryId
+- [x] Usar cache quando disponível, evitando chamada da IA
+- [x] Salvar resultado da IA no objeto de transação após primeira chamada
+- [x] Logs de debug para monitorar uso de cache vs IA
+- [x] Adicionar botão "Aplicar a Todos Similares" na validação
+- [x] Identificar transações com descrição similar (case-insensitive, match exato ou contido)
+- [x] Aplicar mesma categorização (division, type, categoryId) em lote
+- [x] Toast com feedback de quantas transações foram atualizadas
+- [x] Botão desabilitado quando skipCurrent ou campos vazios

@@ -67,8 +67,19 @@ export default function InvoiceValidation({
       // Resetar mutation anterior
       precategorizeMutation.reset();
 
-      // Pré-categorizar com IA sempre
-      loadPrecategorization();
+      // Usar cache se disponível, senão chamar IA
+      if (currentTransaction.suggestedDivision && currentTransaction.suggestedType) {
+        console.log('[Pré-categorização] Usando cache:', {
+          division: currentTransaction.suggestedDivision,
+          type: currentTransaction.suggestedType,
+          categoryId: currentTransaction.suggestedCategoryId,
+        });
+        setDivision(currentTransaction.suggestedDivision);
+        setType(currentTransaction.suggestedType);
+        setCategoryId(currentTransaction.suggestedCategoryId || undefined);
+      } else {
+        loadPrecategorization();
+      }
     }
   }, [currentIndex, currentTransaction]);
 
@@ -83,7 +94,13 @@ export default function InvoiceValidation({
         nature: currentTransaction.nature,
       });
 
-      console.log('[Pré-categorização] Resultado:', result);
+      console.log('[Pré-categorização] Resultado da IA:', result);
+      
+      // Salvar no cache da transação
+      currentTransaction.suggestedDivision = result.division;
+      currentTransaction.suggestedType = result.type;
+      currentTransaction.suggestedCategoryId = result.categoryId || undefined;
+      
       setDivision(result.division);
       setType(result.type);
       setCategoryId(result.categoryId || undefined);
@@ -145,6 +162,30 @@ export default function InvoiceValidation({
         setValidatedTransactions(validatedTransactions.slice(0, -1));
       }
     }
+  };
+
+  const handleApplyToSimilar = () => {
+    if (!description || !division || !type) {
+      toast.error("Preencha a categorização antes de aplicar");
+      return;
+    }
+
+    // Identificar transações similares (mesma descrição, case-insensitive)
+    const currentDesc = description.toLowerCase().trim();
+    let appliedCount = 0;
+
+    transactions.forEach((trx) => {
+      const trxDesc = trx.description.toLowerCase().trim();
+      // Match exato ou contido
+      if (trxDesc === currentDesc || trxDesc.includes(currentDesc) || currentDesc.includes(trxDesc)) {
+        trx.suggestedDivision = division;
+        trx.suggestedType = type;
+        trx.suggestedCategoryId = categoryId;
+        appliedCount++;
+      }
+    });
+
+    toast.success(`Categorização aplicada a ${appliedCount} transações similares`);
   };
 
   const saveAll = async () => {
@@ -321,11 +362,22 @@ export default function InvoiceValidation({
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
-          <div className="text-sm text-muted-foreground">
-            {validatedTransactions.length} confirmados
+        <CardFooter className="flex flex-col gap-3">
+          <div className="flex items-center justify-between w-full">
+            <div className="text-sm text-muted-foreground">
+              {validatedTransactions.length} confirmados
+            </div>
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={handleApplyToSimilar} 
+              disabled={skipCurrent || !division || !type}
+              className="gap-2"
+            >
+              Aplicar a Todos Similares
+            </Button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full justify-end">
             <Button variant="outline" onClick={onCancel}>
               Cancelar Importação
             </Button>
