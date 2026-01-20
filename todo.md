@@ -309,3 +309,10 @@
 - [x] Indentação visual (ml-10) nas linhas expandidas
 - [x] Background diferenciado (bg-muted/50) para linhas filhas
 - [x] Função toggleGroup para alternar expansão
+
+## Bug: Natureza Incorreta em Faturas Agrupadas
+- [x] Faturas de cartão agrupadas aparecem como "Entrada" ao invés de "Saída"
+- [x] Isso causa cálculo errado do saldo (soma ao invés de subtrair)
+- [x] Corrigido: grupos de CC agora sempre usam nature: "Saída"
+- [x] Lógica de cálculo de saldo já estava correta (usa nature para determinar sinal)
+- [x] Saldos agora calculam corretamente (subtraem faturas de cartão)

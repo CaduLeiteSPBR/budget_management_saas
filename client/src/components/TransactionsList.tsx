@@ -272,7 +272,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
           date,
           transactions: [],
           totalAmount: 0,
-          nature: transaction.nature,
+          nature: "Sa\u00edda", // Faturas de cart\u00e3o s\u00e3o sempre gastos
           division: transaction.division,
           type: transaction.type,
         };
