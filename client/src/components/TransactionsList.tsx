@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 import InvoiceImport from "@/components/InvoiceImport";
 import InvoiceValidation from "@/components/InvoiceValidation";
@@ -125,6 +125,49 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
       setSortField(field);
       setSortOrder("asc");
     }
+  };
+
+  // Função para exportar para CSV
+  const handleExport = () => {
+    if (!sortedTransactions || sortedTransactions.length === 0) {
+      toast.error("Nenhum lançamento para exportar");
+      return;
+    }
+
+    // Cabeçalho do CSV
+    const headers = ["Data", "Descrição", "Valor", "Natureza", "Divisão", "Tipo", "Categoria"];
+    
+    // Linhas de dados
+    const rows = sortedTransactions.map(t => [
+      formatDate(t.date),
+      `"${t.description.replace(/"/g, '""')}"`, // Escapar aspas
+      Number(t.amount).toFixed(2),
+      t.nature,
+      t.division || "",
+      t.type || "",
+      t.categoryName || ""
+    ]);
+
+    // Montar CSV
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    // Criar blob e fazer download
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" }); // BOM para Excel
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    link.setAttribute("href", url);
+    link.setAttribute("download", `lancamentos_${today}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success(`${sortedTransactions.length} lançamentos exportados com sucesso!`);
   };
 
   // Filtrar transações
@@ -279,6 +322,10 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
               </CardDescription>
             </div>
             <div className="flex gap-2">
+              <Button onClick={handleExport} variant="outline" className="gap-2">
+                <Download className="w-4 h-4" />
+                Exportar
+              </Button>
               <Button onClick={() => onEdit?.(0)} variant="default">
                 Novo Lançamento
               </Button>

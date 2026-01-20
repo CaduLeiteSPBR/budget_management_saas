@@ -262,3 +262,14 @@
 - [x] Aplicar categoriza\u00e7\u00e3o apenas ap\u00f3s confirma\u00e7\u00e3o
 - [x] Toast de feedback ap\u00f3s aplica\u00e7\u00e3o
 - [x] Validar se h\u00e1 transa\u00e7\u00f5es similares antes de abrir modal
+## Nova Feature: Exportação de Lançamentos
+- [x] Adicionar botão "Exportar" na tela de Lançamentos
+- [x] Botão com ícone Download e variant outline
+- [x] Exportar apenas lançamentos visíveis (respeitando filtros e ordenação)
+- [x] Formato CSV com colunas: Data, Descrição, Valor, Natureza, Divisão, Tipo, Categoria
+- [x] Escapar aspas duplas nas descrições ("" para compatibilidade CSV)
+- [x] BOM UTF-8 para compatibilidade com Excel
+- [x] Nome do arquivo com data atual: lancamentos_YYYY-MM-DD.csv
+- [x] Download automático do arquivo
+- [x] Toast de feedback com quantidade de lançamentos exportados
+- [x] Validação: mensagem de erro se não houver lançamentos
