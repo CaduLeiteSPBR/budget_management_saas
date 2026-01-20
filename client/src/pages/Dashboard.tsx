@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
   Users
 } from "lucide-react";
 import { Link } from "wouter";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, FolderOpen } from "lucide-react";
 import OverviewDashboard from "@/components/OverviewDashboard";
 import TransactionsList from "@/components/TransactionsList";
@@ -26,6 +28,12 @@ export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<number | undefined>();
+  
+  // Estado do seletor de período
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+  const [selectedMonths, setSelectedMonths] = useState<number[]>([currentMonth]);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const { data: balance, isLoading: balanceLoading } = trpc.transactions.balance.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -50,24 +58,38 @@ export default function Dashboard() {
     }).format(value);
   };
 
-  // Calcular totais do mês atual
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime();
+  // Calcular totais do período selecionado
+  const periodTransactions = useMemo(() => {
+    if (!transactions) return [];
+    return transactions.filter(t => {
+      const tDate = new Date(t.date);
+      const tMonth = tDate.getMonth() + 1;
+      const tYear = tDate.getFullYear();
+      return selectedMonths.includes(tMonth) && tYear === selectedYear && t.isPaid;
+    });
+  }, [transactions, selectedMonths, selectedYear]);
 
-  const monthTransactions = transactions?.filter(
-    t => t.date >= startOfMonth && t.date <= endOfMonth && t.isPaid
-  ) || [];
-
-  const monthIncome = monthTransactions
+  const periodIncome = periodTransactions
     .filter(t => t.nature === "Entrada")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const monthExpense = monthTransactions
+  const periodExpense = periodTransactions
     .filter(t => t.nature === "Saída")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const monthBalance = monthIncome - monthExpense;
+  const periodBalance = periodIncome - periodExpense;
+  
+  // Calcular saldo atual (todas as transações pagas até hoje)
+  const currentBalance = transactions?.filter(t => t.isPaid && t.date <= Date.now())
+    .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
+  
+  // Calcular saldo no fim do mês (incluindo transações futuras do período)
+  const endOfPeriodBalance = transactions?.filter(t => {
+    const tDate = new Date(t.date);
+    const tMonth = tDate.getMonth() + 1;
+    const tYear = tDate.getFullYear();
+    return selectedMonths.includes(tMonth) && tYear === selectedYear;
+  }).reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), currentBalance) || currentBalance;
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,21 +131,111 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Seletor de Período */}
+        <div className="mb-6 flex items-center gap-4">
+          <span className="text-sm font-medium text-muted-foreground">Período:</span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                {selectedMonths.length === 0 ? "Selecione os meses" :
+                 selectedMonths.length === 1 ? new Date(2000, selectedMonths[0] - 1).toLocaleDateString('pt-BR', { month: 'long' }) :
+                 selectedMonths.length === 12 ? "Todos os meses" :
+                 `${selectedMonths.length} meses selecionados`}
+                {" de "}{selectedYear}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Ano</label>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedYear(selectedYear - 1)}
+                    >
+                      {selectedYear - 1}
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      {selectedYear}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedYear(selectedYear + 1)}
+                    >
+                      {selectedYear + 1}
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-medium">Meses</label>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedMonths([1,2,3,4,5,6,7,8,9,10,11,12])}
+                      >
+                        Todos
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedMonths([])}
+                      >
+                        Limpar
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(month => (
+                      <div key={month} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`month-${month}`}
+                          checked={selectedMonths.includes(month)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedMonths([...selectedMonths, month].sort((a,b) => a-b));
+                            } else {
+                              setSelectedMonths(selectedMonths.filter(m => m !== month));
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`month-${month}`}
+                          className="text-sm cursor-pointer"
+                        >
+                          {new Date(2000, month - 1).toLocaleDateString('pt-BR', { month: 'short' })}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo Total
+                Saldo Atual
               </CardTitle>
               <Wallet className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {balanceLoading ? '...' : formatCurrency(balance || 0)}
+                {formatCurrency(currentBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Todas as contas
+                Saldo real até hoje
               </p>
             </CardContent>
           </Card>
@@ -137,10 +249,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-income">
-                {formatCurrency(monthIncome)}
+                {formatCurrency(periodIncome)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {monthTransactions.filter(t => t.nature === "Entrada").length} transações
+                {periodTransactions.filter(t => t.nature === "Entrada").length} transações
               </p>
             </CardContent>
           </Card>
@@ -154,10 +266,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-expense">
-                {formatCurrency(monthExpense)}
+                {formatCurrency(periodExpense)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {monthTransactions.filter(t => t.nature === "Saída").length} transações
+                {periodTransactions.filter(t => t.nature === "Saída").length} transações
               </p>
             </CardContent>
           </Card>
@@ -165,16 +277,16 @@ export default function Dashboard() {
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Balanço do Mês
+                Saldo no Fim do Mês
               </CardTitle>
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${monthBalance >= 0 ? 'text-income' : 'text-expense'}`}>
-                {formatCurrency(monthBalance)}
+              <div className={`text-2xl font-bold ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
+                {formatCurrency(endOfPeriodBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {monthBalance >= 0 ? 'Superávit' : 'Déficit'}
+                Projeção com lançamentos futuros
               </p>
             </CardContent>
           </Card>
@@ -198,7 +310,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <OverviewDashboard />
+            <OverviewDashboard selectedMonths={selectedMonths} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-6">

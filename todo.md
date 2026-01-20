@@ -291,3 +291,20 @@
 - [x] Validação: impedir aplicar filtro sem meses selecionados
 - [x] Saldos calculados automaticamente com base nas transações filtradas
 - [x] Contador de transações atualiza automaticamente
+
+## Refatoração: Visão Geral com Seletor de Período
+- [x] Remover cards "Saldo Total" e "Balanço do Mês"
+- [x] Adicionar card "Saldo Atual" (saldo real até hoje, todas as transações pagas)
+- [x] Adicionar card "Saldo no Fim do Mês" (projeção com lançamentos futuros do período)
+- [x] Criar seletor de período no topo (múltiplos meses + ano)
+- [x] Seletor com Popover contendo checkboxes para meses (grid 3 colunas)
+- [x] Botões "Todos" e "Limpar" no seletor
+- [x] Seletor de ano com botões -1, atual, +1
+- [x] Feedback visual no botão: "X meses selecionados de YYYY"
+- [x] Atualização automática de todos os cards ao mudar período (sem botão Aplicar)
+- [x] Atualização automática dos gráficos ao mudar período
+- [x] Cards "Entradas do Mês" e "Saídas do Mês" refletem período selecionado
+- [x] OverviewDashboard recebe selectedMonths e selectedYear como props
+- [x] Gráficos de Distribuição usam periodTransactions
+- [x] Burn Rate Diário ajustado para período selecionado
+- [x] Aderência ao Orçamento usa periodIncome e periodExpense

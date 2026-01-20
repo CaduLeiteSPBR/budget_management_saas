@@ -3,7 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
 
-export default function OverviewDashboard() {
+interface OverviewDashboardProps {
+  selectedMonths: number[];
+  selectedYear: number;
+}
+
+export default function OverviewDashboard({ selectedMonths, selectedYear }: OverviewDashboardProps) {
   const { data: transactions } = trpc.transactions.list.useQuery();
   const { data: budgets } = trpc.budgets.list.useQuery({
     monthYear: new Date().toISOString().slice(0, 7)
@@ -16,14 +21,13 @@ export default function OverviewDashboard() {
     }).format(value);
   };
 
-  // Calcular dados do mês atual
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime();
-
-  const monthTransactions = transactions?.filter(
-    t => t.date >= startOfMonth && t.date <= endOfMonth
-  ) || [];
+  // Calcular dados do período selecionado
+  const periodTransactions = transactions?.filter(t => {
+    const tDate = new Date(t.date);
+    const tMonth = tDate.getMonth() + 1;
+    const tYear = tDate.getFullYear();
+    return selectedMonths.includes(tMonth) && tYear === selectedYear;
+  }) || [];
 
   // Distribuição por Divisão (Gráfico de Rosca)
   const divisionData = [
@@ -32,7 +36,7 @@ export default function OverviewDashboard() {
     { name: "Investimento", value: 0, color: "#10b981" } // Verde vibrante
   ];
 
-  monthTransactions.forEach(t => {
+  periodTransactions.forEach(t => {
     if (t.nature === "Saída" && t.division) {
       const div = divisionData.find(d => d.name === t.division);
       if (div) div.value += Number(t.amount);
@@ -47,7 +51,7 @@ export default function OverviewDashboard() {
     { name: "Investimento", value: 0, color: "#10b981" } // Verde vibrante
   ];
 
-  monthTransactions.forEach(t => {
+  periodTransactions.forEach(t => {
     if (t.nature === "Saída" && t.type) {
       const type = typeData.find(d => d.name === t.type);
       if (type) type.value += Number(t.amount);
@@ -55,6 +59,7 @@ export default function OverviewDashboard() {
   });
 
   // Projeção de 12 meses
+  const now = new Date();
   const projectionData = [];
   for (let i = 0; i < 12; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -82,25 +87,26 @@ export default function OverviewDashboard() {
     });
   }
 
-  // Burn Rate Diário
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const currentDay = now.getDate();
+  // Burn Rate Diário (baseado no mês atual se selecionado, senão no primeiro mês selecionado)
+  const referenceMonth = selectedMonths.includes(now.getMonth() + 1) ? now.getMonth() + 1 : selectedMonths[0] || 1;
+  const daysInMonth = new Date(selectedYear, referenceMonth, 0).getDate();
+  const currentDay = referenceMonth === (now.getMonth() + 1) && selectedYear === now.getFullYear() ? now.getDate() : 1;
   const daysRemaining = daysInMonth - currentDay;
 
-  const monthIncome = monthTransactions
+  const periodIncome = periodTransactions
     .filter(t => t.nature === "Entrada")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const monthExpense = monthTransactions
+  const periodExpense = periodTransactions
     .filter(t => t.nature === "Saída")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const remainingBudget = monthIncome - monthExpense;
+  const remainingBudget = periodIncome - periodExpense;
   const dailyBurnRate = daysRemaining > 0 ? remainingBudget / daysRemaining : 0;
 
   // Aderência ao Orçamento
   const totalBudgetPercentage = budgets?.reduce((sum, b) => sum + Number(b.targetPercentage), 0) || 0;
-  const budgetAdherence = totalBudgetPercentage > 0 ? (monthExpense / monthIncome) * 100 : 0;
+  const budgetAdherence = totalBudgetPercentage > 0 ? (periodExpense / periodIncome) * 100 : 0;
 
   return (
     <div className="space-y-6">
