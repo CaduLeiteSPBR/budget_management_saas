@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Loader2, ChevronRight, Check, X } from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, Check, X } from "lucide-react";
 
 interface Transaction {
   description: string;
@@ -64,10 +64,13 @@ export default function InvoiceValidation({
       setNature(currentTransaction.nature);
       setSkipCurrent(false);
 
+      // Resetar mutation anterior
+      precategorizeMutation.reset();
+
       // Pré-categorizar com IA sempre
       loadPrecategorization();
     }
-  }, [currentIndex]);
+  }, [currentIndex, currentTransaction]);
 
   const loadPrecategorization = async () => {
     if (!currentTransaction) return;
@@ -80,6 +83,7 @@ export default function InvoiceValidation({
         nature: currentTransaction.nature,
       });
 
+      console.log('[Pré-categorização] Resultado:', result);
       setDivision(result.division);
       setType(result.type);
       setCategoryId(result.categoryId || undefined);
@@ -88,6 +92,7 @@ export default function InvoiceValidation({
       // Usar valores padrão
       setDivision("Pessoal");
       setType("Importante");
+      setCategoryId(undefined);
     } finally {
       setIsLoadingCategories(false);
     }
@@ -117,15 +122,28 @@ export default function InvoiceValidation({
     };
 
     setValidatedTransactions([...validatedTransactions, validated]);
-    goToNext();
+    
+    if (currentIndex < transactions.length - 1) {
+      goToNext();
+    } else {
+      // Última transação - salvar todas
+      saveAll();
+    }
   };
 
   const goToNext = () => {
     if (currentIndex < transactions.length - 1) {
       setCurrentIndex(currentIndex + 1);
-    } else {
-      // Última transação - salvar todas
-      saveAll();
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      // Remover última transação validada se voltar
+      if (validatedTransactions.length > 0) {
+        setValidatedTransactions(validatedTransactions.slice(0, -1));
+      }
     }
   };
 
@@ -311,6 +329,12 @@ export default function InvoiceValidation({
             <Button variant="outline" onClick={onCancel}>
               Cancelar Importação
             </Button>
+            {currentIndex > 0 && (
+              <Button variant="outline" onClick={goToPrevious} disabled={isSaving} className="gap-2">
+                <ChevronLeft className="w-4 h-4" />
+                Voltar
+              </Button>
+            )}
             <Button onClick={handleConfirm} disabled={isSaving} className="gap-2">
               {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
               {currentIndex < transactions.length - 1 ? (

@@ -218,3 +218,14 @@
 - [x] Problema: delimitador não estava sendo detectado automaticamente
 - [x] Adicionada detecção automática de delimitador (`;` ou `,`)
 - [x] Adicionado suporte a colunas do C6 Bank: "Descrição", "Valor (em R$)"
+
+## Bugs: Importação de Fatura
+- [x] IA pré-categoriza Categoria apenas no primeiro registro
+- [x] Problema: mutation não estava sendo resetada entre chamadas
+- [x] Adicionado precategorizeMutation.reset() antes de cada pré-categorização
+- [x] Adicionado log de debug para monitorar resultado da IA
+- [x] Resetar categoryId para undefined em caso de erro
+- [x] Adicionar botão "Voltar" para revisar item anterior na validação
+- [x] Botão Voltar aparece apenas quando currentIndex > 0
+- [x] Ao voltar, remove última transação validada da lista
+- [x] Botão com ícone ChevronLeft e desabilitado durante salvamento
