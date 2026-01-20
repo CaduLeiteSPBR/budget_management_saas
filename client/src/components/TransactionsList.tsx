@@ -278,7 +278,12 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                 {transactionsWithBalance?.length || 0} transação(ões) encontrada(s)
               </CardDescription>
             </div>
-            <InvoiceImport onTransactionsExtracted={handleTransactionsExtracted} />
+            <div className="flex gap-2">
+              <Button onClick={() => onEdit?.(0)} variant="default">
+                Novo Lançamento
+              </Button>
+              <InvoiceImport onTransactionsExtracted={handleTransactionsExtracted} />
+            </div>
           </div>
 
           {/* Filtros de Período */}

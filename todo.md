@@ -199,3 +199,10 @@
 - [x] Implementar aprendizado baseado em descrições similares
 - [x] Buscar padrões no histórico antes de chamar IA (otimização)
 - [x] Adicionar histórico ao contexto da IA para melhor precisão
+
+## Novos Bugs Reportados
+- [x] Botão "Novo Lançamento" sumiu da aba Lançamentos
+- [x] Restaurado botão ao lado de "Importar Fatura"
+- [x] IA pré-categoriza Categoria apenas no primeiro registro
+- [x] Corrigida lógica para sempre chamar pré-categorização em cada registro
+- [x] Removida condição que pulava pré-categorização após primeiro registro

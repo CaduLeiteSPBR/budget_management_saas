@@ -64,14 +64,8 @@ export default function InvoiceValidation({
       setNature(currentTransaction.nature);
       setSkipCurrent(false);
 
-      // Pré-categorizar com IA
-      if (!currentTransaction.suggestedDivision) {
-        loadPrecategorization();
-      } else {
-        setDivision(currentTransaction.suggestedDivision || "");
-        setType(currentTransaction.suggestedType || "");
-        setCategoryId(currentTransaction.suggestedCategoryId);
-      }
+      // Pré-categorizar com IA sempre
+      loadPrecategorization();
     }
   }, [currentIndex]);
 
