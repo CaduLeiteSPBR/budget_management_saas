@@ -291,3 +291,21 @@
 - [x] Validação: impedir aplicar filtro sem meses selecionados
 - [x] Saldos calculados automaticamente com base nas transações filtradas
 - [x] Contador de transações atualiza automaticamente
+
+## Nova Feature: Agrupamento de Lançamentos de Cartão de Crédito
+- [x] Identificar lançamentos que começam com "CC - "
+- [x] Agrupar por banco e data de pagamento (mesmo dia)
+- [x] Adicionar ícone ChevronRight/ChevronDown para expandir/colapsar
+- [x] Quando agrupado: mostrar soma total dos valores
+- [x] Quando expandido: mostrar valores individuais
+- [x] Ícone muda de ChevronRight para ChevronDown quando expandido
+- [x] Linha agrupada mostra "Fatura Cartão - [Banco]" + contador de lançamentos
+- [x] Linhas expandidas mostram descrições individuais com indentação
+- [x] Garantir que Saldo e Saldo Final calculam corretamente:
+  - Grupos somam total ao saldo
+  - Transações filhas NÃO afetam saldo (já contado no grupo)
+  - Transações normais somam individualmente
+- [x] Estado de expansão independente por grupo (Set<string>)
+- [x] Indentação visual (ml-10) nas linhas expandidas
+- [x] Background diferenciado (bg-muted/50) para linhas filhas
+- [x] Função toggleGroup para alternar expansão

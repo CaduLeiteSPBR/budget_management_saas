@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download } from "lucide-react";
+import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download, ChevronRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import InvoiceImport from "@/components/InvoiceImport";
 import InvoiceValidation from "@/components/InvoiceValidation";
@@ -238,15 +238,130 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     return categoryComp;
   });
 
-  // Calcular saldo acumulado
+  // Estado para controlar expansão de grupos de CC
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Função para alternar expansão de grupo
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
+      } else {
+        newSet.add(groupKey);
+      }
+      return newSet;
+    });
+  };
+
+  // Agrupar lançamentos de cartão de crédito
+  const groupedTransactions = sortedTransactions.reduce((acc, transaction) => {
+    const isCC = transaction.description.startsWith("CC - ");
+    
+    if (isCC) {
+      // Extrair banco do formato "CC - [Banco] - Descrição"
+      const parts = transaction.description.split(" - ");
+      const bank = parts[1] || "Cartão";
+      const date = transaction.date;
+      const groupKey = `cc_${bank}_${date}`;
+      
+      if (!acc.groups[groupKey]) {
+        acc.groups[groupKey] = {
+          key: groupKey,
+          bank,
+          date,
+          transactions: [],
+          totalAmount: 0,
+          nature: transaction.nature,
+          division: transaction.division,
+          type: transaction.type,
+        };
+      }
+      
+      acc.groups[groupKey].transactions.push(transaction);
+      acc.groups[groupKey].totalAmount += Number(transaction.amount);
+    } else {
+      acc.ungrouped.push(transaction);
+    }
+    
+    return acc;
+  }, { groups: {} as Record<string, any>, ungrouped: [] as any[] });
+
+  // Combinar grupos e lançamentos não agrupados, mantendo ordem por data
+  const displayTransactions: any[] = [];
+  
+  sortedTransactions.forEach((transaction) => {
+    const isCC = transaction.description.startsWith("CC - ");
+    
+    if (isCC) {
+      const parts = transaction.description.split(" - ");
+      const bank = parts[1] || "Cartão";
+      const date = transaction.date;
+      const groupKey = `cc_${bank}_${date}`;
+      const group = groupedTransactions.groups[groupKey];
+      
+      // Adicionar grupo apenas uma vez (na primeira transação do grupo)
+      if (group && group.transactions[0].id === transaction.id) {
+        const isExpanded = expandedGroups.has(groupKey);
+        
+        displayTransactions.push({
+          type: 'group',
+          groupKey,
+          bank,
+          date,
+          totalAmount: group.totalAmount,
+          count: group.transactions.length,
+          nature: group.nature,
+          division: group.division,
+          typeField: group.type,
+          isExpanded,
+        });
+        
+        if (isExpanded) {
+          group.transactions.forEach((t: any) => {
+            displayTransactions.push({
+              type: 'transaction',
+              isChild: true,
+              ...t,
+            });
+          });
+        }
+      }
+    } else {
+      const { type: typeField, ...transactionRest } = transaction;
+      displayTransactions.push({
+        type: 'transaction',
+        isChild: false,
+        typeField,
+        ...transactionRest,
+      });
+    }
+  });
+
+  // Calcular saldo acumulado considerando agrupamento
   let runningBalance = 0;
-  const transactionsWithBalance = sortedTransactions.map((t) => {
-    const amount = Number(t.amount);
-    runningBalance += t.nature === "Entrada" ? amount : -amount;
-    return {
-      ...t,
-      balance: runningBalance,
-    };
+  const transactionsWithBalance = displayTransactions.map((item) => {
+    if (item.type === 'group') {
+      const amount = item.totalAmount;
+      runningBalance += item.nature === "Entrada" ? amount : -amount;
+      return {
+        ...item,
+        balance: runningBalance,
+      };
+    } else if (item.type === 'transaction' && !item.isChild) {
+      const amount = Number(item.amount);
+      runningBalance += item.nature === "Entrada" ? amount : -amount;
+      return {
+        ...item,
+        balance: runningBalance,
+      };
+    } else {
+      // Transações filhas não afetam saldo (já contado no grupo)
+      return {
+        ...item,
+        balance: runningBalance,
+      };
+    }
   });
 
   const hasActiveFilters = filterNature !== "all" || filterDivision !== "all" || filterType !== "all" || searchTerm;
@@ -550,14 +665,14 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactionsWithBalance.map((transaction, index) => {
+                  {transactionsWithBalance.map((item, index) => {
                     // Determinar cor alternada baseada em mudança de data
                     let isNewDateGroup = false;
                     if (index === 0) {
                       isNewDateGroup = true;
                     } else {
                       const prevDate = new Date(transactionsWithBalance[index - 1].date).toDateString();
-                      const currentDate = new Date(transaction.date).toDateString();
+                      const currentDate = new Date(item.date).toDateString();
                       isNewDateGroup = prevDate !== currentDate;
                     }
                     
@@ -565,7 +680,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                     let dateGroupIndex = 0;
                     for (let i = 0; i < index; i++) {
                       const prevDate = new Date(transactionsWithBalance[i].date).toDateString();
-                      const currentDate = new Date(transactionsWithBalance[i + 1]?.date || transaction.date).toDateString();
+                      const currentDate = new Date(transactionsWithBalance[i + 1]?.date || item.date).toDateString();
                       if (prevDate !== currentDate) {
                         dateGroupIndex++;
                       }
@@ -573,13 +688,93 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
                     
                     const rowBgClass = dateGroupIndex % 2 === 0 ? "" : "bg-muted/30";
                     
+                    // Renderizar grupo de CC
+                    if (item.type === 'group') {
+                      return (
+                        <TableRow key={item.groupKey} className={rowBgClass}>
+                          <TableCell className="font-medium">
+                            {formatDate(item.date)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => toggleGroup(item.groupKey)}
+                              >
+                                {item.isExpanded ? (
+                                  <ChevronDown className="w-4 h-4" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <div>
+                                <div className="font-medium">Fatura Cartão - {item.bank}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {item.count} lançamentos
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={item.nature === "Entrada" ? "default" : "destructive"}
+                              className={item.nature === "Entrada" ? "bg-income hover:bg-income" : "bg-expense hover:bg-expense"}
+                            >
+                              {item.nature === "Entrada" ? (
+                                <ArrowUpCircle className="w-3 h-3 mr-1" />
+                              ) : (
+                                <ArrowDownCircle className="w-3 h-3 mr-1" />
+                              )}
+                              {item.nature}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {item.division ? (
+                              <Badge variant="outline">{item.division}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {item.typeField ? (
+                              <Badge variant="outline">{item.typeField}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground text-sm">-</span>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            <span className={item.nature === "Entrada" ? "text-income" : "text-expense"}>
+                              {formatCurrency(item.totalAmount)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right font-bold">
+                            <span className={item.balance >= 0 ? "text-income" : "text-expense"}>
+                              {formatCurrency(item.balance)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className="text-muted-foreground text-sm">-</span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                    
+                    // Renderizar transação normal ou filha
+                    const transaction = item;
+                    const isChild = item.isChild;
+                    
                     return (
-                    <TableRow key={transaction.id} className={rowBgClass}>
+                    <TableRow key={transaction.id} className={`${rowBgClass} ${isChild ? 'bg-muted/50' : ''}`}>
                       <TableCell className="font-medium">
                         {formatDate(transaction.date)}
                       </TableCell>
                       <TableCell>
-                        <div>
+                        <div className={isChild ? "ml-10" : ""}>
                           <div className="font-medium">{transaction.description}</div>
                           {transaction.notes && (
                             <div className="text-xs text-muted-foreground mt-1">
