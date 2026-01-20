@@ -337,8 +337,9 @@ Sugira a melhor categorização (Divisão, Tipo E Categoria).`,
     },
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content || typeof content !== 'string') {
+  // Validar resposta da IA
+  if (!response || !response.choices || !Array.isArray(response.choices) || response.choices.length === 0) {
+    console.error('[Pré-categorização] Resposta inválida da IA:', response);
     return {
       division: "Pessoal",
       type: "Importante",
@@ -346,10 +347,29 @@ Sugira a melhor categorização (Divisão, Tipo E Categoria).`,
     };
   }
 
-  const parsed = JSON.parse(content);
-  return {
-    division: parsed.division,
-    type: parsed.type,
-    categoryId: parsed.categoryId,
-  };
+  const content = response.choices[0]?.message?.content;
+  if (!content || typeof content !== 'string') {
+    console.error('[Pré-categorização] Conteúdo inválido:', content);
+    return {
+      division: "Pessoal",
+      type: "Importante",
+      categoryId: null,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(content);
+    return {
+      division: parsed.division,
+      type: parsed.type,
+      categoryId: parsed.categoryId,
+    };
+  } catch (error) {
+    console.error('[Pré-categorização] Erro ao parsear JSON:', error, 'Content:', content);
+    return {
+      division: "Pessoal",
+      type: "Importante",
+      categoryId: null,
+    };
+  }
 }

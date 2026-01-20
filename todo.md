@@ -229,3 +229,12 @@
 - [x] Botão Voltar aparece apenas quando currentIndex > 0
 - [x] Ao voltar, remove última transação validada da lista
 - [x] Botão com ícone ChevronLeft e desabilitado durante salvamento
+
+## Bug: Erro 500 na Pré-categorização
+- [x] Procedure precategorize retorna erro 500
+- [x] Erro: "Cannot read properties of undefined (reading '0')" ao acessar response.choices[0]
+- [x] Problema: resposta da IA não tinha validação robusta
+- [x] Adicionada validação de response.choices antes de acessar
+- [x] Adicionado try-catch para parsear JSON
+- [x] Logs de erro detalhados para debug
+- [x] Retorno de valores padrão em caso de falha
