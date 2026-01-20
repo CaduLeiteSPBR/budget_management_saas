@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,12 @@ import { Link } from "wouter";
 import { ArrowRight, FolderOpen } from "lucide-react";
 import OverviewDashboard from "@/components/OverviewDashboard";
 import TransactionsList from "@/components/TransactionsList";
+import TransactionForm from "@/components/TransactionForm";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
+  const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [editingTransactionId, setEditingTransactionId] = useState<number | undefined>();
   const { data: balance, isLoading: balanceLoading } = trpc.transactions.balance.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -198,7 +202,26 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-6">
-            <TransactionsList />
+            {showTransactionForm ? (
+              <TransactionForm
+                transactionId={editingTransactionId}
+                onSuccess={() => {
+                  setShowTransactionForm(false);
+                  setEditingTransactionId(undefined);
+                }}
+                onCancel={() => {
+                  setShowTransactionForm(false);
+                  setEditingTransactionId(undefined);
+                }}
+              />
+            ) : (
+              <TransactionsList
+                onEdit={(id) => {
+                  setEditingTransactionId(id);
+                  setShowTransactionForm(true);
+                }}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="budgets" className="space-y-6">

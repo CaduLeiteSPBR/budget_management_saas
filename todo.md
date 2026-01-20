@@ -206,3 +206,9 @@
 - [x] IA pré-categoriza Categoria apenas no primeiro registro
 - [x] Corrigida lógica para sempre chamar pré-categorização em cada registro
 - [x] Removida condição que pulava pré-categorização após primeiro registro
+
+## Bug: Botão Novo Lançamento
+- [x] Botão "Novo Lançamento" não abre pop-up de criação
+- [x] Implementado estado showTransactionForm e editingTransactionId no Dashboard
+- [x] Adicionado TransactionForm com callbacks onSuccess e onCancel
+- [x] Botão agora abre formulário corretamente (id=0 para novo, id>0 para edição)
