@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Loader2, ChevronRight, ChevronLeft, Check, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Transaction {
   description: string;
@@ -35,6 +36,8 @@ export default function InvoiceValidation({
 }: InvoiceValidationProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [validatedTransactions, setValidatedTransactions] = useState<any[]>([]);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [similarTransactions, setSimilarTransactions] = useState<Transaction[]>([]);
   const [skipCurrent, setSkipCurrent] = useState(false);
 
   // Estados do formulário
@@ -166,26 +169,43 @@ export default function InvoiceValidation({
 
   const handleApplyToSimilar = () => {
     if (!description || !division || !type) {
-      toast.error("Preencha a categorização antes de aplicar");
+      toast.error("Preencha a categoriza\u00e7\u00e3o antes de aplicar");
       return;
     }
 
-    // Identificar transações similares (mesma descrição, case-insensitive)
+    // Identificar transa\u00e7\u00f5es similares (mesma descri\u00e7\u00e3o, case-insensitive)
     const currentDesc = description.toLowerCase().trim();
-    let appliedCount = 0;
+    const similar: Transaction[] = [];
 
     transactions.forEach((trx) => {
       const trxDesc = trx.description.toLowerCase().trim();
       // Match exato ou contido
       if (trxDesc === currentDesc || trxDesc.includes(currentDesc) || currentDesc.includes(trxDesc)) {
-        trx.suggestedDivision = division;
-        trx.suggestedType = type;
-        trx.suggestedCategoryId = categoryId;
-        appliedCount++;
+        similar.push(trx);
       }
     });
 
-    toast.success(`Categorização aplicada a ${appliedCount} transações similares`);
+    if (similar.length === 0) {
+      toast.error("Nenhuma transa\u00e7\u00e3o similar encontrada");
+      return;
+    }
+
+    // Mostrar modal de preview
+    setSimilarTransactions(similar);
+    setShowPreviewModal(true);
+  };
+
+  const confirmApplyToSimilar = () => {
+    // Aplicar categoriza\u00e7\u00e3o a todas as transa\u00e7\u00f5es similares
+    similarTransactions.forEach((trx) => {
+      trx.suggestedDivision = division;
+      trx.suggestedType = type;
+      trx.suggestedCategoryId = categoryId;
+    });
+
+    toast.success(`Categoriza\u00e7\u00e3o aplicada a ${similarTransactions.length} transa\u00e7\u00f5es similares`);
+    setShowPreviewModal(false);
+    setSimilarTransactions([]);
   };
 
   const saveAll = async () => {
@@ -404,6 +424,49 @@ export default function InvoiceValidation({
           </div>
         </CardFooter>
       </Card>
+
+      {/* Modal de Preview de Transa\u00e7\u00f5es Similares */}
+      <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Aplicar Categoriza\u00e7\u00e3o a Transa\u00e7\u00f5es Similares</DialogTitle>
+            <DialogDescription>
+              As seguintes {similarTransactions.length} transa\u00e7\u00f5es ser\u00e3o categorizadas como:
+              <strong> {division} \u2192 {type} {categoryId && categories?.find(c => c.id === categoryId) ? `\u2192 ${categories.find(c => c.id === categoryId)?.name}` : ''}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 my-4">
+            <div className="text-sm font-medium text-muted-foreground mb-3">
+              Total: {similarTransactions.length} transa\u00e7\u00f5es | Valor total: R$ {similarTransactions.reduce((sum, t) => sum + t.amount, 0).toFixed(2)}
+            </div>
+            <div className="border rounded-lg divide-y max-h-96 overflow-y-auto">
+              {similarTransactions.map((trx, idx) => (
+                <div key={idx} className="p-3 hover:bg-accent/50 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="font-medium">{trx.description}</div>
+                      <div className="text-sm text-muted-foreground">{trx.nature}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">R$ {trx.amount.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmApplyToSimilar}>
+              Confirmar e Aplicar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

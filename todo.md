@@ -250,3 +250,15 @@
 - [x] Aplicar mesma categorização (division, type, categoryId) em lote
 - [x] Toast com feedback de quantas transações foram atualizadas
 - [x] Botão desabilitado quando skipCurrent ou campos vazios
+
+## Nova Feature: Preview de Transa\u00e7\u00f5es Similares
+- [x] Criar modal de preview ao clicar em "Aplicar a Todos Similares"
+- [x] Mostrar lista de transa\u00e7\u00f5es que ser\u00e3o afetadas (scroll\u00e1vel, max 96 altura)
+- [x] Exibir quantidade total e valor total das transa\u00e7\u00f5es no header
+- [x] Mostrar categoriza\u00e7\u00e3o que ser\u00e1 aplicada (Divis\u00e3o \u2192 Tipo \u2192 Categoria)
+- [x] Card para cada transa\u00e7\u00e3o com descri\u00e7\u00e3o, natureza e valor
+- [x] Hover effect nos cards de transa\u00e7\u00e3o
+- [x] Bot\u00f5es Confirmar e Cancelar no footer do modal
+- [x] Aplicar categoriza\u00e7\u00e3o apenas ap\u00f3s confirma\u00e7\u00e3o
+- [x] Toast de feedback ap\u00f3s aplica\u00e7\u00e3o
+- [x] Validar se h\u00e1 transa\u00e7\u00f5es similares antes de abrir modal
