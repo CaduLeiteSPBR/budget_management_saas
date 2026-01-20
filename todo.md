@@ -273,3 +273,21 @@
 - [x] Download automático do arquivo
 - [x] Toast de feedback com quantidade de lançamentos exportados
 - [x] Validação: mensagem de erro se não houver lançamentos
+
+## Nova Feature: Seleção Múltipla de Meses
+- [x] Modificar filtro de mês para permitir seleção de múltiplos meses
+- [x] Substituir Select por Popover com checkboxes
+- [x] Permitir marcar/desmarcar meses individualmente
+- [x] Botão "Todos" para selecionar todos os 12 meses
+- [x] Botão "Limpar" para desmarcar todos
+- [x] Mostrar meses selecionados no botão do filtro:
+  - 0 meses: "Selecione os meses"
+  - 1 mês: Nome do mês (ex: "Janeiro")
+  - 2-11 meses: "X meses selecionados"
+  - 12 meses: "Todos os meses"
+- [x] Checkboxes em grid 2 colunas com abreviações (Jan, Fev, Mar...)
+- [x] Ajustar query para buscar lançamentos do range (mênimo ao máximo)
+- [x] Filtrar transações para mostrar apenas meses selecionados
+- [x] Validação: impedir aplicar filtro sem meses selecionados
+- [x] Saldos calculados automaticamente com base nas transações filtradas
+- [x] Contador de transações atualiza automaticamente

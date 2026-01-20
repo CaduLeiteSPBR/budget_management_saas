@@ -3,6 +3,8 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog,
@@ -47,15 +49,17 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [importBankName, setImportBankName] = useState<string>("");
   const [showValidation, setShowValidation] = useState(false);
   
-  // Filtros de período
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  // Filtros de período - suporte a múltiplos meses
+  const [selectedMonths, setSelectedMonths] = useState<number[]>([currentMonth]);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [appliedMonth, setAppliedMonth] = useState<number>(currentMonth);
+  const [appliedMonths, setAppliedMonths] = useState<number[]>([currentMonth]);
   const [appliedYear, setAppliedYear] = useState<number>(currentYear);
 
-  // Calcular startDate e endDate baseado no período aplicado
-  const startDate = Date.UTC(appliedYear, appliedMonth - 1, 1);
-  const endDate = Date.UTC(appliedYear, appliedMonth, 0, 23, 59, 59, 999);
+  // Calcular startDate e endDate baseado nos meses aplicados
+  const minMonth = Math.min(...appliedMonths);
+  const maxMonth = Math.max(...appliedMonths);
+  const startDate = Date.UTC(appliedYear, minMonth - 1, 1);
+  const endDate = Date.UTC(appliedYear, maxMonth, 0, 23, 59, 59, 999);
 
   const { data: transactions, isLoading } = trpc.transactions.list.useQuery({ startDate, endDate });
 
@@ -172,6 +176,11 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
 
   // Filtrar transações
   const filteredTransactions = transactions?.filter((t) => {
+    // Filtrar por meses selecionados
+    const transactionDate = new Date(t.date);
+    const transactionMonth = transactionDate.getUTCMonth() + 1; // 1-12
+    if (!appliedMonths.includes(transactionMonth)) return false;
+    
     if (filterNature !== "all" && t.nature !== filterNature) return false;
     if (filterDivision !== "all" && t.division !== filterDivision) return false;
     if (filterType !== "all" && t.type !== filterType) return false;
@@ -260,7 +269,11 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   }
 
   const applyPeriodFilter = () => {
-    setAppliedMonth(selectedMonth);
+    if (selectedMonths.length === 0) {
+      toast.error("Selecione pelo menos um mês");
+      return;
+    }
+    setAppliedMonths(selectedMonths);
     setAppliedYear(selectedYear);
   };
 
@@ -336,19 +349,65 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
           {/* Filtros de Período */}
           <div className="flex flex-wrap items-end gap-3 mb-4">
             <div className="flex-1 min-w-[150px]">
-              <label className="text-sm font-medium mb-2 block">Mês</label>
-              <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((m) => (
-                    <SelectItem key={m.value} value={m.value.toString()}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium mb-2 block">Meses</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    {selectedMonths.length === 0
+                      ? "Selecione os meses"
+                      : selectedMonths.length === 12
+                      ? "Todos os meses"
+                      : selectedMonths.length === 1
+                      ? months.find(m => m.value === selectedMonths[0])?.label
+                      : `${selectedMonths.length} meses selecionados`}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4" align="start">
+                  <div className="space-y-3">
+                    <div className="flex gap-2 mb-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setSelectedMonths(months.map(m => m.value))}
+                      >
+                        Todos
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setSelectedMonths([])}
+                      >
+                        Limpar
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {months.map((month) => (
+                        <div key={month.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`month-${month.value}`}
+                            checked={selectedMonths.includes(month.value)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedMonths([...selectedMonths, month.value].sort((a, b) => a - b));
+                              } else {
+                                setSelectedMonths(selectedMonths.filter(m => m !== month.value));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`month-${month.value}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {month.label.substring(0, 3)}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex-1 min-w-[120px]">
               <label className="text-sm font-medium mb-2 block">Ano</label>
