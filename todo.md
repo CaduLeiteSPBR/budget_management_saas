@@ -324,3 +324,16 @@
 - [x] Problema: Dashboard somava TODAS as transações até o fim do período
 - [x] Correção: agora usa saldo progressivo das transações do período selecionado (igual ao TransactionsList)
 - [x] Ordena transações por data e calcula saldo iterativamente
+
+## Problema: Cache de Navegador
+- [x] Valor correto (R$ 1.975,99) aparece na visualização central
+- [x] Valor antigo (R$ 8.854,92) aparecia na pré-visualização lateral e site publicado
+- [x] Servidor reiniciado para limpar cache do Vite
+- [x] Screenshot confirma valor correto (R$ 1.975,99) em ambos Saldo Atual e Saldo no Fim do Mês
+
+## Bug e Feature: Botão de Configurações
+- [x] Botão de configurações retorna erro 404
+- [x] Substituir link /settings por DropdownMenu
+- [x] Adicionar opção "Logout" no menu com ícone LogOut
+- [x] Implementar função handleLogout que chama trpc.auth.logout
+- [x] Redirecionamento para página inicial ("/") após logout
