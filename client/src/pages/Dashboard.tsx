@@ -83,11 +83,13 @@ export default function Dashboard() {
   const currentBalance = transactions?.filter(t => t.isPaid && t.date <= Date.now())
     .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
   
-  // Calcular saldo no fim do mês (todas as transações até o fim do período selecionado)
-  const maxSelectedMonth = Math.max(...selectedMonths);
-  const endOfPeriodDate = new Date(selectedYear, maxSelectedMonth, 0, 23, 59, 59).getTime(); // Último dia do maior mês selecionado
-  const endOfPeriodBalance = transactions?.filter(t => t.date <= endOfPeriodDate)
-    .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
+  // Calcular saldo no fim do mês (saldo progressivo das transações do período selecionado, ordenadas por data)
+  const sortedPeriodTransactions = periodTransactions?.slice().sort((a, b) => a.date - b.date) || [];
+  let endOfPeriodBalance = 0;
+  sortedPeriodTransactions.forEach((t) => {
+    const amount = Number(t.amount);
+    endOfPeriodBalance += t.nature === "Entrada" ? amount : -amount;
+  });
 
   return (
     <div className="min-h-screen bg-background">

@@ -317,3 +317,10 @@
 - [x] Remover menu "Orçamentos" do Dashboard
 - [x] Remover TabsTrigger e TabsContent de Orçamentos
 - [x] Remover card "Aderência ao Orçamento" da Visão Geral
+
+## Bug: Saldo no Fim do Mês Incorreto
+- [x] Saldo no Fim do Mês mostra R$ 36.504,99 ao invés de R$ 1.975,99
+- [x] Valor correto aparece na aba Lançamentos (último lançamento ordenado por data)
+- [x] Problema: Dashboard somava TODAS as transações até o fim do período
+- [x] Correção: agora usa saldo progressivo das transações do período selecionado (igual ao TransactionsList)
+- [x] Ordena transações por data e calcula saldo iterativamente
