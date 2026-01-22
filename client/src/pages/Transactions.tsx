@@ -12,6 +12,12 @@ export default function Transactions() {
   const [, setLocation] = useLocation();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | undefined>();
+  
+  // Estados de período (inicializar com mês e ano atuais)
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+  const [selectedMonths] = useState<number[]>([currentMonth]);
+  const [selectedYear] = useState<number>(currentYear);
 
   if (loading) {
     return (
@@ -88,7 +94,11 @@ export default function Transactions() {
             onCancel={handleCancel}
           />
         ) : (
-          <TransactionsList onEdit={handleEdit} />
+          <TransactionsList 
+            onEdit={handleEdit} 
+            selectedMonths={selectedMonths}
+            selectedYear={selectedYear}
+          />
         )}
       </main>
     </div>

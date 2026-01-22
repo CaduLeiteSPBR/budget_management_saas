@@ -337,3 +337,15 @@
 - [x] Adicionar opção "Logout" no menu com ícone LogOut
 - [x] Implementar função handleLogout que chama trpc.auth.logout
 - [x] Redirecionamento para página inicial ("/") após logout
+
+## Bug: Erro 404 após Login OAuth
+- [ ] Corrigir erro 404 após login com Google (usuário caduleitenet@gmail.com)
+- [ ] Investigar fluxo de callback OAuth
+- [ ] Verificar rota de redirecionamento após autenticação
+- [ ] Testar fluxo completo de login
+
+## Melhoria: Unificação de Filtro de Período
+- [x] Remover filtro de período duplicado da aba Lançamentos
+- [x] TransactionsList deve usar filtro de período do topo da página
+- [x] Passar selectedMonths e selectedYear como props para TransactionsList
+- [x] Remover estado interno de período do TransactionsList

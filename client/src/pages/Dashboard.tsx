@@ -349,6 +349,8 @@ export default function Dashboard() {
                   setEditingTransactionId(id);
                   setShowTransactionForm(true);
                 }}
+                selectedMonths={selectedMonths}
+                selectedYear={selectedYear}
               />
             )}
           </TabsContent>

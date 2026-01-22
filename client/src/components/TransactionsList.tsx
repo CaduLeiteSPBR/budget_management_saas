@@ -25,15 +25,12 @@ import InvoiceValidation from "@/components/InvoiceValidation";
 
 interface TransactionsListProps {
   onEdit?: (transactionId: number) => void;
+  selectedMonths: number[];
+  selectedYear: number;
 }
 
-export default function TransactionsList({ onEdit }: TransactionsListProps) {
+export default function TransactionsList({ onEdit, selectedMonths, selectedYear }: TransactionsListProps) {
   const utils = trpc.useUtils();
-  
-  // Obter mês e ano atuais
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1; // 1-12
-  const currentYear = now.getFullYear();
   
   const [filterNature, setFilterNature] = useState<string>("all");
   const [filterDivision, setFilterDivision] = useState<string>("all");
@@ -48,18 +45,12 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
   const [importPaymentDate, setImportPaymentDate] = useState<number>(0);
   const [importBankName, setImportBankName] = useState<string>("");
   const [showValidation, setShowValidation] = useState(false);
-  
-  // Filtros de período - suporte a múltiplos meses
-  const [selectedMonths, setSelectedMonths] = useState<number[]>([currentMonth]);
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [appliedMonths, setAppliedMonths] = useState<number[]>([currentMonth]);
-  const [appliedYear, setAppliedYear] = useState<number>(currentYear);
 
-  // Calcular startDate e endDate baseado nos meses aplicados
-  const minMonth = Math.min(...appliedMonths);
-  const maxMonth = Math.max(...appliedMonths);
-  const startDate = Date.UTC(appliedYear, minMonth - 1, 1);
-  const endDate = Date.UTC(appliedYear, maxMonth, 0, 23, 59, 59, 999);
+  // Calcular startDate e endDate baseado nos meses recebidos via props
+  const minMonth = Math.min(...selectedMonths);
+  const maxMonth = Math.max(...selectedMonths);
+  const startDate = Date.UTC(selectedYear, minMonth - 1, 1);
+  const endDate = Date.UTC(selectedYear, maxMonth, 0, 23, 59, 59, 999);
 
   const { data: transactions, isLoading } = trpc.transactions.list.useQuery({ startDate, endDate });
 
@@ -179,7 +170,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     // Filtrar por meses selecionados
     const transactionDate = new Date(t.date);
     const transactionMonth = transactionDate.getUTCMonth() + 1; // 1-12
-    if (!appliedMonths.includes(transactionMonth)) return false;
+    if (!selectedMonths.includes(transactionMonth)) return false;
     
     if (filterNature !== "all" && t.nature !== filterNature) return false;
     if (filterDivision !== "all" && t.division !== filterDivision) return false;
@@ -268,15 +259,6 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     );
   }
 
-  const applyPeriodFilter = () => {
-    if (selectedMonths.length === 0) {
-      toast.error("Selecione pelo menos um mês");
-      return;
-    }
-    setAppliedMonths(selectedMonths);
-    setAppliedYear(selectedYear);
-  };
-
   // Calcular saldo inicial e final do período
   const initialBalance = 0; // TODO: buscar saldo anterior ao período
   let periodBalance = initialBalance;
@@ -285,23 +267,6 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
     periodBalance += t.nature === "Entrada" ? amount : -amount;
   });
   const finalBalance = periodBalance;
-
-  const months = [
-    { value: 1, label: "Janeiro" },
-    { value: 2, label: "Fevereiro" },
-    { value: 3, label: "Março" },
-    { value: 4, label: "Abril" },
-    { value: 5, label: "Maio" },
-    { value: 6, label: "Junho" },
-    { value: 7, label: "Julho" },
-    { value: 8, label: "Agosto" },
-    { value: 9, label: "Setembro" },
-    { value: 10, label: "Outubro" },
-    { value: 11, label: "Novembro" },
-    { value: 12, label: "Dezembro" },
-  ];
-
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
 
   return (
     <>
@@ -329,94 +294,7 @@ export default function TransactionsList({ onEdit }: TransactionsListProps) {
             </div>
           </div>
 
-          {/* Filtros de Período */}
-          <div className="flex flex-wrap items-end gap-3 mb-4">
-            <div className="flex-1 min-w-[150px]">
-              <label className="text-sm font-medium mb-2 block">Meses</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    {selectedMonths.length === 0
-                      ? "Selecione os meses"
-                      : selectedMonths.length === 12
-                      ? "Todos os meses"
-                      : selectedMonths.length === 1
-                      ? months.find(m => m.value === selectedMonths[0])?.label
-                      : `${selectedMonths.length} meses selecionados`}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-4" align="start">
-                  <div className="space-y-3">
-                    <div className="flex gap-2 mb-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setSelectedMonths(months.map(m => m.value))}
-                      >
-                        Todos
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => setSelectedMonths([])}
-                      >
-                        Limpar
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {months.map((month) => (
-                        <div key={month.value} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`month-${month.value}`}
-                            checked={selectedMonths.includes(month.value)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedMonths([...selectedMonths, month.value].sort((a, b) => a - b));
-                              } else {
-                                setSelectedMonths(selectedMonths.filter(m => m !== month.value));
-                              }
-                            }}
-                          />
-                          <label
-                            htmlFor={`month-${month.value}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {month.label.substring(0, 3)}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex-1 min-w-[120px]">
-              <label className="text-sm font-medium mb-2 block">Ano</label>
-              <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={applyPeriodFilter} className="mb-0">
-              Aplicar
-            </Button>
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 mb-0">
-                <X className="w-4 h-4" />
-                Limpar Filtros
-              </Button>
-            )}
-          </div>
+
 
         </CardHeader>
         <CardContent className="space-y-4">
