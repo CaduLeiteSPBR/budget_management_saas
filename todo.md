@@ -349,3 +349,9 @@
 - [x] TransactionsList deve usar filtro de período do topo da página
 - [x] Passar selectedMonths e selectedYear como props para TransactionsList
 - [x] Remover estado interno de período do TransactionsList
+
+## Bug: Cálculo Incorreto de Entradas do Mês (RESOLVIDO)
+- [x] Investigar cálculo de Entradas do Mês no Dashboard
+- [x] Identificar causa da discrepância (era erro de hooks React)
+- [x] Corrigir lógica de cálculo (movido early return para depois dos hooks)
+- [x] Validar que o valor exibido corresponde à soma real das entradas (R$ 82.938,48 correto)

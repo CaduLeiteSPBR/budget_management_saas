@@ -55,21 +55,6 @@ export default function Dashboard() {
     { enabled: isAuthenticated }
   );
 
-  if (loading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Carregando...</div>
-      </div>
-    );
-  }
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   // Calcular totais do período selecionado
   const periodTransactions = useMemo(() => {
     if (!transactions) return [];
@@ -102,6 +87,21 @@ export default function Dashboard() {
     const amount = Number(t.amount);
     endOfPeriodBalance += t.nature === "Entrada" ? amount : -amount;
   });
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
+  }
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
 
   return (
     <div className="min-h-screen bg-background">
