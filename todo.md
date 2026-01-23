@@ -363,3 +363,10 @@
 - [x] Identificar causa da discrepância (Dashboard filtrava isPaid, OverviewDashboard não)
 - [x] Corrigir lógica de cálculo (removido filtro isPaid do periodTransactions)
 - [ ] Validar correção com usuário
+
+## Issue: Discrepância entre Preview e Management UI (RESOLVIDO)
+- [x] Preview mostra R$ 82.938,48 (correto)
+- [x] Management UI mostra R$ 89.818,83 (incorreto - cache)
+- [x] Forçar rebuild completo e limpar cache (servidor reiniciado)
+- [x] Verificar se há múltiplos componentes Dashboard (confirmado que usa mesmo código)
+- [x] Checkpoint criado para forçar novo build e limpar cache do Management UI
