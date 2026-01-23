@@ -24,8 +24,8 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
   // Calcular dados do período selecionado
   const periodTransactions = transactions?.filter(t => {
     const tDate = new Date(t.date);
-    const tMonth = tDate.getMonth() + 1;
-    const tYear = tDate.getFullYear();
+    const tMonth = tDate.getUTCMonth() + 1;
+    const tYear = tDate.getUTCFullYear();
     return selectedMonths.includes(tMonth) && tYear === selectedYear;
   }) || [];
 
@@ -88,9 +88,9 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
   }
 
   // Burn Rate Diário (baseado no mês atual se selecionado, senão no primeiro mês selecionado)
-  const referenceMonth = selectedMonths.includes(now.getMonth() + 1) ? now.getMonth() + 1 : selectedMonths[0] || 1;
+  const referenceMonth = selectedMonths.includes(now.getUTCMonth() + 1) ? now.getUTCMonth() + 1 : selectedMonths[0] || 1;
   const daysInMonth = new Date(selectedYear, referenceMonth, 0).getDate();
-  const currentDay = referenceMonth === (now.getMonth() + 1) && selectedYear === now.getFullYear() ? now.getDate() : 1;
+  const currentDay = referenceMonth === (now.getUTCMonth() + 1) && selectedYear === now.getUTCFullYear() ? now.getUTCDate() : 1;
   const daysRemaining = daysInMonth - currentDay;
 
   const periodIncome = periodTransactions

@@ -14,8 +14,8 @@ export default function Transactions() {
   const [editingId, setEditingId] = useState<number | undefined>();
   
   // Estados de período (inicializar com mês e ano atuais)
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getUTCMonth() + 1;
+  const currentYear = new Date().getUTCFullYear();
   const [selectedMonths] = useState<number[]>([currentMonth]);
   const [selectedYear] = useState<number>(currentYear);
 

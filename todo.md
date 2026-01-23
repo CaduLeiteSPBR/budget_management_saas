@@ -370,3 +370,11 @@
 - [x] Forçar rebuild completo e limpar cache (servidor reiniciado)
 - [x] Verificar se há múltiplos componentes Dashboard (confirmado que usa mesmo código)
 - [x] Checkpoint criado para forçar novo build e limpar cache do Management UI
+
+## Bug: Timezone Drift (Discrepância de Valores por Fuso Horário) - CORRIGIDO
+- [x] Corrigir OverviewDashboard para usar getUTCMonth() e getUTCFullYear()
+- [x] Corrigir Dashboard para usar UTC em cálculos de data (periodTransactions)
+- [x] Corrigir inicialização de currentMonth/currentYear em Dashboard e Transactions
+- [x] Corrigir Burn Rate Diário para usar UTC (referenceMonth, currentDay)
+- [x] Verificar TransactionsList (não usa getMonth/getFullYear diretamente)
+- [ ] Validar consistência entre cards e tabela (deve equalizar 17 transações)

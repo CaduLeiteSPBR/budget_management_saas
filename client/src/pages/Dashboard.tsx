@@ -42,8 +42,8 @@ export default function Dashboard() {
   };
   
   // Estado do seletor de período
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getUTCMonth() + 1;
+  const currentYear = new Date().getUTCFullYear();
   const [selectedMonths, setSelectedMonths] = useState<number[]>([currentMonth]);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const { data: balance, isLoading: balanceLoading } = trpc.transactions.balance.useQuery(undefined, {
@@ -60,8 +60,8 @@ export default function Dashboard() {
     if (!transactions) return [];
     return transactions.filter(t => {
       const tDate = new Date(t.date);
-      const tMonth = tDate.getMonth() + 1;
-      const tYear = tDate.getFullYear();
+      const tMonth = tDate.getUTCMonth() + 1;
+      const tYear = tDate.getUTCFullYear();
       return selectedMonths.includes(tMonth) && tYear === selectedYear;
     });
   }, [transactions, selectedMonths, selectedYear]);
