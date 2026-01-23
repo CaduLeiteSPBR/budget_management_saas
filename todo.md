@@ -355,3 +355,11 @@
 - [x] Identificar causa da discrepância (era erro de hooks React)
 - [x] Corrigir lógica de cálculo (movido early return para depois dos hooks)
 - [x] Validar que o valor exibido corresponde à soma real das entradas (R$ 82.938,48 correto)
+
+## Bug: Cálculo Incorreto de Entradas do Mês (CORRIGIDO)
+- [x] Investigar cálculo de periodIncome no Dashboard
+- [x] Verificar filtro de transações pagas (isPaid) no cálculo
+- [x] Comparar cálculos entre Dashboard e OverviewDashboard
+- [x] Identificar causa da discrepância (Dashboard filtrava isPaid, OverviewDashboard não)
+- [x] Corrigir lógica de cálculo (removido filtro isPaid do periodTransactions)
+- [ ] Validar correção com usuário

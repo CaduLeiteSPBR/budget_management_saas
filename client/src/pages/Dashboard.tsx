@@ -62,7 +62,7 @@ export default function Dashboard() {
       const tDate = new Date(t.date);
       const tMonth = tDate.getMonth() + 1;
       const tYear = tDate.getFullYear();
-      return selectedMonths.includes(tMonth) && tYear === selectedYear && t.isPaid;
+      return selectedMonths.includes(tMonth) && tYear === selectedYear;
     });
   }, [transactions, selectedMonths, selectedYear]);
 
