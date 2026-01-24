@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `isSystemGenerated` boolean DEFAULT false NOT NULL;

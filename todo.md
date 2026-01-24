@@ -378,3 +378,16 @@
 - [x] Corrigir Burn Rate Diário para usar UTC (referenceMonth, currentDay)
 - [x] Verificar TransactionsList (não usa getMonth/getFullYear diretamente)
 - [ ] Validar consistência entre cards e tabela (deve equalizar 17 transações)
+
+## Feature: Saldo Inicial Automático com Cálculo em Cascata
+- [x] Adicionar campo isSystemGenerated ao schema de transações
+- [x] Criar função calculateMonthEndBalance() no db.ts
+- [x] Criar função recalculateInitialBalances() para recalculo em cascata
+- [x] Criar procedure initializeMonthlyBalances() para gerar saldos Fev/2026-Dez/2030
+- [x] Adicionar hooks de recalculo em transactions.create
+- [x] Adicionar hooks de recalculo em transactions.update
+- [x] Adicionar hooks de recalculo em transactions.delete
+- [x] Proteger exclusão de transações com isSystemGenerated=true
+- [x] Ajustar ordenação no TransactionsList (Saldo Inicial sempre primeiro)
+- [x] Adicionar procedure tRPC transactions.initializeBalances
+- [ ] Testar criação/edição/exclusão e verificar recalculo automático

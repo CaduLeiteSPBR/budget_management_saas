@@ -56,6 +56,7 @@ export const transactions = mysqlTable("transactions", {
   installmentNumber: int("installmentNumber"), // Número da parcela (1/12, 2/12, etc)
   totalInstallments: int("totalInstallments"), // Total de parcelas
   isPaid: boolean("isPaid").default(true).notNull(), // Para parcelas futuras
+  isSystemGenerated: boolean("isSystemGenerated").default(false).notNull(), // Saldo Inicial automático
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

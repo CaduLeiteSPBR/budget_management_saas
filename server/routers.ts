@@ -182,6 +182,20 @@ export const appRouter = router({
           });
         }
 
+        // Recalcular saldos iniciais em cascata
+        const transactionDate = new Date(input.date);
+        const transactionMonth = transactionDate.getUTCMonth() + 1;
+        const transactionYear = transactionDate.getUTCFullYear();
+        
+        // Recalcular a partir do mês seguinte
+        let nextMonth = transactionMonth + 1;
+        let nextYear = transactionYear;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
+
         return transaction;
       }),
 
@@ -200,19 +214,77 @@ export const appRouter = router({
       }))
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
+        
+        // Buscar transação original para pegar a data
+        const transactions = await db.getUserTransactions(ctx.user.id);
+        const originalTransaction = transactions.find(t => t.id === id);
+        
         await db.updateTransaction(id, ctx.user.id, data);
+        
+        // Recalcular saldos iniciais em cascata
+        if (originalTransaction) {
+          const transactionDate = new Date(data.date || originalTransaction.date);
+          const transactionMonth = transactionDate.getUTCMonth() + 1;
+          const transactionYear = transactionDate.getUTCFullYear();
+          
+          // Recalcular a partir do mês seguinte
+          let nextMonth = transactionMonth + 1;
+          let nextYear = transactionYear;
+          if (nextMonth > 12) {
+            nextMonth = 1;
+            nextYear++;
+          }
+          await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
+        }
+        
         return { success: true };
       }),
 
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
+        // Buscar transação antes de excluir para verificar se é gerada pelo sistema
+        const transactions = await db.getUserTransactions(ctx.user.id);
+        const transaction = transactions.find(t => t.id === input.id);
+        
+        if (!transaction) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Transação não encontrada' });
+        }
+        
+        // Proteger exclusão de saldos iniciais gerados pelo sistema
+        if (transaction.isSystemGenerated) {
+          throw new TRPCError({ 
+            code: 'FORBIDDEN', 
+            message: 'Não é possível excluir saldos iniciais gerados automaticamente pelo sistema' 
+          });
+        }
+        
+        const transactionDate = new Date(transaction.date);
+        const transactionMonth = transactionDate.getUTCMonth() + 1;
+        const transactionYear = transactionDate.getUTCFullYear();
+        
         await db.deleteTransaction(input.id, ctx.user.id);
+        
+        // Recalcular saldos iniciais em cascata
+        let nextMonth = transactionMonth + 1;
+        let nextYear = transactionYear;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
+        
         return { success: true };
       }),
 
     balance: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUserBalance(ctx.user.id);
+    }),
+
+    // Inicializar saldos iniciais automáticos (Fev/2026 - Dez/2030)
+    initializeBalances: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.initializeMonthlyBalances(ctx.user.id);
+      return { success: true, message: 'Saldos iniciais gerados com sucesso!' };
     }),
 
     // Processar arquivo de fatura

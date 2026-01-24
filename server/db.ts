@@ -254,6 +254,7 @@ export async function getUserTransactions(userId: number, startDate?: number, en
       installmentNumber: transactions.installmentNumber,
       totalInstallments: transactions.totalInstallments,
       isPaid: transactions.isPaid,
+      isSystemGenerated: transactions.isSystemGenerated,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
@@ -545,4 +546,119 @@ export async function getAiLearningHistory(userId: number): Promise<AiLearning[]
   ).orderBy(desc(aiLearning.frequency), desc(aiLearning.lastUsed)).limit(50);
   
   return history;
+}
+
+// ==================== SALDO INICIAL AUTOMÁTICO ====================
+
+/**
+ * Calcula o saldo final de um mês específico
+ * @param userId ID do usuário
+ * @param year Ano (ex: 2026)
+ * @param month Mês (1-12)
+ * @returns Saldo final do mês (Entradas - Saídas)
+ */
+export async function calculateMonthEndBalance(userId: number, year: number, month: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  // Calcular timestamps UTC para início e fim do mês
+  const monthStart = Date.UTC(year, month - 1, 1, 0, 0, 0, 0);
+  const monthEnd = Date.UTC(year, month, 0, 23, 59, 59, 999);
+  
+  // Somar todas as transações do mês (Entradas - Saídas)
+  const result = await db
+    .select({
+      total: sql<string>`SUM(CASE WHEN ${transactions.nature} = 'Entrada' THEN ${transactions.amount} ELSE -${transactions.amount} END)`
+    })
+    .from(transactions)
+    .where(and(
+      eq(transactions.userId, userId),
+      gte(transactions.date, monthStart),
+      lte(transactions.date, monthEnd)
+    ));
+  
+  return Number(result[0]?.total || 0);
+}
+
+/**
+ * Recalcula saldos iniciais em cascata a partir de um mês específico
+ * @param userId ID do usuário
+ * @param fromYear Ano inicial
+ * @param fromMonth Mês inicial (1-12)
+ */
+export async function recalculateInitialBalances(userId: number, fromYear: number, fromMonth: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Calcular saldo final do mês anterior
+  let previousBalance = 0;
+  if (fromMonth === 1) {
+    // Se é Janeiro, pegar saldo final de Dezembro do ano anterior
+    previousBalance = await calculateMonthEndBalance(userId, fromYear - 1, 12);
+  } else {
+    // Senão, pegar saldo final do mês anterior
+    previousBalance = await calculateMonthEndBalance(userId, fromYear, fromMonth - 1);
+  }
+  
+  // Iterar de fromYear/fromMonth até Dezembro/2030
+  let currentYear = fromYear;
+  let currentMonth = fromMonth;
+  
+  while (currentYear < 2031) {
+    // Data do saldo inicial: dia 01 do mês às 00:00:00 UTC
+    const initialBalanceDate = Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0);
+    
+    // Buscar se já existe saldo inicial para este mês
+    const existingBalance = await db
+      .select()
+      .from(transactions)
+      .where(and(
+        eq(transactions.userId, userId),
+        eq(transactions.isSystemGenerated, true),
+        eq(transactions.date, initialBalanceDate)
+      ))
+      .limit(1);
+    
+    if (existingBalance.length > 0) {
+      // Atualizar saldo inicial existente
+      await db
+        .update(transactions)
+        .set({ amount: previousBalance.toFixed(2) })
+        .where(eq(transactions.id, existingBalance[0].id));
+    } else {
+      // Criar novo saldo inicial
+      await db.insert(transactions).values({
+        userId,
+        description: "Saldo Inicial",
+        amount: previousBalance.toFixed(2),
+        nature: "Entrada",
+        division: "Pessoal",
+        type: "Essencial",
+        date: initialBalanceDate,
+        isSystemGenerated: true,
+        isPaid: true,
+        notes: "Saldo inicial automático gerado pelo sistema",
+      });
+    }
+    
+    // Calcular saldo final do mês atual para usar como saldo inicial do próximo mês
+    previousBalance = await calculateMonthEndBalance(userId, currentYear, currentMonth);
+    
+    // Avançar para o próximo mês
+    currentMonth++;
+    if (currentMonth > 12) {
+      currentMonth = 1;
+      currentYear++;
+    }
+  }
+}
+
+/**
+ * Inicializa saldos iniciais automáticos de Fevereiro/2026 até Dezembro/2030
+ * @param userId ID do usuário
+ */
+export async function initializeMonthlyBalances(userId: number): Promise<void> {
+  // Janeiro/2026 não tem saldo inicial (mês de partida)
+  // Começar de Fevereiro/2026
+  await recalculateInitialBalances(userId, 2026, 2);
 }

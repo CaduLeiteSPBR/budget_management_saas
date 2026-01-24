@@ -181,6 +181,13 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
 
   // Ordenar transações com múltiplos critérios
   const sortedTransactions = [...(filteredTransactions || [])].sort((a, b) => {
+    // Forçar Saldo Inicial (isSystemGenerated) sempre primeiro
+    const aIsSystem = (a as any).isSystemGenerated || false;
+    const bIsSystem = (b as any).isSystemGenerated || false;
+    
+    if (aIsSystem && !bIsSystem) return -1;
+    if (!aIsSystem && bIsSystem) return 1;
+    
     let comparison = 0;
     
     switch (sortField) {
