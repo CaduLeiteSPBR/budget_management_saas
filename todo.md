@@ -436,3 +436,12 @@
 - [x] Implementar save automático via formData (onChange)
 - [x] Adicionar trigger de recalculo em cascata ao mudar isShared ou myPercentage (creditCards.update)
 - [ ] Testar cálculo proporcional e descrição dinâmica (aguardando validação do usuário)
+
+
+## Feature: Botões de Navegação Temporal Rápida
+- [x] Adicionar botões ChevronLeft e ChevronRight ao lado do seletor de Período no Dashboard
+- [x] Implementar lógica de navegação para mês único (retrocede/avança 1 mês)
+- [x] Implementar lógica de navegação para múltiplos meses (desloca bloco inteiro)
+- [x] Adicionar tratamento de virada de ano (Dez→Jan, Jan→Dez)
+- [x] Garantir atualização automática de OverviewDashboard e TransactionsList (via selectedMonths/selectedYear state)
+- [ ] Testar navegação com seleção única e múltipla (aguardando validação do usuário)

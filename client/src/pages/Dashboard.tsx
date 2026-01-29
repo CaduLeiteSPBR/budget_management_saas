@@ -15,7 +15,9 @@ import {
   Receipt,
   Target,
   Users,
-  CreditCard
+  CreditCard,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Link } from "wouter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -48,6 +50,63 @@ export default function Dashboard() {
   const currentYear = new Date().getUTCFullYear();
   const [selectedMonths, setSelectedMonths] = useState<number[]>([currentMonth]);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  
+  // Função de navegação temporal
+  const handleNavigate = (direction: 'prev' | 'next') => {
+    const sortedMonths = [...selectedMonths].sort((a, b) => a - b);
+    
+    if (sortedMonths.length === 0) return;
+    
+    if (sortedMonths.length === 1) {
+      // Navegação de mês único
+      const currentMonth = sortedMonths[0];
+      let newMonth = direction === 'next' ? currentMonth + 1 : currentMonth - 1;
+      let newYear = selectedYear;
+      
+      // Tratamento de virada de ano
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      } else if (newMonth < 1) {
+        newMonth = 12;
+        newYear--;
+      }
+      
+      setSelectedMonths([newMonth]);
+      setSelectedYear(newYear);
+    } else {
+      // Navegação de múltiplos meses (desloca bloco)
+      const blockSize = sortedMonths.length;
+      const firstMonth = sortedMonths[0];
+      const lastMonth = sortedMonths[sortedMonths.length - 1];
+      
+      let newMonths: number[];
+      let newYear = selectedYear;
+      
+      if (direction === 'next') {
+        // Desloca para frente
+        newMonths = sortedMonths.map(m => m + 1);
+        
+        // Verifica virada de ano
+        if (newMonths.some(m => m > 12)) {
+          newMonths = newMonths.map(m => m > 12 ? m - 12 : m);
+          newYear++;
+        }
+      } else {
+        // Desloca para trás
+        newMonths = sortedMonths.map(m => m - 1);
+        
+        // Verifica virada de ano
+        if (newMonths.some(m => m < 1)) {
+          newMonths = newMonths.map(m => m < 1 ? m + 12 : m);
+          newYear--;
+        }
+      }
+      
+      setSelectedMonths(newMonths);
+      setSelectedYear(newYear);
+    }
+  };
   const { data: balance, isLoading: balanceLoading } = trpc.transactions.balance.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -156,6 +215,17 @@ export default function Dashboard() {
         {/* Seletor de Período */}
         <div className="mb-6 flex items-center gap-4">
           <span className="text-sm font-medium text-muted-foreground">Período:</span>
+          
+          {/* Botão Navegar para Trás */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleNavigate('prev')}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -241,6 +311,16 @@ export default function Dashboard() {
               </div>
             </PopoverContent>
           </Popover>
+          
+          {/* Botão Navegar para Frente */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleNavigate('next')}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
         
         {/* Stats Cards */}
