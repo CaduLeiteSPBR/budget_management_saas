@@ -416,3 +416,10 @@
 - [x] Implementar reset de campo "Valor Total Hoje" ao mudar ciclo (useEffect + key prop)
 - [x] Proteger lançamentos de meses anteriores (nunca sobrescrever histórico)
 - [ ] Testar criação, edição de expectedAmount e mudança de ciclo
+
+
+## Bug: Loop Infinito de Atualizações na Aba Cartões (CORRIGIDO)
+- [x] Remover useEffect que dispara updateCurrentTotalMutation automaticamente
+- [x] Remover estado inputKeys e key dinâmica do Input
+- [x] Remover import de useEffect não utilizado
+- [ ] Testar que mensagem "Valor atualizado..." não dispara repetidamente (aguardando validação do usuário)

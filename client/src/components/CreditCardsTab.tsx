@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,32 +62,6 @@ export default function CreditCardsTab() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [inputKeys, setInputKeys] = useState<Record<number, number>>({});
-
-  // Resetar campos quando ciclo mudar
-  useEffect(() => {
-    if (!cards) return;
-    
-    const now = new Date();
-    const currentDay = now.getUTCDate();
-    
-    cards.forEach(card => {
-      // Se passou do closingDay, resetar o campo
-      if (currentDay > card.closingDay && Number(card.currentTotalAmount) > 0) {
-        // Forçar re-render do input com key
-        setInputKeys(prev => ({
-          ...prev,
-          [card.id]: (prev[card.id] || 0) + 1
-        }));
-        
-        // Resetar valor no backend
-        updateCurrentTotalMutation.mutate({
-          id: card.id,
-          currentTotalAmount: card.recurringAmount || "0.00",
-        });
-      }
-    });
-  }, [cards]);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -448,7 +422,6 @@ export default function CreditCardsTab() {
                     </Badge>
                   </div>
                   <Input
-                    key={`current-total-${card.id}-${inputKeys[card.id] || 0}`}
                     id={`current-total-${card.id}`}
                     type="number"
                     step="0.01"
