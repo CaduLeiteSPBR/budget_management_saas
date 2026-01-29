@@ -608,6 +608,8 @@ Retorne apenas JSON válido.`,
           expectedAmount: newCard.expectedAmount,
           division: newCard.division,
           type: newCard.type,
+          isShared: newCard.isShared,
+          myPercentage: newCard.myPercentage,
         });
 
         return newCard;
@@ -625,6 +627,8 @@ Retorne apenas JSON válido.`,
         expectedAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
         division: z.enum(["Pessoal", "Familiar", "Investimento"]).optional(),
         type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
+        isShared: z.boolean().optional(),
+        myPercentage: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
@@ -638,8 +642,13 @@ Retorne apenas JSON válido.`,
         // Atualizar cartão
         await db.updateCreditCard(id, ctx.user.id, data);
         
-        // Se expectedAmount mudou, regenerar cascata
-        if (input.expectedAmount && input.expectedAmount !== cardBefore.expectedAmount) {
+        // Se expectedAmount, isShared ou myPercentage mudaram, regenerar cascata
+        const needsRegenerateCascade = 
+          (input.expectedAmount && input.expectedAmount !== cardBefore.expectedAmount) ||
+          (input.isShared !== undefined && input.isShared !== cardBefore.isShared) ||
+          (input.myPercentage && input.myPercentage !== cardBefore.myPercentage);
+        
+        if (needsRegenerateCascade) {
           const updatedCard = await db.getCreditCardById(id, ctx.user.id);
           if (updatedCard) {
             await generateCascadeInvoices(ctx.user.id, {
@@ -651,6 +660,8 @@ Retorne apenas JSON válido.`,
               expectedAmount: updatedCard.expectedAmount,
               division: updatedCard.division,
               type: updatedCard.type,
+              isShared: updatedCard.isShared,
+              myPercentage: updatedCard.myPercentage,
             });
           }
         }
@@ -717,7 +728,7 @@ Retorne apenas JSON válido.`,
         if (existingTransaction) {
           // Atualizar apenas lançamento da fatura ativa
           await db.updateTransaction(existingTransaction.id, ctx.user.id, {
-            amount: projection.finalAmount.toFixed(2),
+            amount: projection.myAmount.toFixed(2),
             division: card.division,
             type: card.type,
             notes: `Projeção automática baseada em gasto atual de R$ ${input.currentTotalAmount}`,
@@ -727,7 +738,7 @@ Retorne apenas JSON válido.`,
           await db.createTransaction({
             userId: ctx.user.id,
             description,
-            amount: projection.finalAmount.toFixed(2),
+            amount: projection.myAmount.toFixed(2),
             nature: "Saída",
             division: card.division,
             type: card.type,
@@ -776,10 +787,19 @@ async function generateCascadeInvoices(
     expectedAmount: string;
     division: string;
     type: string;
+    isShared?: boolean;
+    myPercentage?: string;
   }
 ) {
-  const description = `Previsão CC ${card.name} ${card.brand}`;
+  const isShared = card.isShared || false;
+  const myPercentage = Number(card.myPercentage || "100.00");
   const expectedValue = Number(card.expectedAmount);
+  const myExpectedValue = isShared ? (expectedValue * myPercentage / 100) : expectedValue;
+  
+  // Descrição dinâmica baseada em isShared
+  const description = isShared 
+    ? `Previsão CC ${card.name} ${card.brand} (Fatura Total: R$ ${expectedValue.toFixed(2)})`
+    : `Previsão CC ${card.name} ${card.brand}`;
 
   // Identificar fatura ativa
   const activeCycle = identifyActiveBillingCycle(card.closingDay);
@@ -812,13 +832,15 @@ async function generateCascadeInvoices(
     invoicesToCreate.push({
       userId,
       description,
-      amount: expectedValue.toFixed(2),
+      amount: myExpectedValue.toFixed(2),
       nature: "Saída" as const,
       division: card.division as any,
       type: card.type as any,
       date: dueDate,
       isPaid: false,
-      notes: `Previsão automática - Fatura esperada de ${card.name} ${card.brand}`,
+      notes: isShared 
+        ? `Previsão automática - Fatura esperada de ${card.name} ${card.brand} (${myPercentage}% de R$ ${expectedValue.toFixed(2)})`
+        : `Previsão automática - Fatura esperada de ${card.name} ${card.brand}`,
     });
 
     // Avançar para próximo mês
@@ -872,6 +894,8 @@ function calculateInvoiceProjection(card: {
   recurringAmount: string;
   expectedAmount: string;
   currentTotalAmount: string;
+  isShared?: boolean;
+  myPercentage?: string;
 }) {
   const now = new Date();
   const currentYear = now.getUTCFullYear();
@@ -920,8 +944,13 @@ function calculateInvoiceProjection(card: {
     ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
     : variableAmount;
   
-  // Valor final = MAX(Projeção Variável + Recorrente, Esperado)
-  const finalAmount = Math.max(projectedVariable + recurring, expected);
+  // Valor Total Projetado = MAX(Projeção Variável + Recorrente, Esperado)
+  const totalProjected = Math.max(projectedVariable + recurring, expected);
+  
+  // Se for gasto compartilhado, calcular valor proporcional
+  const isShared = card.isShared || false;
+  const myPercentage = Number(card.myPercentage || "100.00");
+  const myAmount = isShared ? (totalProjected * myPercentage / 100) : totalProjected;
 
   // Próximo vencimento
   let nextDueMonth = nextClosingMonth;
@@ -939,7 +968,10 @@ function calculateInvoiceProjection(card: {
   const nextDueDate = Date.UTC(nextDueYear, nextDueMonth, card.dueDay, 0, 0, 0, 0);
 
   return {
-    finalAmount,
+    totalProjected,
+    myAmount,
+    isShared,
+    myPercentage,
     projectedVariable,
     daysSinceClosing,
     totalDaysInCycle,

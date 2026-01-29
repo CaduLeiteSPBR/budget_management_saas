@@ -29,6 +29,13 @@
       "when": 1769700188699,
       "tag": "0003_curvy_black_tom",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1769713172937,
+      "tag": "0004_strong_firestar",
+      "breakpoints": true
     }
   ]
 }

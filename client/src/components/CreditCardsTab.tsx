@@ -74,6 +74,8 @@ export default function CreditCardsTab() {
     expectedAmount: "0.00",
     division: "Pessoal" as "Pessoal" | "Familiar" | "Investimento",
     type: "Essencial" as "Essencial" | "Importante" | "Conforto" | "Investimento",
+    isShared: false,
+    myPercentage: "100.00",
   });
 
   const createMutation = trpc.creditCards.create.useMutation({
@@ -133,6 +135,8 @@ export default function CreditCardsTab() {
       expectedAmount: "0.00",
       division: "Pessoal",
       type: "Essencial",
+      isShared: false,
+      myPercentage: "100.00",
     });
   };
 
@@ -165,6 +169,8 @@ export default function CreditCardsTab() {
       expectedAmount: card.expectedAmount,
       division: card.division,
       type: card.type,
+      isShared: card.isShared || false,
+      myPercentage: card.myPercentage || "100.00",
     });
   };
 
@@ -337,6 +343,38 @@ export default function CreditCardsTab() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              {/* Gasto Compartilhado */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isShared"
+                    checked={formData.isShared}
+                    onChange={(e) => setFormData({ ...formData, isShared: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor="isShared" className="cursor-pointer">
+                    Gasto Compartilhado
+                  </Label>
+                </div>
+                
+                {formData.isShared && (
+                  <div className="space-y-2">
+                    <Label htmlFor="myPercentage">Meu Percentual (%)</Label>
+                    <Input
+                      id="myPercentage"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={formData.myPercentage}
+                      onChange={(e) => setFormData({ ...formData, myPercentage: e.target.value })}
+                      placeholder="100.00"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             <DialogFooter>

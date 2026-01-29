@@ -423,3 +423,16 @@
 - [x] Remover estado inputKeys e key dinâmica do Input
 - [x] Remover import de useEffect não utilizado
 - [ ] Testar que mensagem "Valor atualizado..." não dispara repetidamente (aguardando validação do usuário)
+
+
+## Feature: Gastos Compartilhados em Cartões de Crédito
+- [x] Adicionar campos isShared (boolean) e myPercentage (decimal) ao schema credit_cards
+- [x] Aplicar migração do schema (pnpm db:push) - 0004_strong_firestar.sql
+- [x] Atualizar calculateInvoiceProjection para calcular valor proporcional (totalProjected, myAmount)
+- [x] Atualizar generateCascadeInvoices com descrição dinâmica (mostra fatura total se compartilhado)
+- [x] Atualizar updateCurrentTotal para usar cálculo proporcional (projection.myAmount)
+- [x] Adicionar checkbox "Gasto Compartilhado" na interface
+- [x] Adicionar input "Meu Percentual (%)" que aparece ao marcar checkbox
+- [x] Implementar save automático via formData (onChange)
+- [x] Adicionar trigger de recalculo em cascata ao mudar isShared ou myPercentage (creditCards.update)
+- [ ] Testar cálculo proporcional e descrição dinâmica (aguardando validação do usuário)

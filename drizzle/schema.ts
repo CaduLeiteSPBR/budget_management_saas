@@ -175,6 +175,8 @@ export const creditCards = mysqlTable("credit_cards", {
   currentTotalAmount: decimal("currentTotalAmount", { precision: 15, scale: 2 }).default("0.00").notNull(), // Valor total hoje
   division: mysqlEnum("division", ["Pessoal", "Familiar", "Investimento"]).default("Pessoal").notNull(), // Divisão padrão para lançamento
   type: mysqlEnum("type", ["Essencial", "Importante", "Conforto", "Investimento"]).default("Essencial").notNull(), // Tipo padrão para lançamento
+  isShared: boolean("isShared").default(false).notNull(), // Indica se o gasto é compartilhado
+  myPercentage: decimal("myPercentage", { precision: 5, scale: 2 }).default("100.00").notNull(), // Percentual do usuário (0-100)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
