@@ -10,6 +10,7 @@ import {
   installments,
   budgets,
   aiLearning,
+  creditCards,
   type Category,
   type Transaction,
   type Subscription,
@@ -17,6 +18,7 @@ import {
   type Installment,
   type Budget,
   type AiLearning,
+  type CreditCard,
   type InsertCategory,
   type InsertTransaction,
   type InsertSubscription,
@@ -24,6 +26,7 @@ import {
   type InsertInstallment,
   type InsertBudget,
   type InsertAiLearning,
+  type InsertCreditCard,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -661,4 +664,68 @@ export async function initializeMonthlyBalances(userId: number): Promise<void> {
   // Janeiro/2026 não tem saldo inicial (mês de partida)
   // Começar de Fevereiro/2026
   await recalculateInitialBalances(userId, 2026, 2);
+}
+
+// ==================== CREDIT CARDS ====================
+
+export async function createCreditCard(data: InsertCreditCard): Promise<CreditCard> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(creditCards).values(data);
+  
+  // Get insertId from result
+  let insertId: number;
+  if (typeof result === 'object' && result !== null) {
+    if ('insertId' in result && typeof result.insertId === 'bigint') {
+      insertId = Number(result.insertId);
+    } else if ('insertId' in result && typeof result.insertId === 'number') {
+      insertId = result.insertId;
+    } else {
+      // Fallback: query the last inserted record
+      const [lastCard] = await db
+        .select()
+        .from(creditCards)
+        .where(eq(creditCards.userId, data.userId))
+        .orderBy(desc(creditCards.id))
+        .limit(1);
+      if (!lastCard) throw new Error("Failed to retrieve created credit card");
+      return lastCard;
+    }
+  } else {
+    throw new Error("Unexpected result format from insert operation");
+  }
+  
+  if (isNaN(insertId)) {
+    throw new Error("Failed to get valid insertId after creating credit card");
+  }
+  
+  const [newCard] = await db.select().from(creditCards).where(eq(creditCards.id, insertId));
+  if (!newCard) throw new Error("Failed to retrieve created credit card");
+  return newCard;
+}
+
+export async function getUserCreditCards(userId: number): Promise<CreditCard[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(creditCards).where(eq(creditCards.userId, userId)).orderBy(asc(creditCards.name));
+}
+
+export async function getCreditCardById(id: number, userId: number): Promise<CreditCard | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [card] = await db.select().from(creditCards).where(and(eq(creditCards.id, id), eq(creditCards.userId, userId))).limit(1);
+  return card;
+}
+
+export async function updateCreditCard(id: number, userId: number, data: Partial<InsertCreditCard>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(creditCards).set(data).where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)));
+}
+
+export async function deleteCreditCard(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(creditCards).where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)));
 }

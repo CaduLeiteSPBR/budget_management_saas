@@ -570,6 +570,200 @@ Retorne apenas JSON válido.`,
         }
       }),
   }),
+
+  // ==================== CREDIT CARDS ====================
+  creditCards: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getUserCreditCards(ctx.user.id);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(100),
+        brand: z.string().min(1).max(50),
+        limit: z.string().regex(/^\d+(\.\d{1,2})?$/),
+        closingDay: z.number().min(1).max(31),
+        dueDay: z.number().min(1).max(31),
+        recurringAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        expectedAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        division: z.enum(["Pessoal", "Familiar", "Investimento"]).optional(),
+        type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.createCreditCard({
+          userId: ctx.user.id,
+          ...input,
+          recurringAmount: input.recurringAmount || "0.00",
+          expectedAmount: input.expectedAmount || "0.00",
+          currentTotalAmount: "0.00",
+        });
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).max(100).optional(),
+        brand: z.string().min(1).max(50).optional(),
+        limit: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        closingDay: z.number().min(1).max(31).optional(),
+        dueDay: z.number().min(1).max(31).optional(),
+        recurringAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        expectedAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        division: z.enum(["Pessoal", "Familiar", "Investimento"]).optional(),
+        type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await db.updateCreditCard(id, ctx.user.id, data);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteCreditCard(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    updateCurrentTotal: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        currentTotalAmount: z.string().regex(/^\d+(\.\d{1,2})?$/),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Buscar cartão
+        const card = await db.getCreditCardById(input.id, ctx.user.id);
+        if (!card) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Cartão não encontrado' });
+        }
+
+        // Atualizar currentTotalAmount
+        await db.updateCreditCard(input.id, ctx.user.id, {
+          currentTotalAmount: input.currentTotalAmount,
+        });
+
+        // Calcular projeção da fatura
+        const projection = calculateInvoiceProjection({
+          ...card,
+          currentTotalAmount: input.currentTotalAmount,
+        });
+
+        // Buscar ou criar lançamento de previsão
+        const description = `Previsão CC ${card.name} ${card.brand}`;
+        const allTransactions = await db.getUserTransactions(ctx.user.id);
+        const existingTransaction = allTransactions.find(t => 
+          t.description === description && 
+          t.nature === "Saída"
+        );
+
+        if (existingTransaction) {
+          // Atualizar lançamento existente
+          await db.updateTransaction(existingTransaction.id, ctx.user.id, {
+            amount: projection.finalAmount.toFixed(2),
+            date: projection.nextDueDate,
+            division: card.division,
+            type: card.type,
+          });
+        } else {
+          // Criar novo lançamento
+          await db.createTransaction({
+            userId: ctx.user.id,
+            description,
+            amount: projection.finalAmount.toFixed(2),
+            nature: "Saída",
+            division: card.division,
+            type: card.type,
+            date: projection.nextDueDate,
+            isPaid: false,
+            notes: `Projeção automática baseada em gasto atual de R$ ${input.currentTotalAmount}`,
+          });
+        }
+
+        return { success: true, projection };
+      }),
+  }),
 });
+
+// Função auxiliar para calcular projeção de fatura
+function calculateInvoiceProjection(card: {
+  closingDay: number;
+  dueDay: number;
+  recurringAmount: string;
+  expectedAmount: string;
+  currentTotalAmount: string;
+}) {
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth();
+  const currentDay = now.getUTCDate();
+
+  // Determinar o ciclo atual (período entre fechamentos)
+  let cycleStartYear = currentYear;
+  let cycleStartMonth = currentMonth;
+  
+  if (currentDay < card.closingDay) {
+    // Ainda estamos no ciclo anterior
+    cycleStartMonth--;
+    if (cycleStartMonth < 0) {
+      cycleStartMonth = 11;
+      cycleStartYear--;
+    }
+  }
+
+  // Data de fechamento do ciclo atual
+  const cycleStartDate = Date.UTC(cycleStartYear, cycleStartMonth, card.closingDay, 0, 0, 0, 0);
+  
+  // Data de fechamento do próximo ciclo
+  let nextClosingMonth = cycleStartMonth + 1;
+  let nextClosingYear = cycleStartYear;
+  if (nextClosingMonth > 11) {
+    nextClosingMonth = 0;
+    nextClosingYear++;
+  }
+  const nextClosingDate = Date.UTC(nextClosingYear, nextClosingMonth, card.closingDay, 0, 0, 0, 0);
+
+  // Calcular dias transcorridos desde o fechamento
+  const nowTimestamp = Date.UTC(currentYear, currentMonth, currentDay, 0, 0, 0, 0);
+  const daysSinceClosing = Math.floor((nowTimestamp - cycleStartDate) / (1000 * 60 * 60 * 24));
+  
+  // Total de dias no ciclo
+  const totalDaysInCycle = Math.floor((nextClosingDate - cycleStartDate) / (1000 * 60 * 60 * 24));
+
+  // Projeção variável
+  const currentTotal = Number(card.currentTotalAmount);
+  const recurring = Number(card.recurringAmount);
+  const expected = Number(card.expectedAmount);
+  
+  const variableAmount = currentTotal - recurring;
+  const projectedVariable = daysSinceClosing > 0 
+    ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
+    : variableAmount;
+  
+  // Valor final = MAX(Projeção Variável + Recorrente, Esperado)
+  const finalAmount = Math.max(projectedVariable + recurring, expected);
+
+  // Próximo vencimento
+  let nextDueMonth = nextClosingMonth;
+  let nextDueYear = nextClosingYear;
+  
+  // Vencimento é geralmente após o fechamento
+  if (card.dueDay < card.closingDay) {
+    nextDueMonth++;
+    if (nextDueMonth > 11) {
+      nextDueMonth = 0;
+      nextDueYear++;
+    }
+  }
+  
+  const nextDueDate = Date.UTC(nextDueYear, nextDueMonth, card.dueDay, 0, 0, 0, 0);
+
+  return {
+    finalAmount,
+    projectedVariable,
+    daysSinceClosing,
+    totalDaysInCycle,
+    nextDueDate,
+  };
+}
 
 export type AppRouter = typeof appRouter;

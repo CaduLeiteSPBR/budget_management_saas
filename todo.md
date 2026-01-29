@@ -391,3 +391,16 @@
 - [x] Ajustar ordenação no TransactionsList (Saldo Inicial sempre primeiro)
 - [x] Adicionar procedure tRPC transactions.initializeBalances
 - [ ] Testar criação/edição/exclusão e verificar recalculo automático
+
+
+## Feature: Gestão e Projeção de Cartões de Crédito
+- [x] Criar tabela credit_cards no schema.ts (id, name, brand, limit, closingDay, dueDay, recurringAmount, expectedAmount, currentTotalAmount, division, type, userId)
+- [x] Aplicar migração do schema (pnpm db:push) - 0003_curvy_black_tom.sql
+- [x] Criar funções CRUD no db.ts (createCreditCard, getUserCreditCards, getCreditCardById, updateCreditCard, deleteCreditCard)
+- [x] Criar router creditCards no routers.ts (list, create, update, delete, updateCurrentTotal)
+- [x] Implementar lógica de projeção de fatura (calculateInvoiceProjection)
+- [x] Criar procedure updateCurrentTotal que recalcula projeção e cria/atualiza lançamento
+- [x] Criar componente CreditCardsTab.tsx com formulário e lista de cartões
+- [x] Adicionar campo input "Valor Total Hoje" com save onBlur/Enter
+- [x] Integrar aba "Cartões" no Dashboard.tsx
+- [ ] Testar criação, edição, projeção e geração de lançamentos

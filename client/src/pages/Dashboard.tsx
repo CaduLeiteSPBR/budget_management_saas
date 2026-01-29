@@ -14,7 +14,8 @@ import {
   LayoutDashboard,
   Receipt,
   Target,
-  Users
+  Users,
+  CreditCard
 } from "lucide-react";
 import { Link } from "wouter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,6 +30,7 @@ import {
 import OverviewDashboard from "@/components/OverviewDashboard";
 import TransactionsList from "@/components/TransactionsList";
 import TransactionForm from "@/components/TransactionForm";
+import CreditCardsTab from "@/components/CreditCardsTab";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -323,7 +325,10 @@ export default function Dashboard() {
               <Receipt className="w-4 h-4 mr-2" />
               Lançamentos
             </TabsTrigger>
-
+            <TabsTrigger value="cards">
+              <CreditCard className="w-4 h-4 mr-2" />
+              Cartões
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -355,7 +360,9 @@ export default function Dashboard() {
             )}
           </TabsContent>
 
-
+          <TabsContent value="cards" className="space-y-6">
+            <CreditCardsTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>

@@ -158,3 +158,26 @@ export const aiLearning = mysqlTable("ai_learning", {
 
 export type AiLearning = typeof aiLearning.$inferSelect;
 export type InsertAiLearning = typeof aiLearning.$inferInsert;
+
+/**
+ * Cartões de Crédito com projeção de fatura
+ */
+export const creditCards = mysqlTable("credit_cards", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 100 }).notNull(), // Nome do banco (ex: "Nubank", "Itaú")
+  brand: varchar("brand", { length: 50 }).notNull(), // Bandeira (ex: "Mastercard", "Visa")
+  limit: decimal("limit", { precision: 15, scale: 2 }).notNull(), // Limite do cartão
+  closingDay: int("closingDay").notNull(), // Dia do fechamento da fatura (1-31)
+  dueDay: int("dueDay").notNull(), // Dia do vencimento da fatura (1-31)
+  recurringAmount: decimal("recurringAmount", { precision: 15, scale: 2 }).default("0.00").notNull(), // Valor fixo recorrente
+  expectedAmount: decimal("expectedAmount", { precision: 15, scale: 2 }).default("0.00").notNull(), // Fatura esperada
+  currentTotalAmount: decimal("currentTotalAmount", { precision: 15, scale: 2 }).default("0.00").notNull(), // Valor total hoje
+  division: mysqlEnum("division", ["Pessoal", "Familiar", "Investimento"]).default("Pessoal").notNull(), // Divisão padrão para lançamento
+  type: mysqlEnum("type", ["Essencial", "Importante", "Conforto", "Investimento"]).default("Essencial").notNull(), // Tipo padrão para lançamento
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CreditCard = typeof creditCards.$inferSelect;
+export type InsertCreditCard = typeof creditCards.$inferInsert;
