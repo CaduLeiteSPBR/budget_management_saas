@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +24,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
-import { CreditCard as CreditCardIcon, Plus, Edit, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CreditCard as CreditCardIcon, Plus, Edit, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+
+// Função auxiliar para identificar mês ativo
+function getActiveBillingMonth(closingDay: number): string {
+  const now = new Date();
+  const currentDay = now.getUTCDate();
+  const currentMonth = now.getUTCMonth();
+  const currentYear = now.getUTCFullYear();
+  
+  const monthNames = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+  
+  if (currentDay <= closingDay) {
+    // Ciclo do mês atual
+    return `${monthNames[currentMonth]} ${currentYear}`;
+  } else {
+    // Ciclo do próximo mês
+    let nextMonth = currentMonth + 1;
+    let nextYear = currentYear;
+    if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear++;
+    }
+    return `${monthNames[nextMonth]} ${nextYear}`;
+  }
+}
 
 export default function CreditCardsTab() {
   const utils = trpc.useUtils();
@@ -34,6 +62,32 @@ export default function CreditCardsTab() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [inputKeys, setInputKeys] = useState<Record<number, number>>({});
+
+  // Resetar campos quando ciclo mudar
+  useEffect(() => {
+    if (!cards) return;
+    
+    const now = new Date();
+    const currentDay = now.getUTCDate();
+    
+    cards.forEach(card => {
+      // Se passou do closingDay, resetar o campo
+      if (currentDay > card.closingDay && Number(card.currentTotalAmount) > 0) {
+        // Forçar re-render do input com key
+        setInputKeys(prev => ({
+          ...prev,
+          [card.id]: (prev[card.id] || 0) + 1
+        }));
+        
+        // Resetar valor no backend
+        updateCurrentTotalMutation.mutate({
+          id: card.id,
+          currentTotalAmount: card.recurringAmount || "0.00",
+        });
+      }
+    });
+  }, [cards]);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -384,10 +438,17 @@ export default function CreditCardsTab() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <Label htmlFor={`current-total-${card.id}`} className="text-sm font-medium">
-                    Valor Total Hoje
-                  </Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor={`current-total-${card.id}`} className="text-sm font-medium">
+                      Valor Total Hoje
+                    </Label>
+                    <Badge variant="secondary" className="text-xs">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {getActiveBillingMonth(card.closingDay)}
+                    </Badge>
+                  </div>
                   <Input
+                    key={`current-total-${card.id}-${inputKeys[card.id] || 0}`}
                     id={`current-total-${card.id}`}
                     type="number"
                     step="0.01"

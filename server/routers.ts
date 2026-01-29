@@ -590,13 +590,27 @@ Retorne apenas JSON válido.`,
         type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        return await db.createCreditCard({
+        const newCard = await db.createCreditCard({
           userId: ctx.user.id,
           ...input,
           recurringAmount: input.recurringAmount || "0.00",
           expectedAmount: input.expectedAmount || "0.00",
           currentTotalAmount: "0.00",
         });
+
+        // Gerar lançamentos em cascata até Dez/2030
+        await generateCascadeInvoices(ctx.user.id, {
+          id: newCard.id,
+          name: newCard.name,
+          brand: newCard.brand,
+          closingDay: newCard.closingDay,
+          dueDay: newCard.dueDay,
+          expectedAmount: newCard.expectedAmount,
+          division: newCard.division,
+          type: newCard.type,
+        });
+
+        return newCard;
       }),
 
     update: protectedProcedure
@@ -614,7 +628,33 @@ Retorne apenas JSON válido.`,
       }))
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
+        
+        // Buscar cartão antes de atualizar
+        const cardBefore = await db.getCreditCardById(id, ctx.user.id);
+        if (!cardBefore) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Cartão não encontrado' });
+        }
+        
+        // Atualizar cartão
         await db.updateCreditCard(id, ctx.user.id, data);
+        
+        // Se expectedAmount mudou, regenerar cascata
+        if (input.expectedAmount && input.expectedAmount !== cardBefore.expectedAmount) {
+          const updatedCard = await db.getCreditCardById(id, ctx.user.id);
+          if (updatedCard) {
+            await generateCascadeInvoices(ctx.user.id, {
+              id: updatedCard.id,
+              name: updatedCard.name,
+              brand: updatedCard.brand,
+              closingDay: updatedCard.closingDay,
+              dueDay: updatedCard.dueDay,
+              expectedAmount: updatedCard.expectedAmount,
+              division: updatedCard.division,
+              type: updatedCard.type,
+            });
+          }
+        }
+        
         return { success: true };
       }),
 
@@ -642,30 +682,48 @@ Retorne apenas JSON válido.`,
           currentTotalAmount: input.currentTotalAmount,
         });
 
-        // Calcular projeção da fatura
+        // Identificar fatura ativa
+        const activeCycle = identifyActiveBillingCycle(card.closingDay);
+        
+        // Calcular projeção da fatura ativa
         const projection = calculateInvoiceProjection({
           ...card,
           currentTotalAmount: input.currentTotalAmount,
         });
 
-        // Buscar ou criar lançamento de previsão
+        // Buscar lançamento da fatura ativa
         const description = `Previsão CC ${card.name} ${card.brand}`;
         const allTransactions = await db.getUserTransactions(ctx.user.id);
+        
+        // Calcular data de vencimento da fatura ativa
+        let activeDueMonth = activeCycle.month;
+        let activeDueYear = activeCycle.year;
+        if (card.dueDay < card.closingDay) {
+          activeDueMonth++;
+          if (activeDueMonth > 11) {
+            activeDueMonth = 0;
+            activeDueYear++;
+          }
+        }
+        const activeDueDate = Date.UTC(activeDueYear, activeDueMonth, card.dueDay, 0, 0, 0, 0);
+        
+        // Buscar lançamento da fatura ativa especificamente
         const existingTransaction = allTransactions.find(t => 
           t.description === description && 
-          t.nature === "Saída"
+          t.nature === "Saída" &&
+          t.date === activeDueDate
         );
 
         if (existingTransaction) {
-          // Atualizar lançamento existente
+          // Atualizar apenas lançamento da fatura ativa
           await db.updateTransaction(existingTransaction.id, ctx.user.id, {
             amount: projection.finalAmount.toFixed(2),
-            date: projection.nextDueDate,
             division: card.division,
             type: card.type,
+            notes: `Projeção automática baseada em gasto atual de R$ ${input.currentTotalAmount}`,
           });
         } else {
-          // Criar novo lançamento
+          // Criar novo lançamento para fatura ativa
           await db.createTransaction({
             userId: ctx.user.id,
             description,
@@ -673,7 +731,7 @@ Retorne apenas JSON válido.`,
             nature: "Saída",
             division: card.division,
             type: card.type,
-            date: projection.nextDueDate,
+            date: activeDueDate,
             isPaid: false,
             notes: `Projeção automática baseada em gasto atual de R$ ${input.currentTotalAmount}`,
           });
@@ -683,6 +741,129 @@ Retorne apenas JSON válido.`,
       }),
   }),
 });
+
+// Função auxiliar para identificar qual é a fatura ativa (mês atual ou próximo)
+function identifyActiveBillingCycle(closingDay: number): { year: number; month: number; isClosed: boolean } {
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth(); // 0-11
+  const currentDay = now.getUTCDate();
+
+  if (currentDay <= closingDay) {
+    // Ainda estamos no ciclo do mês atual
+    return { year: currentYear, month: currentMonth, isClosed: false };
+  } else {
+    // Ciclo do mês atual está fechado, fatura ativa é do próximo mês
+    let nextMonth = currentMonth + 1;
+    let nextYear = currentYear;
+    if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear++;
+    }
+    return { year: nextYear, month: nextMonth, isClosed: true };
+  }
+}
+
+// Função auxiliar para gerar lançamentos em cascata até Dez/2030
+async function generateCascadeInvoices(
+  userId: number,
+  card: {
+    id: number;
+    name: string;
+    brand: string;
+    closingDay: number;
+    dueDay: number;
+    expectedAmount: string;
+    division: string;
+    type: string;
+  }
+) {
+  const description = `Previsão CC ${card.name} ${card.brand}`;
+  const expectedValue = Number(card.expectedAmount);
+
+  // Identificar fatura ativa
+  const activeCycle = identifyActiveBillingCycle(card.closingDay);
+  
+  // Gerar lançamentos do mês ativo até Dez/2030
+  const endYear = 2030;
+  const endMonth = 11; // Dezembro (0-indexed)
+
+  let currentYear = activeCycle.year;
+  let currentMonth = activeCycle.month;
+
+  const invoicesToCreate = [];
+
+  while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+    // Calcular data de vencimento para este mês
+    let dueMonth = currentMonth;
+    let dueYear = currentYear;
+    
+    // Se dueDay < closingDay, vencimento é no mês seguinte
+    if (card.dueDay < card.closingDay) {
+      dueMonth++;
+      if (dueMonth > 11) {
+        dueMonth = 0;
+        dueYear++;
+      }
+    }
+
+    const dueDate = Date.UTC(dueYear, dueMonth, card.dueDay, 0, 0, 0, 0);
+
+    invoicesToCreate.push({
+      userId,
+      description,
+      amount: expectedValue.toFixed(2),
+      nature: "Saída" as const,
+      division: card.division as any,
+      type: card.type as any,
+      date: dueDate,
+      isPaid: false,
+      notes: `Previsão automática - Fatura esperada de ${card.name} ${card.brand}`,
+    });
+
+    // Avançar para próximo mês
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+  }
+
+  // Buscar lançamentos existentes
+  const allTransactions = await db.getUserTransactions(userId);
+  const existingInvoices = allTransactions.filter(t => 
+    t.description === description && t.nature === "Saída"
+  );
+
+  // Atualizar ou criar lançamentos
+  for (const invoice of invoicesToCreate) {
+    const existing = existingInvoices.find(t => t.date === invoice.date);
+    
+    if (existing) {
+      // Atualizar apenas se for mês futuro (não sobrescreve histórico)
+      const invoiceMonth = new Date(invoice.date).getUTCMonth();
+      const invoiceYear = new Date(invoice.date).getUTCFullYear();
+      const now = new Date();
+      const currentMonth = now.getUTCMonth();
+      const currentYear = now.getUTCFullYear();
+      
+      // Só atualiza se for mês futuro ou mês atual após closingDay
+      if (invoiceYear > currentYear || 
+          (invoiceYear === currentYear && invoiceMonth > currentMonth) ||
+          (invoiceYear === currentYear && invoiceMonth === currentMonth && now.getUTCDate() > card.closingDay)) {
+        await db.updateTransaction(existing.id, userId, {
+          amount: invoice.amount,
+          division: invoice.division,
+          type: invoice.type,
+          notes: invoice.notes,
+        });
+      }
+    } else {
+      // Criar novo lançamento
+      await db.createTransaction(invoice);
+    }
+  }
+}
 
 // Função auxiliar para calcular projeção de fatura
 function calculateInvoiceProjection(card: {

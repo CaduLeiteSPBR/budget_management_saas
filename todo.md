@@ -404,3 +404,15 @@
 - [x] Adicionar campo input "Valor Total Hoje" com save onBlur/Enter
 - [x] Integrar aba "Cartões" no Dashboard.tsx
 - [ ] Testar criação, edição, projeção e geração de lançamentos
+
+
+## Refinamento: Automação em Cascata e Lógica de Fechamento de Fatura
+- [x] Criar função identifyActiveBillingCycle() que determina se fatura ativa é mês atual ou próximo
+- [x] Criar função generateCascadeInvoices() que gera lançamentos até Dez/2030
+- [x] Atualizar creditCards.create para gerar cascata automática
+- [x] Atualizar creditCards.update para regenerar cascata quando expectedAmount muda
+- [x] Modificar updateCurrentTotal para atualizar apenas fatura ativa (não sobrescreve fechadas)
+- [x] Adicionar indicador visual na interface mostrando mês sendo editado (Badge com Calendar icon)
+- [x] Implementar reset de campo "Valor Total Hoje" ao mudar ciclo (useEffect + key prop)
+- [x] Proteger lançamentos de meses anteriores (nunca sobrescrever histórico)
+- [ ] Testar criação, edição de expectedAmount e mudança de ciclo
