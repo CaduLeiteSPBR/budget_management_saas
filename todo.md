@@ -445,3 +445,13 @@
 - [x] Adicionar tratamento de virada de ano (Dez→Jan, Jan→Dez)
 - [x] Garantir atualização automática de OverviewDashboard e TransactionsList (via selectedMonths/selectedYear state)
 - [ ] Testar navegação com seleção única e múltipla (aguardando validação do usuário)
+
+
+## Refinamento: Resumo da Projeção em Cartões de Crédito
+- [x] Criar função de cálculo de projeção no frontend (espelhando calculateInvoiceProjection do backend)
+- [x] Adicionar seção "Resumo da Projeção" abaixo do campo "Valor Total Hoje"
+- [x] Exibir "Projeção Total da Fatura" em tempo real
+- [x] Exibir "Valor a ser lançado no seu extrato" considerando myPercentage
+- [x] Adicionar tooltip com ícone Info explicando fórmula de cálculo
+- [x] Garantir consistência entre valores frontend e backend (mesma função calculateProjection)
+- [ ] Testar reatividade ao digitar no campo "Valor Total Hoje" (aguardando validação do usuário)

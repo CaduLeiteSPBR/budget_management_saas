@@ -25,8 +25,60 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard as CreditCardIcon, Plus, Edit, Trash2, Calendar } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CreditCard as CreditCardIcon, Plus, Edit, Trash2, Calendar, Info } from "lucide-react";
 import { toast } from "sonner";
+
+// Função de cálculo de projeção (espelhando backend)
+function calculateProjection(
+  currentTotalAmount: number,
+  recurringAmount: number,
+  expectedAmount: number,
+  closingDay: number,
+  isShared: boolean,
+  myPercentage: number
+): { totalProjected: number; myAmount: number } {
+  const now = new Date();
+  const currentDay = now.getUTCDate();
+  const currentMonth = now.getUTCMonth();
+  const currentYear = now.getUTCFullYear();
+  
+  // Determinar início e fim do ciclo
+  let cycleStartDate: Date;
+  let cycleEndDate: Date;
+  
+  if (currentDay <= closingDay) {
+    // Ciclo do mês atual (do dia X do mês passado até dia X deste mês)
+    cycleStartDate = new Date(Date.UTC(currentYear, currentMonth - 1, closingDay));
+    cycleEndDate = new Date(Date.UTC(currentYear, currentMonth, closingDay));
+  } else {
+    // Ciclo do próximo mês (do dia X deste mês até dia X do próximo mês)
+    cycleStartDate = new Date(Date.UTC(currentYear, currentMonth, closingDay));
+    cycleEndDate = new Date(Date.UTC(currentYear, currentMonth + 1, closingDay));
+  }
+  
+  const daysSinceClosing = Math.floor((now.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  const totalDaysInCycle = Math.floor((cycleEndDate.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Projeção variável
+  const variableAmount = currentTotalAmount - recurringAmount;
+  const projectedVariable = daysSinceClosing > 0 
+    ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
+    : 0;
+  
+  // Valor total projetado
+  const totalProjected = Math.max(projectedVariable + recurringAmount, expectedAmount);
+  
+  // Valor proporcional (se compartilhado)
+  const myAmount = isShared ? totalProjected * (myPercentage / 100) : totalProjected;
+  
+  return { totalProjected, myAmount };
+}
 
 // Função auxiliar para identificar mês ativo
 function getActiveBillingMonth(closingDay: number): string {
@@ -475,6 +527,56 @@ export default function CreditCardsTab() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Pressione Enter ou clique fora para salvar
                   </p>
+                  
+                  {/* Resumo da Projeção */}
+                  {Number(card.currentTotalAmount) > 0 && (() => {
+                    const projection = calculateProjection(
+                      Number(card.currentTotalAmount),
+                      Number(card.recurringAmount),
+                      Number(card.expectedAmount),
+                      Number(card.closingDay),
+                      card.isShared,
+                      Number(card.myPercentage)
+                    );
+                    
+                    return (
+                      <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground mb-2">Resumo da Projeção</div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-muted-foreground">Projeção Total da Fatura:</span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <p className="text-xs">
+                                    <strong>Fórmula:</strong><br />
+                                    ((Valor Hoje - Recorrente) / Dias Passados × Dias Totais) + Recorrente<br />
+                                    <strong>Mínimo:</strong> Fatura Esperada
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                          <span className="text-sm font-semibold">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.totalProjected)}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">
+                            Valor a ser lançado no seu extrato{card.isShared ? ` (${card.myPercentage}%)` : ''}:
+                          </span>
+                          <span className="text-sm font-bold text-primary">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.myAmount)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>
