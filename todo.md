@@ -512,3 +512,12 @@
 - [x] Adicionados logs de depuração (console.log com IDs e quantidade deletada)
 - [x] Sincronizado frontend (TransactionsList.tsx) com novo parâmetro
 - [ ] Testar exclusão "Este e todos os futuros" (aguardando validação do usuário)
+
+
+## Bug: Duplicação na Criação de Lançamentos Recorrentes
+- [x] Identificado problema: loop cria lançamento no mesmo mês do original
+- [x] Exemplo: criar item 31/01 gera dois lançamentos em Janeiro (original + cópia)
+- [x] Corrigir loop para começar obrigatoriamente do mês seguinte ao original
+- [x] Adicionar verificação para prevenir criação no mesmo mês/ano (incremento de mês antes do while)
+- [x] Adicionar logs de depuração para monitorar geração de série
+- [ ] Testar criação de recorrente no dia 31 (aguardando validação do usuário)

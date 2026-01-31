@@ -929,9 +929,28 @@ function generateRecurringSeries(
   const startMonth = startDate.getUTCMonth();
   const startYear = startDate.getUTCFullYear();
 
+  console.log('[generateRecurringSeries] Starting generation:', {
+    originalDate: new Date(baseTransaction.date).toISOString(),
+    startDay,
+    startMonth: startMonth + 1, // +1 para exibir 1-12
+    startYear
+  });
+
   // Gerar lançamentos até Dezembro de 2030
+  // IMPORTANTE: Começar do mês SEGUINTE ao original para evitar duplicação
+  let currentMonth = startMonth + 1;
   let currentYear = startYear;
-  let currentMonth = startMonth;
+  
+  // Ajustar ano se passar de dezembro
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+
+  console.log('[generateRecurringSeries] First recurring transaction will be:', {
+    month: currentMonth + 1, // +1 para exibir 1-12
+    year: currentYear
+  });
 
   while (currentYear < 2031) {
     // Ajustar dia para meses curtos (regra do dia 31)
@@ -951,6 +970,12 @@ function generateRecurringSeries(
       currentYear++;
     }
   }
+
+  console.log('[generateRecurringSeries] Generated', transactions.length, 'recurring transactions');
+  console.log('[generateRecurringSeries] Date range:', {
+    first: transactions[0] ? new Date(transactions[0].date).toISOString() : 'N/A',
+    last: transactions[transactions.length - 1] ? new Date(transactions[transactions.length - 1].date).toISOString() : 'N/A'
+  });
 
   return transactions;
 }
