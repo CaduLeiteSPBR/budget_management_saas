@@ -796,7 +796,7 @@ async function generateCascadeInvoices(
   const expectedValue = Number(card.expectedAmount);
   const myExpectedValue = isShared ? (expectedValue * myPercentage / 100) : expectedValue;
   
-  // Descrição dinâmica baseada em isShared
+  // Descrição dinâmica baseada em isShared (mostra finalAmount, não expectedAmount)
   const description = isShared 
     ? `Previsão CC ${card.name} ${card.brand} (Fatura Total: R$ ${expectedValue.toFixed(2)})`
     : `Previsão CC ${card.name} ${card.brand}`;
@@ -944,13 +944,16 @@ function calculateInvoiceProjection(card: {
     ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
     : variableAmount;
   
-  // Valor Total Projetado = MAX(Projeção Variável + Recorrente, Esperado)
-  const totalProjected = Math.max(projectedVariable + recurring, expected);
+  // Projeção Real (sem trava) - sempre mostra cálculo bruto
+  const rawProjection = projectedVariable + recurring;
   
-  // Se for gasto compartilhado, calcular valor proporcional
+  // Valor final com trava de mínimo esperado
+  const finalAmount = Math.max(rawProjection, expected);
+  
+  // Se for gasto compartilhado, calcular valor proporcional DEPOIS da trava
   const isShared = card.isShared || false;
   const myPercentage = Number(card.myPercentage || "100.00");
-  const myAmount = isShared ? (totalProjected * myPercentage / 100) : totalProjected;
+  const myAmount = isShared ? (finalAmount * myPercentage / 100) : finalAmount;
 
   // Próximo vencimento
   let nextDueMonth = nextClosingMonth;
@@ -968,7 +971,8 @@ function calculateInvoiceProjection(card: {
   const nextDueDate = Date.UTC(nextDueYear, nextDueMonth, card.dueDay, 0, 0, 0, 0);
 
   return {
-    totalProjected,
+    rawProjection,
+    finalAmount,
     myAmount,
     isShared,
     myPercentage,

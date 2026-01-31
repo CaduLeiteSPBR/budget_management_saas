@@ -42,7 +42,7 @@ function calculateProjection(
   closingDay: number,
   isShared: boolean,
   myPercentage: number
-): { totalProjected: number; myAmount: number } {
+): { rawProjection: number; finalAmount: number; myAmount: number; usingMinimum: boolean } {
   const now = new Date();
   const currentDay = now.getUTCDate();
   const currentMonth = now.getUTCMonth();
@@ -71,13 +71,19 @@ function calculateProjection(
     ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
     : 0;
   
-  // Valor total projetado
-  const totalProjected = Math.max(projectedVariable + recurringAmount, expectedAmount);
+  // Projeção Real (sem trava) - sempre mostra cálculo bruto
+  const rawProjection = projectedVariable + recurringAmount;
   
-  // Valor proporcional (se compartilhado)
-  const myAmount = isShared ? totalProjected * (myPercentage / 100) : totalProjected;
+  // Valor final com trava de mínimo esperado
+  const finalAmount = Math.max(rawProjection, expectedAmount);
   
-  return { totalProjected, myAmount };
+  // Detecta se está usando valor mínimo esperado
+  const usingMinimum = rawProjection < expectedAmount;
+  
+  // Valor proporcional (se compartilhado) - aplica percentual DEPOIS da trava
+  const myAmount = isShared ? finalAmount * (myPercentage / 100) : finalAmount;
+  
+  return { rawProjection, finalAmount, myAmount, usingMinimum };
 }
 
 // Função auxiliar para identificar mês ativo
@@ -562,17 +568,26 @@ export default function CreditCardsTab() {
                             </TooltipProvider>
                           </div>
                           <span className="text-sm font-semibold">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.totalProjected)}
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.rawProjection)}
                           </span>
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Valor a ser lançado no seu extrato{card.isShared ? ` (${card.myPercentage}%)` : ''}:
-                          </span>
-                          <span className="text-sm font-bold text-primary">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.myAmount)}
-                          </span>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Valor a ser lançado no seu extrato{card.isShared ? ` (${card.myPercentage}%)` : ''}:
+                            </span>
+                            <span className={`text-sm font-bold ${
+                              projection.usingMinimum ? 'text-amber-600 dark:text-amber-500' : 'text-primary'
+                            }`}>
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(projection.myAmount)}
+                            </span>
+                          </div>
+                          {projection.usingMinimum && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 italic">
+                              ⚠️ Usando valor mínimo esperado (projeção abaixo do esperado)
+                            </p>
+                          )}
                         </div>
                       </div>
                     );

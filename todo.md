@@ -455,3 +455,13 @@
 - [x] Adicionar tooltip com ícone Info explicando fórmula de cálculo
 - [x] Garantir consistência entre valores frontend e backend (mesma função calculateProjection)
 - [ ] Testar reatividade ao digitar no campo "Valor Total Hoje" (aguardando validação do usuário)
+
+
+## Correção: Lógica de Projeção de Cartões (Separar Projeção Real de Valor Lançado)
+- [x] Ajustar calculateProjection() para retornar rawProjection (sem trava) e finalAmount (com trava)
+- [x] Exibir "Projeção Total da Fatura" sempre com cálculo bruto (projection.rawProjection)
+- [x] Aplicar trava MAX(rawProjection, expectedAmount) apenas em "Valor a ser Lançado"
+- [x] Adicionar nota/cor diferente quando Valor Lançado usar expectedAmount (text-amber-600, ⚠️)
+- [x] Aplicar myPercentage após trava de expectedAmount (finalAmount * myPercentage / 100)
+- [x] Atualizar backend (calculateInvoiceProjection) para usar mesma lógica
+- [ ] Testar cenário: gasto baixo deve mostrar projeção baixa, mas lançar expectedAmount (aguardando validação do usuário)
