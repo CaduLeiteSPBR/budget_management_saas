@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `recurringGroupId` varchar(36);

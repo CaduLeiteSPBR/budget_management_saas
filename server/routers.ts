@@ -154,19 +154,36 @@ export const appRouter = router({
           });
         }
 
-        // Se for recorrente, criar assinatura
+        // Se for recorrente, gerar série de lançamentos até Dez/2030
         if (paymentType === "recurring") {
-          const baseDate = new Date(input.date);
-          await db.createSubscription({
-            userId: ctx.user.id,
-            description: input.description,
-            currentAmount: input.amount,
-            dayOfMonth: baseDate.getUTCDate(),
-            categoryId: input.categoryId,
-            division: input.division,
-            type: input.type,
-            startDate: input.date,
-            notes: input.notes,
+          // Gerar UUID para agrupar lançamentos recorrentes
+          const recurringGroupId = crypto.randomUUID();
+          
+          // Gerar série de lançamentos
+          const recurringSeries = generateRecurringSeries(
+            {
+              userId: ctx.user.id,
+              description: input.description,
+              amount: input.amount,
+              nature: input.nature,
+              categoryId: input.categoryId,
+              division: input.division,
+              type: input.type,
+              date: input.date,
+              isPaid: false, // Lançamentos futuros começam como não pagos
+              notes: input.notes,
+            },
+            recurringGroupId
+          );
+          
+          // Inserir todos os lançamentos da série
+          for (const recurringTransaction of recurringSeries) {
+            await db.createTransaction(recurringTransaction);
+          }
+          
+          // Atualizar primeira transação com recurringGroupId
+          await db.updateTransaction(transaction.id, ctx.user.id, {
+            recurringGroupId,
           });
         }
 
@@ -275,6 +292,108 @@ export const appRouter = router({
         await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
         
         return { success: true };
+      }),
+
+    // Atualizar lançamentos recorrentes (este + futuros)
+    updateRecurringSeries: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        updateFutureOnly: z.boolean(), // true = apenas este, false = este + futuros
+        description: z.string().min(1).optional(),
+        amount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        nature: z.enum(["Entrada", "Saída"]).optional(),
+        categoryId: z.number().optional(),
+        division: z.enum(["Pessoal", "Familiar", "Investimento"]).optional(),
+        type: z.enum(["Essencial", "Importante", "Conforto", "Investimento"]).optional(),
+        isPaid: z.boolean().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, updateFutureOnly, ...data } = input;
+        
+        // Buscar transação original
+        const transactions = await db.getUserTransactions(ctx.user.id);
+        const originalTransaction = transactions.find(t => t.id === id);
+        
+        if (!originalTransaction || !originalTransaction.recurringGroupId) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Lançamento recorrente não encontrado' });
+        }
+        
+        if (updateFutureOnly) {
+          // Atualizar apenas este lançamento
+          await db.updateTransaction(id, ctx.user.id, data);
+        } else {
+          // Atualizar este + todos os futuros do mesmo grupo
+          const now = Date.now();
+          const futureTransactions = transactions.filter(
+            t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
+          );
+          
+          for (const transaction of futureTransactions) {
+            await db.updateTransaction(transaction.id, ctx.user.id, data);
+          }
+        }
+        
+        return { success: true, updatedCount: updateFutureOnly ? 1 : transactions.filter(
+          t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
+        ).length };
+      }),
+    
+    // Excluir lançamentos recorrentes (este + futuros)
+    deleteRecurringSeries: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        deleteFutureOnly: z.boolean(), // true = apenas este, false = este + futuros
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, deleteFutureOnly } = input;
+        
+        // Buscar transação original
+        const transactions = await db.getUserTransactions(ctx.user.id);
+        const originalTransaction = transactions.find(t => t.id === id);
+        
+        if (!originalTransaction || !originalTransaction.recurringGroupId) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Lançamento recorrente não encontrado' });
+        }
+        
+        // Proteger exclusão de saldos iniciais gerados pelo sistema
+        if (originalTransaction.isSystemGenerated) {
+          throw new TRPCError({ 
+            code: 'FORBIDDEN', 
+            message: 'Não é possível excluir saldos iniciais gerados automaticamente pelo sistema' 
+          });
+        }
+        
+        if (deleteFutureOnly) {
+          // Excluir apenas este lançamento
+          await db.deleteTransaction(id, ctx.user.id);
+        } else {
+          // Excluir este + todos os futuros do mesmo grupo
+          const futureTransactions = transactions.filter(
+            t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
+          );
+          
+          for (const transaction of futureTransactions) {
+            await db.deleteTransaction(transaction.id, ctx.user.id);
+          }
+        }
+        
+        // Recalcular saldos iniciais em cascata
+        const transactionDate = new Date(originalTransaction.date);
+        const transactionMonth = transactionDate.getUTCMonth() + 1;
+        const transactionYear = transactionDate.getUTCFullYear();
+        
+        let nextMonth = transactionMonth + 1;
+        let nextYear = transactionYear;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
+        
+        return { success: true, deletedCount: deleteFutureOnly ? 1 : transactions.filter(
+          t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
+        ).length };
       }),
 
     balance: protectedProcedure.query(async ({ ctx }) => {
@@ -752,6 +871,66 @@ Retorne apenas JSON válido.`,
       }),
   }),
 });
+
+// Função auxiliar para ajustar data em meses curtos (regra do dia 31)
+function adjustDateForShortMonths(originalDay: number, targetYear: number, targetMonth: number): number {
+  // Se o dia original é 29, 30 ou 31, verificar se o mês de destino tem esse dia
+  if (originalDay >= 29) {
+    // Criar data no último dia do mês de destino
+    const lastDayOfMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+    // Retornar o menor entre o dia original e o último dia do mês
+    return Math.min(originalDay, lastDayOfMonth);
+  }
+  return originalDay;
+}
+
+// Função auxiliar para gerar série de lançamentos recorrentes até Dez/2030
+function generateRecurringSeries(
+  baseTransaction: {
+    userId: number;
+    description: string;
+    amount: string;
+    nature: "Entrada" | "Saída";
+    categoryId?: number | null;
+    division?: "Pessoal" | "Familiar" | "Investimento" | null;
+    type?: "Essencial" | "Importante" | "Conforto" | "Investimento" | null;
+    date: number; // Unix timestamp em ms
+    isPaid: boolean;
+    notes?: string | null;
+  },
+  recurringGroupId: string
+): Array<typeof baseTransaction & { recurringGroupId: string }> {
+  const transactions = [];
+  const startDate = new Date(baseTransaction.date);
+  const startDay = startDate.getUTCDate();
+  const startMonth = startDate.getUTCMonth();
+  const startYear = startDate.getUTCFullYear();
+
+  // Gerar lançamentos até Dezembro de 2030
+  let currentYear = startYear;
+  let currentMonth = startMonth;
+
+  while (currentYear < 2031) {
+    // Ajustar dia para meses curtos (regra do dia 31)
+    const adjustedDay = adjustDateForShortMonths(startDay, currentYear, currentMonth);
+    const transactionDate = Date.UTC(currentYear, currentMonth, adjustedDay, 0, 0, 0, 0);
+
+    transactions.push({
+      ...baseTransaction,
+      date: transactionDate,
+      recurringGroupId,
+    });
+
+    // Avançar para o próximo mês
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+  }
+
+  return transactions;
+}
 
 // Função auxiliar para identificar qual é a fatura ativa (mês atual ou próximo)
 function identifyActiveBillingCycle(closingDay: number): { year: number; month: number; isClosed: boolean } {

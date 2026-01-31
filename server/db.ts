@@ -258,6 +258,7 @@ export async function getUserTransactions(userId: number, startDate?: number, en
       totalInstallments: transactions.totalInstallments,
       isPaid: transactions.isPaid,
       isSystemGenerated: transactions.isSystemGenerated,
+      recurringGroupId: transactions.recurringGroupId,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))

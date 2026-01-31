@@ -57,6 +57,7 @@ export const transactions = mysqlTable("transactions", {
   totalInstallments: int("totalInstallments"), // Total de parcelas
   isPaid: boolean("isPaid").default(true).notNull(), // Para parcelas futuras
   isSystemGenerated: boolean("isSystemGenerated").default(false).notNull(), // Saldo Inicial automático
+  recurringGroupId: varchar("recurringGroupId", { length: 36 }), // UUID para agrupar lançamentos recorrentes
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

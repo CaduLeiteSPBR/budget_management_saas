@@ -465,3 +465,30 @@
 - [x] Aplicar myPercentage após trava de expectedAmount (finalAmount * myPercentage / 100)
 - [x] Atualizar backend (calculateInvoiceProjection) para usar mesma lógica
 - [ ] Testar cenário: gasto baixo deve mostrar projeção baixa, mas lançar expectedAmount (aguardando validação do usuário)
+
+
+## Feature: Lançamentos Recorrentes Automáticos
+- [ ] Adicionar campo recurringGroupId (UUID) ao schema de transactions
+- [ ] Aplicar migração do schema (pnpm db:push)
+- [ ] Criar função adjustDateForShortMonths() para tratar regra do dia 31
+- [ ] Criar função generateRecurringSeries() que gera lançamentos até Dez/2030
+- [ ] Atualizar transactions.create para detectar paymentType='Recorrente (Mensal)' e gerar série
+- [ ] Criar procedure transactions.updateRecurringSeries (editar este + futuros)
+- [ ] Criar procedure transactions.deleteRecurringSeries (excluir este + futuros)
+- [ ] Adicionar modal de confirmação na interface (apenas este / este + futuros)
+- [ ] Garantir que meses passados nunca sejam alterados em edições em massa
+- [ ] Testar criação, edição e exclusão de lançamentos recorrentes
+
+
+## Feature: Lançamentos Recorrentes Automáticos
+- [x] Adicionar campo recurringGroupId (UUID) ao schema de transações
+- [x] Aplicar migração do schema (pnpm db:push) - 0005_flippant_kulan_gath.sql
+- [x] Criar função adjustDateForShortMonths() para tratar regra do dia 31
+- [x] Criar função generateRecurringSeries() para gerar série até Dez/2030
+- [x] Atualizar transactions.create para gerar série quando paymentType = 'recurring'
+- [x] Adicionar procedure updateRecurringSeries (apenas este / este + futuros)
+- [x] Adicionar procedure deleteRecurringSeries (apenas este / este + futuros)
+- [x] Adicionar recurringGroupId ao select de getUserTransactions
+- [ ] Criar modal de confirmação na interface ("Alterar apenas este?" / "Este e todos os futuros?")
+- [ ] Garantir que edição/exclusão preserva histórico passado (aguardando validação do usuário)
+- [ ] Testar criação de recorrência dia 31 (deve ajustar para 28/29 em Fev)
