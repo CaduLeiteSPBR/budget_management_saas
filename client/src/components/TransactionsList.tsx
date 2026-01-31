@@ -136,7 +136,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
 
   const handleDeleteRecurringFuture = () => {
     if (deleteRecurringId) {
-      deleteRecurringFutureMutation.mutate({ id: deleteRecurringId, deleteFutureOnly: true });
+      deleteRecurringFutureMutation.mutate({ id: deleteRecurringId, deleteAllFuture: true });
     }
   };
 

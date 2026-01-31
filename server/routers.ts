@@ -343,10 +343,10 @@ export const appRouter = router({
     deleteRecurringSeries: protectedProcedure
       .input(z.object({
         id: z.number(),
-        deleteFutureOnly: z.boolean(), // true = apenas este, false = este + futuros
+        deleteAllFuture: z.boolean(), // true = este + todos os futuros, false = apenas este
       }))
       .mutation(async ({ ctx, input }) => {
-        const { id, deleteFutureOnly } = input;
+        const { id, deleteAllFuture } = input;
         
         // Buscar transação original
         const transactions = await db.getUserTransactions(ctx.user.id);
@@ -356,6 +356,14 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Lançamento recorrente não encontrado' });
         }
         
+        console.log('[deleteRecurringSeries] Original Transaction:', {
+          id: originalTransaction.id,
+          recurringGroupId: originalTransaction.recurringGroupId,
+          date: originalTransaction.date,
+          dateISO: new Date(originalTransaction.date).toISOString(),
+          deleteAllFuture
+        });
+        
         // Proteger exclusão de saldos iniciais gerados pelo sistema
         if (originalTransaction.isSystemGenerated) {
           throw new TRPCError({ 
@@ -364,22 +372,39 @@ export const appRouter = router({
           });
         }
         
-        if (deleteFutureOnly) {
+        let deletedCount = 0;
+        
+        if (!deleteAllFuture) {
           // Excluir apenas este lançamento
+          console.log('[deleteRecurringSeries] Deleting only transaction ID:', id);
           await db.deleteTransaction(id, ctx.user.id);
+          deletedCount = 1;
         } else {
           // Excluir este + todos os futuros do mesmo grupo
+          // IMPORTANTE: date é bigint (timestamp), comparação numérica direta
           const futureTransactions = transactions.filter(
-            t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
+            t => t.recurringGroupId === originalTransaction.recurringGroupId && 
+                 Number(t.date) >= Number(originalTransaction.date)
           );
+          
+          console.log('[deleteRecurringSeries] Future transactions to delete:', futureTransactions.length);
+          console.log('[deleteRecurringSeries] Transaction IDs:', futureTransactions.map(t => ({
+            id: t.id,
+            date: t.date,
+            dateISO: new Date(Number(t.date)).toISOString()
+          })));
           
           for (const transaction of futureTransactions) {
             await db.deleteTransaction(transaction.id, ctx.user.id);
           }
+          
+          deletedCount = futureTransactions.length;
         }
         
+        console.log('[deleteRecurringSeries] Total deleted:', deletedCount);
+        
         // Recalcular saldos iniciais em cascata
-        const transactionDate = new Date(originalTransaction.date);
+        const transactionDate = new Date(Number(originalTransaction.date));
         const transactionMonth = transactionDate.getUTCMonth() + 1;
         const transactionYear = transactionDate.getUTCFullYear();
         
@@ -391,9 +416,7 @@ export const appRouter = router({
         }
         await db.recalculateInitialBalances(ctx.user.id, nextYear, nextMonth);
         
-        return { success: true, deletedCount: deleteFutureOnly ? 1 : transactions.filter(
-          t => t.recurringGroupId === originalTransaction.recurringGroupId && t.date >= originalTransaction.date
-        ).length };
+        return { success: true, deletedCount };
       }),
 
     balance: protectedProcedure.query(async ({ ctx }) => {

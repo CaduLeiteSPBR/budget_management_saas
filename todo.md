@@ -503,3 +503,12 @@
 - [x] Adicionar feedback com toast mostrando quantidade de lançamentos removidos
 - [x] Garantir refetch automático após exclusão (invalidate list + balance)
 - [ ] Testar exclusão de apenas um lançamento vs série completa (aguardando validação do usuário)
+
+## Bug: Exclusão em Massa de Recorrentes Não Funcionava
+- [x] Identificado problema: lógica invertida em deleteRecurringSeries
+- [x] Renomeado parâmetro deleteFutureOnly → deleteAllFuture (nomenclatura mais clara)
+- [x] Invertida lógica: true = série completa, false = apenas um
+- [x] Corrigida comparação de timestamps (Number(t.date) >= Number(originalTransaction.date))
+- [x] Adicionados logs de depuração (console.log com IDs e quantidade deletada)
+- [x] Sincronizado frontend (TransactionsList.tsx) com novo parâmetro
+- [ ] Testar exclusão "Este e todos os futuros" (aguardando validação do usuário)
