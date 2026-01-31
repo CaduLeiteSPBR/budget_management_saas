@@ -165,7 +165,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
@@ -211,10 +211,9 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 py-8">
-          {/* Seletor de Período */}
-          <div className="mb-6 flex items-center gap-4">
+      <main className="container mx-auto px-4 py-8">
+        {/* Seletor de Período */}
+        <div className="mb-6 flex items-center gap-4">
             <span className="text-sm font-medium text-muted-foreground">Período:</span>
             
             {/* Botão Navegar para Trás */}
@@ -322,10 +321,10 @@ export default function Dashboard() {
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-          
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        </div>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -393,10 +392,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          </div>
+        </div>
 
-          {/* Navigation Tabs */}
-          <Tabs defaultValue="overview" className="space-y-6">
+        {/* Navigation Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass-strong">
             <TabsTrigger value="overview">
               <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -444,8 +443,7 @@ export default function Dashboard() {
           <TabsContent value="cards" className="space-y-6">
             <CreditCardsTab />
           </TabsContent>
-          </Tabs>
-        </div>
+        </Tabs>
       </main>
     </div>
   );

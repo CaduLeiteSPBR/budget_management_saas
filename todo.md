@@ -530,3 +530,13 @@
 - [x] Garantir que abas e filtros permaneçam visíveis abaixo do cabeçalho
 - [x] Correção de indentação JSX para evitar erros de parsing
 - [x] Servidor reiniciado para limpar cache de erros
+
+
+## Correção: Scroll Duplo no Dashboard
+- [x] Remover h-screen flex flex-col do container principal
+- [x] Remover flex-1 overflow-y-auto do main
+- [x] Manter header sticky top-0 z-50 bg-background
+- [x] Verificar TransactionsList (nenhum overflow-y-auto ou max-h-* encontrado)
+- [x] Garantir scroll único no nível da janela (window)
+- [x] Correção de indentação JSX após remoção de estrutura Flexbox
+- [x] Servidor reiniciado para aplicar mudanças
