@@ -521,3 +521,12 @@
 - [x] Adicionar verificação para prevenir criação no mesmo mês/ano (incremento de mês antes do while)
 - [x] Adicionar logs de depuração para monitorar geração de série
 - [ ] Testar criação de recorrente no dia 31 (aguardando validação do usuário)
+
+
+## Melhoria: Layout com Cabeçalho Fixo (Sticky Header)
+- [x] Aplicar estrutura Flexbox ao Dashboard (h-screen flex flex-col)
+- [x] Cabeçalho fixo com sticky top-0 z-50 bg-background border-b
+- [x] Área de conteúdo com flex-1 overflow-y-auto (scroll isolado)
+- [x] Garantir que abas e filtros permaneçam visíveis abaixo do cabeçalho
+- [x] Correção de indentação JSX para evitar erros de parsing
+- [x] Servidor reiniciado para limpar cache de erros

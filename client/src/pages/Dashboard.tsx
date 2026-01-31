@@ -165,9 +165,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="border-b border-border glass-strong sticky top-0 z-50">
+      <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -211,22 +211,23 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Seletor de Período */}
-        <div className="mb-6 flex items-center gap-4">
-          <span className="text-sm font-medium text-muted-foreground">Período:</span>
-          
-          {/* Botão Navegar para Trás */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleNavigate('prev')}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <Popover>
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-8">
+          {/* Seletor de Período */}
+          <div className="mb-6 flex items-center gap-4">
+            <span className="text-sm font-medium text-muted-foreground">Período:</span>
+            
+            {/* Botão Navegar para Trás */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleNavigate('prev')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
                 {selectedMonths.length === 0 ? "Selecione os meses" :
@@ -310,21 +311,21 @@ export default function Dashboard() {
                 </div>
               </div>
             </PopoverContent>
-          </Popover>
+            </Popover>
+            
+            {/* Botão Navegar para Frente */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleNavigate('next')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
           
-          {/* Botão Navegar para Frente */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => handleNavigate('next')}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -392,10 +393,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-        </div>
+          </div>
 
-        {/* Navigation Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
+          {/* Navigation Tabs */}
+          <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass-strong">
             <TabsTrigger value="overview">
               <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -443,7 +444,8 @@ export default function Dashboard() {
           <TabsContent value="cards" className="space-y-6">
             <CreditCardsTab />
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </main>
     </div>
   );
