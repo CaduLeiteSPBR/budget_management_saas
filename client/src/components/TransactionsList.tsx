@@ -22,6 +22,7 @@ import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download } fro
 import { toast } from "sonner";
 import InvoiceImport from "@/components/InvoiceImport";
 import InvoiceValidation from "@/components/InvoiceValidation";
+import { DeleteRecurringDialog } from "@/components/DeleteRecurringDialog";
 
 interface TransactionsListProps {
   onEdit?: (transactionId: number) => void;
@@ -37,6 +38,8 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
   const [filterType, setFilterType] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteRecurringId, setDeleteRecurringId] = useState<number | null>(null);
+  const [deleteRecurringDescription, setDeleteRecurringDescription] = useState<string>("");
   const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Ordem ascendente (cronológica)
   
@@ -66,6 +69,32 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     },
   });
 
+  const deleteRecurringSingleMutation = trpc.transactions.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Lançamento recorrente excluído com sucesso!");
+      utils.transactions.list.invalidate();
+      utils.transactions.balance.invalidate();
+      setDeleteRecurringId(null);
+      setDeleteRecurringDescription("");
+    },
+    onError: (error) => {
+      toast.error(`Erro ao excluir: ${error.message}`);
+    },
+  });
+
+  const deleteRecurringFutureMutation = trpc.transactions.deleteRecurringSeries.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Lançamento e ${result.deletedCount - 1} parcelas futuras removidas com sucesso!`);
+      utils.transactions.list.invalidate();
+      utils.transactions.balance.invalidate();
+      setDeleteRecurringId(null);
+      setDeleteRecurringDescription("");
+    },
+    onError: (error) => {
+      toast.error(`Erro ao excluir série: ${error.message}`);
+    },
+  });
+
   const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -80,12 +109,34 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
   };
 
   const handleDelete = (id: number) => {
-    setDeleteId(id);
+    // Encontrar a transação para verificar se é recorrente
+    const transaction = sortedTransactions?.find(t => t.id === id);
+    
+    if (transaction && transaction.recurringGroupId) {
+      // É recorrente - abrir dialog especial
+      setDeleteRecurringId(id);
+      setDeleteRecurringDescription(transaction.description);
+    } else {
+      // Não é recorrente - usar dialog padrão
+      setDeleteId(id);
+    }
   };
 
   const confirmDelete = () => {
     if (deleteId) {
       deleteMutation.mutate({ id: deleteId });
+    }
+  };
+
+  const handleDeleteRecurringSingle = () => {
+    if (deleteRecurringId) {
+      deleteRecurringSingleMutation.mutate({ id: deleteRecurringId });
+    }
+  };
+
+  const handleDeleteRecurringFuture = () => {
+    if (deleteRecurringId) {
+      deleteRecurringFutureMutation.mutate({ id: deleteRecurringId, deleteFutureOnly: true });
     }
   };
 
@@ -559,6 +610,20 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog de exclusão de recorrente */}
+      <DeleteRecurringDialog
+        open={deleteRecurringId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteRecurringId(null);
+            setDeleteRecurringDescription("");
+          }
+        }}
+        onDeleteSingle={handleDeleteRecurringSingle}
+        onDeleteFuture={handleDeleteRecurringFuture}
+        transactionDescription={deleteRecurringDescription}
+      />
 
       {/* Validação de importação */}
       {showValidation && importedTransactions.length > 0 && (

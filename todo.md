@@ -492,3 +492,14 @@
 - [ ] Criar modal de confirmação na interface ("Alterar apenas este?" / "Este e todos os futuros?")
 - [ ] Garantir que edição/exclusão preserva histórico passado (aguardando validação do usuário)
 - [ ] Testar criação de recorrência dia 31 (deve ajustar para 28/29 em Fev)
+
+
+## Feature: Exclusão Inteligente de Lançamentos Recorrentes
+- [x] Criar componente DeleteRecurringDialog com AlertDialog
+- [x] Adicionar opções: "Apenas este", "Este e todos os futuros", "Cancelar"
+- [x] Integrar dialog na lista de transações (TransactionsList)
+- [x] Detectar se lançamento tem recurringGroupId antes de excluir
+- [x] Conectar com procedure deleteRecurringSeries existente
+- [x] Adicionar feedback com toast mostrando quantidade de lançamentos removidos
+- [x] Garantir refetch automático após exclusão (invalidate list + balance)
+- [ ] Testar exclusão de apenas um lançamento vs série completa (aguardando validação do usuário)
