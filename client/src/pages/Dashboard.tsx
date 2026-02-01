@@ -116,7 +116,20 @@ export default function Dashboard() {
     { enabled: isAuthenticated }
   );
 
-  // Calcular totais do período selecionado
+  // Fonte Única da Verdade: Buscar resumo financeiro do backend
+  const { data: financialSummary, isLoading: summaryLoading } = trpc.transactions.getFinancialSummary.useQuery(
+    { selectedMonths, selectedYear },
+    { enabled: isAuthenticated }
+  );
+
+  // Usar valores do backend (Fonte Única da Verdade)
+  const currentBalance = financialSummary?.currentBalance || 0;
+  const periodIncome = financialSummary?.periodIncome || 0;
+  const periodExpense = financialSummary?.periodExpense || 0;
+  const endOfPeriodBalance = financialSummary?.endOfPeriodBalance || 0;
+  const periodBalance = periodIncome - periodExpense;
+  
+  // Filtrar transações do período para exibição na lista (apenas para UI)
   const periodTransactions = useMemo(() => {
     if (!transactions) return [];
     return transactions.filter(t => {
@@ -126,34 +139,6 @@ export default function Dashboard() {
       return selectedMonths.includes(tMonth) && tYear === selectedYear;
     });
   }, [transactions, selectedMonths, selectedYear]);
-
-  const periodIncome = periodTransactions
-    .filter(t => t.nature === "Entrada")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const periodExpense = periodTransactions
-    .filter(t => t.nature === "Saída")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const periodBalance = periodIncome - periodExpense;
-  
-  // Calcular saldo atual (todas as transações pagas até hoje)
-  // Usar fim do dia atual (23:59:59 UTC) para incluir todas as transações de hoje
-  const endOfToday = useMemo(() => {
-    const now = new Date();
-    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999);
-  }, []);
-  
-  const currentBalance = transactions?.filter(t => t.isPaid && t.date <= endOfToday)
-    .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
-  
-  // Calcular saldo no fim do mês (saldo progressivo das transações do período selecionado, ordenadas por data)
-  const sortedPeriodTransactions = periodTransactions?.slice().sort((a, b) => a.date - b.date) || [];
-  let endOfPeriodBalance = 0;
-  sortedPeriodTransactions.forEach((t) => {
-    const amount = Number(t.amount);
-    endOfPeriodBalance += t.nature === "Entrada" ? amount : -amount;
-  });
 
   if (loading || !isAuthenticated) {
     return (

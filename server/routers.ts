@@ -423,6 +423,104 @@ export const appRouter = router({
       return await db.getUserBalance(ctx.user.id);
     }),
 
+    // Fonte Única da Verdade: Cálculo de resumo financeiro no backend
+    getFinancialSummary: protectedProcedure
+      .input(z.object({
+        selectedMonths: z.array(z.number()),
+        selectedYear: z.number(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const { selectedMonths, selectedYear } = input;
+        
+        // Buscar todas as transações do usuário
+        const allTransactions = await db.getUserTransactions(ctx.user.id);
+        
+        // Calcular fim do dia atual (23:59:59 UTC)
+        const now = new Date();
+        const endOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999);
+        
+        console.log('[getFinancialSummary] Calculando resumo financeiro:', {
+          userId: ctx.user.id,
+          selectedMonths,
+          selectedYear,
+          endOfToday: new Date(endOfToday).toISOString(),
+          totalTransactions: allTransactions.length
+        });
+        
+        // Filtrar transações pagas até hoje (23:59:59 UTC)
+        const paidTransactionsUntilToday = allTransactions.filter(t => t.isPaid && t.date <= endOfToday);
+        
+        console.log('[getFinancialSummary] Transações pagas até hoje:', {
+          count: paidTransactionsUntilToday.length,
+          transactions: paidTransactionsUntilToday.map(t => ({
+            id: t.id,
+            description: t.description,
+            amount: t.amount,
+            nature: t.nature,
+            date: new Date(t.date).toISOString(),
+            isPaid: t.isPaid
+          }))
+        });
+        
+        // Calcular saldo atual (soma de todas as transações pagas até hoje)
+        const currentBalance = paidTransactionsUntilToday.reduce((sum, t) => {
+          const amount = Number(t.amount);
+          return sum + (t.nature === "Entrada" ? amount : -amount);
+        }, 0);
+        
+        console.log('[getFinancialSummary] Saldo atual calculado:', {
+          currentBalance,
+          entradas: paidTransactionsUntilToday.filter(t => t.nature === "Entrada").length,
+          saidas: paidTransactionsUntilToday.filter(t => t.nature === "Saída").length
+        });
+        
+        // Filtrar transações do período selecionado
+        const periodTransactions = allTransactions.filter(t => {
+          const tDate = new Date(t.date);
+          const tMonth = tDate.getUTCMonth() + 1;
+          const tYear = tDate.getUTCFullYear();
+          return selectedMonths.includes(tMonth) && tYear === selectedYear;
+        });
+        
+        console.log('[getFinancialSummary] Transações do período:', {
+          count: periodTransactions.length,
+          period: `${selectedMonths.join(', ')}/${selectedYear}`
+        });
+        
+        // Calcular entradas e saídas do período
+        const periodIncome = periodTransactions
+          .filter(t => t.nature === "Entrada")
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        const periodExpense = periodTransactions
+          .filter(t => t.nature === "Saída")
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        // Calcular saldo no fim do período (saldo progressivo)
+        const sortedPeriodTransactions = periodTransactions.slice().sort((a, b) => a.date - b.date);
+        let endOfPeriodBalance = 0;
+        sortedPeriodTransactions.forEach((t) => {
+          const amount = Number(t.amount);
+          endOfPeriodBalance += t.nature === "Entrada" ? amount : -amount;
+        });
+        
+        console.log('[getFinancialSummary] Resumo final:', {
+          currentBalance,
+          periodIncome,
+          periodExpense,
+          endOfPeriodBalance,
+          periodTransactionsCount: periodTransactions.length
+        });
+        
+        return {
+          currentBalance,
+          periodIncome,
+          periodExpense,
+          endOfPeriodBalance,
+          periodTransactionsCount: periodTransactions.length
+        };
+      }),
+
     // Inicializar saldos iniciais automáticos (Fev/2026 - Dez/2030)
     initializeBalances: protectedProcedure.mutation(async ({ ctx }) => {
       await db.initializeMonthlyBalances(ctx.user.id);

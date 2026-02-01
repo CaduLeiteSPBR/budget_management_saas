@@ -549,3 +549,15 @@
 - [x] Corrigir lógica de agregação: usar endOfToday (23:59:59 UTC) ao invés de Date.now()
 - [x] Widget agora inclui todas as transações do dia atual (até 23:59:59)
 - [ ] Testar sincronização após edição de data/valor de lançamento (aguardando validação)
+
+
+## Implementação: Fonte Única da Verdade para Cálculo de Saldo
+- [x] Criar procedure getFinancialSummary no backend (routers.ts)
+- [x] Retornar: currentBalance, periodIncome, periodExpense, endOfPeriodBalance
+- [x] Cálculo no backend (busca todas transações e filtra no servidor)
+- [x] Usar isPaid: true e date <= endOfToday (23:59:59 UTC)
+- [x] Adicionar logs de depuração (lista completa de transações, valores, sinais)
+- [x] Remover cálculos manuais do Dashboard.tsx
+- [x] Substituir por trpc.transactions.getFinancialSummary.useQuery()
+- [ ] Validar com Excel (R$ 30.259,92 esperado) - aguardando teste do usuário
+- [ ] Analisar logs do backend para identificar divergência
