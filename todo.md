@@ -621,3 +621,14 @@
 - [x] Saldo Atual: R$ 28.016,98 (Saldo Inicial: R$ 1.957,69 + Movimentação: R$ 26.059,29)
 - [x] Entradas: 3 transações | Saídas: 6 transações
 - [ ] Diferença com Excel: R$ 2.242,94 (30.259,92 - 28.016,98) - aguardando validação
+
+
+## Correção Urgente: Restaurar Histórico de Janeiro + Corrigir Card -1.5M
+- [x] Verificar se Salário de Janeiro (R$ 30.645,16, 05/01/2026) existe - NÃO encontrado
+- [x] Recriar Salário de Janeiro (Salário 1/12)
+- [x] Verificar se Saldo Inicial de 01/01/2026 (R$ 1.981,05) existe - NÃO encontrado
+- [x] Recriar Saldo Inicial de 01/01/2026
+- [x] Corrigir card com valor negativo absurdo (-1.5M)
+- [x] Modificar lógica: buscar Saldo Inicial do início do ano (01/01), não o mais recente
+- [x] Somar TODAS as movimentações desde 01/01 até hoje
+- [x] Validar saldo final: R$ 30.259,92 ✅ (CORRETO!)

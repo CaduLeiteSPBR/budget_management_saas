@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO transactions (userId, description, amount, nature, date, isPaid, categoryId) VALUES (1, 'Saldo Inicial', '1981.05', 'Entrada', 1735689600000, 1, 1);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute INSERT INTO transactions (userId, description, amount, nature, date, isPaid, categoryId) VALUES (1, 'Saldo Inicial', '1981.05', 'Entrada', 1735689600000, 1, 1);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 53
+}

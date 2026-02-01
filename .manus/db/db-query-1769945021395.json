@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, description, amount, date, FROM_UNIXTIME(date/1000) as readable_date FROM transactions WHERE description LIKE '%Salário%' AND date >= 1735689600000 AND date < 1738368000000 ORDER BY date;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT id, description, amount, date, FROM_UNIXTIME(date/1000) as readable_date FROM transactions WHERE description LIKE '%Salário%' AND date >= 1735689600000 AND date < 1738368000000 ORDER BY date;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 56
+}

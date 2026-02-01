@@ -446,14 +446,16 @@ export const appRouter = router({
           endOfToday: new Date(endOfToday).toISOString()
         });
         
-        // SALDO PROGRESSIVO: Buscar Saldo Inicial mais recente
+        // SALDO PROGRESSIVO: Buscar Saldo Inicial do início do ano (01/01)
+        const startOfYear = Date.UTC(selectedYear, 0, 1, 0, 0, 0, 0); // 01/01 do ano selecionado
         const saldoInicialResult = await database.execute(sql`
           SELECT id, amount, date
           FROM transactions
           WHERE userId = ${ctx.user.id}
           AND description LIKE '%Saldo Inicial%'
           AND isPaid = 1
-          ORDER BY date DESC
+          AND date >= ${startOfYear}
+          ORDER BY date ASC
           LIMIT 1
         `);
         
