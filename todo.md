@@ -581,3 +581,32 @@
 - [x] Criar componente DebugSaldoTab com tabela completa
 - [x] Adicionar resumo: Total transações, Entradas, Saídas, Saldo Calculado
 - [ ] Identificar e remover transações fantasmagóricas (aguardando validação do usuário)
+
+
+## Limpeza: Exclusão de Transações Fantasmagóricas
+- [ ] Excluir ID 30001 (Salário 36k)
+- [ ] Excluir ID 30050 (Férias 13k)
+- [ ] Excluir ID 90123 (Ajuste C6 12k)
+- [ ] Excluir ID 60098 (Reembolso 8k)
+- [ ] Buscar lançamentos de janeiro > R$ 5.000 (exceto Saldo Inicial)
+- [ ] Listar para aprovação do usuário
+- [ ] Validar saldo corrigido após exclusões
+
+
+## Limpeza: Exclusão de Duplicidades e Correção de Valor
+- [ ] Excluir ID 330062 (Salário - Férias + 13. salário + 1/3 de férias R$ 38.193,90)
+- [ ] Excluir ID 330061 (Salário Mensal R$ 15.465,65)
+- [ ] Excluir ID 330447 (Aporte mensal R$ 20.000,00)
+- [ ] Excluir ID 330632 (Adiantamento Salarial R$ 7.162,83)
+- [ ] Excluir ID 30037 (Condomínio 1/12 R$ 9.898,58)
+- [ ] Excluir ID 330063 (VR Marisol R$ 6.000,00)
+- [ ] Atualizar ID 30002 (Salário 2/12): R$ 32.888,10 → R$ 30.645,16
+- [ ] Validar Saldo Atual no Widget
+
+
+## Reset: Limpeza Completa de Saldos Iniciais
+- [x] Excluir TODOS os Saldos Iniciais (118 registros excluídos)
+- [x] Manter apenas ID 240002 (R$ 1.957,69 de 31/01/2026)
+- [x] Recalcular Saldo Atual após limpeza: R$ -32.341,67 (NEGATIVO!)
+- [x] Listar 5 maiores Entradas/Saídas de Jan/Fev
+- [ ] Aguardando validação do usuário sobre divergência

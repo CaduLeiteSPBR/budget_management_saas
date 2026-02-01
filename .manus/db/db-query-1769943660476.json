@@ -1,0 +1,962 @@
+{
+  "query": "SELECT id, description, amount, nature, date, isPaid\nFROM transactions\nWHERE description LIKE '%Saldo Inicial%'\nORDER BY date ASC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT id, description, amount, nature, date, isPaid\nFROM transactions\nWHERE description LIKE '%Saldo Inicial%'\nORDER BY date ASC;",
+  "rows": [
+    {
+      "id": "16",
+      "description": "Saldo Inicial",
+      "amount": "1981.05",
+      "nature": "Entrada",
+      "date": "1767225600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330001",
+      "description": "Saldo Inicial",
+      "amount": "3397.21",
+      "nature": "Entrada",
+      "date": "1767225600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240002",
+      "description": "Saldo Inicial",
+      "amount": "1957.69",
+      "nature": "Entrada",
+      "date": "1769904000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240003",
+      "description": "Saldo Inicial",
+      "amount": "4926.58",
+      "nature": "Entrada",
+      "date": "1772323200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330003",
+      "description": "Saldo Inicial",
+      "amount": "37583.58",
+      "nature": "Entrada",
+      "date": "1772323200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240004",
+      "description": "Saldo Inicial",
+      "amount": "5812.52",
+      "nature": "Entrada",
+      "date": "1775001600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330004",
+      "description": "Saldo Inicial",
+      "amount": "40492.81",
+      "nature": "Entrada",
+      "date": "1775001600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330005",
+      "description": "Saldo Inicial",
+      "amount": "43402.04",
+      "nature": "Entrada",
+      "date": "1777593600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240005",
+      "description": "Saldo Inicial",
+      "amount": "6698.46",
+      "nature": "Entrada",
+      "date": "1777593600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240006",
+      "description": "Saldo Inicial",
+      "amount": "7484.40",
+      "nature": "Entrada",
+      "date": "1780272000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330006",
+      "description": "Saldo Inicial",
+      "amount": "46311.27",
+      "nature": "Entrada",
+      "date": "1780272000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240007",
+      "description": "Saldo Inicial",
+      "amount": "8270.34",
+      "nature": "Entrada",
+      "date": "1782864000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330007",
+      "description": "Saldo Inicial",
+      "amount": "49220.50",
+      "nature": "Entrada",
+      "date": "1782864000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330008",
+      "description": "Saldo Inicial",
+      "amount": "52129.73",
+      "nature": "Entrada",
+      "date": "1785542400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240008",
+      "description": "Saldo Inicial",
+      "amount": "9056.28",
+      "nature": "Entrada",
+      "date": "1785542400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240009",
+      "description": "Saldo Inicial",
+      "amount": "9842.22",
+      "nature": "Entrada",
+      "date": "1788220800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330009",
+      "description": "Saldo Inicial",
+      "amount": "55038.96",
+      "nature": "Entrada",
+      "date": "1788220800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330010",
+      "description": "Saldo Inicial",
+      "amount": "57948.19",
+      "nature": "Entrada",
+      "date": "1790812800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240010",
+      "description": "Saldo Inicial",
+      "amount": "10628.16",
+      "nature": "Entrada",
+      "date": "1790812800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330011",
+      "description": "Saldo Inicial",
+      "amount": "60857.42",
+      "nature": "Entrada",
+      "date": "1793491200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240011",
+      "description": "Saldo Inicial",
+      "amount": "11414.10",
+      "nature": "Entrada",
+      "date": "1793491200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240012",
+      "description": "Saldo Inicial",
+      "amount": "12200.04",
+      "nature": "Entrada",
+      "date": "1796083200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330012",
+      "description": "Saldo Inicial",
+      "amount": "63766.65",
+      "nature": "Entrada",
+      "date": "1796083200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240013",
+      "description": "Saldo Inicial",
+      "amount": "12985.98",
+      "nature": "Entrada",
+      "date": "1798761600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330013",
+      "description": "Saldo Inicial",
+      "amount": "66675.88",
+      "nature": "Entrada",
+      "date": "1798761600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240014",
+      "description": "Saldo Inicial",
+      "amount": "-20514.02",
+      "nature": "Entrada",
+      "date": "1801440000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330014",
+      "description": "Saldo Inicial",
+      "amount": "69872.47",
+      "nature": "Entrada",
+      "date": "1801440000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240015",
+      "description": "Saldo Inicial",
+      "amount": "-54014.02",
+      "nature": "Entrada",
+      "date": "1803859200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330015",
+      "description": "Saldo Inicial",
+      "amount": "73069.06",
+      "nature": "Entrada",
+      "date": "1803859200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240016",
+      "description": "Saldo Inicial",
+      "amount": "-87514.02",
+      "nature": "Entrada",
+      "date": "1806537600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330016",
+      "description": "Saldo Inicial",
+      "amount": "76265.65",
+      "nature": "Entrada",
+      "date": "1806537600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330017",
+      "description": "Saldo Inicial",
+      "amount": "79462.24",
+      "nature": "Entrada",
+      "date": "1809129600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240017",
+      "description": "Saldo Inicial",
+      "amount": "-121014.02",
+      "nature": "Entrada",
+      "date": "1809129600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240018",
+      "description": "Saldo Inicial",
+      "amount": "-154514.02",
+      "nature": "Entrada",
+      "date": "1811808000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330018",
+      "description": "Saldo Inicial",
+      "amount": "82658.83",
+      "nature": "Entrada",
+      "date": "1811808000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240019",
+      "description": "Saldo Inicial",
+      "amount": "-188014.02",
+      "nature": "Entrada",
+      "date": "1814400000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330019",
+      "description": "Saldo Inicial",
+      "amount": "85855.42",
+      "nature": "Entrada",
+      "date": "1814400000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240020",
+      "description": "Saldo Inicial",
+      "amount": "-221514.02",
+      "nature": "Entrada",
+      "date": "1817078400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330020",
+      "description": "Saldo Inicial",
+      "amount": "89052.01",
+      "nature": "Entrada",
+      "date": "1817078400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330021",
+      "description": "Saldo Inicial",
+      "amount": "92248.60",
+      "nature": "Entrada",
+      "date": "1819756800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240021",
+      "description": "Saldo Inicial",
+      "amount": "-255014.02",
+      "nature": "Entrada",
+      "date": "1819756800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240022",
+      "description": "Saldo Inicial",
+      "amount": "-288514.02",
+      "nature": "Entrada",
+      "date": "1822348800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330022",
+      "description": "Saldo Inicial",
+      "amount": "95445.19",
+      "nature": "Entrada",
+      "date": "1822348800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240023",
+      "description": "Saldo Inicial",
+      "amount": "-322014.02",
+      "nature": "Entrada",
+      "date": "1825027200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330023",
+      "description": "Saldo Inicial",
+      "amount": "98641.78",
+      "nature": "Entrada",
+      "date": "1825027200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240024",
+      "description": "Saldo Inicial",
+      "amount": "-355514.02",
+      "nature": "Entrada",
+      "date": "1827619200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330024",
+      "description": "Saldo Inicial",
+      "amount": "101838.37",
+      "nature": "Entrada",
+      "date": "1827619200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330025",
+      "description": "Saldo Inicial",
+      "amount": "105034.96",
+      "nature": "Entrada",
+      "date": "1830297600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240025",
+      "description": "Saldo Inicial",
+      "amount": "-389014.02",
+      "nature": "Entrada",
+      "date": "1830297600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240026",
+      "description": "Saldo Inicial",
+      "amount": "-422514.02",
+      "nature": "Entrada",
+      "date": "1832976000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330026",
+      "description": "Saldo Inicial",
+      "amount": "108231.55",
+      "nature": "Entrada",
+      "date": "1832976000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330027",
+      "description": "Saldo Inicial",
+      "amount": "111428.14",
+      "nature": "Entrada",
+      "date": "1835481600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240027",
+      "description": "Saldo Inicial",
+      "amount": "-456014.02",
+      "nature": "Entrada",
+      "date": "1835481600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330028",
+      "description": "Saldo Inicial",
+      "amount": "114624.73",
+      "nature": "Entrada",
+      "date": "1838160000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240028",
+      "description": "Saldo Inicial",
+      "amount": "-489514.02",
+      "nature": "Entrada",
+      "date": "1838160000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330029",
+      "description": "Saldo Inicial",
+      "amount": "117821.32",
+      "nature": "Entrada",
+      "date": "1840752000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240029",
+      "description": "Saldo Inicial",
+      "amount": "-523014.02",
+      "nature": "Entrada",
+      "date": "1840752000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240030",
+      "description": "Saldo Inicial",
+      "amount": "-556514.02",
+      "nature": "Entrada",
+      "date": "1843430400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330030",
+      "description": "Saldo Inicial",
+      "amount": "121017.91",
+      "nature": "Entrada",
+      "date": "1843430400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330031",
+      "description": "Saldo Inicial",
+      "amount": "124214.50",
+      "nature": "Entrada",
+      "date": "1846022400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240031",
+      "description": "Saldo Inicial",
+      "amount": "-590014.02",
+      "nature": "Entrada",
+      "date": "1846022400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240032",
+      "description": "Saldo Inicial",
+      "amount": "-623514.02",
+      "nature": "Entrada",
+      "date": "1848700800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330032",
+      "description": "Saldo Inicial",
+      "amount": "126411.09",
+      "nature": "Entrada",
+      "date": "1848700800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240033",
+      "description": "Saldo Inicial",
+      "amount": "-657014.02",
+      "nature": "Entrada",
+      "date": "1851379200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330033",
+      "description": "Saldo Inicial",
+      "amount": "128607.68",
+      "nature": "Entrada",
+      "date": "1851379200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330034",
+      "description": "Saldo Inicial",
+      "amount": "130804.27",
+      "nature": "Entrada",
+      "date": "1853971200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240034",
+      "description": "Saldo Inicial",
+      "amount": "-690514.02",
+      "nature": "Entrada",
+      "date": "1853971200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240035",
+      "description": "Saldo Inicial",
+      "amount": "-724014.02",
+      "nature": "Entrada",
+      "date": "1856649600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330035",
+      "description": "Saldo Inicial",
+      "amount": "133000.86",
+      "nature": "Entrada",
+      "date": "1856649600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330036",
+      "description": "Saldo Inicial",
+      "amount": "135197.45",
+      "nature": "Entrada",
+      "date": "1859241600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240036",
+      "description": "Saldo Inicial",
+      "amount": "-757514.02",
+      "nature": "Entrada",
+      "date": "1859241600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330037",
+      "description": "Saldo Inicial",
+      "amount": "137394.04",
+      "nature": "Entrada",
+      "date": "1861920000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240037",
+      "description": "Saldo Inicial",
+      "amount": "-791014.02",
+      "nature": "Entrada",
+      "date": "1861920000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330038",
+      "description": "Saldo Inicial",
+      "amount": "139590.63",
+      "nature": "Entrada",
+      "date": "1864598400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240038",
+      "description": "Saldo Inicial",
+      "amount": "-824514.02",
+      "nature": "Entrada",
+      "date": "1864598400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240039",
+      "description": "Saldo Inicial",
+      "amount": "-858014.02",
+      "nature": "Entrada",
+      "date": "1867017600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330039",
+      "description": "Saldo Inicial",
+      "amount": "141787.22",
+      "nature": "Entrada",
+      "date": "1867017600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330040",
+      "description": "Saldo Inicial",
+      "amount": "143983.81",
+      "nature": "Entrada",
+      "date": "1869696000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240040",
+      "description": "Saldo Inicial",
+      "amount": "-891514.02",
+      "nature": "Entrada",
+      "date": "1869696000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240041",
+      "description": "Saldo Inicial",
+      "amount": "-925014.02",
+      "nature": "Entrada",
+      "date": "1872288000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330041",
+      "description": "Saldo Inicial",
+      "amount": "146180.40",
+      "nature": "Entrada",
+      "date": "1872288000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240042",
+      "description": "Saldo Inicial",
+      "amount": "-958514.02",
+      "nature": "Entrada",
+      "date": "1874966400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330042",
+      "description": "Saldo Inicial",
+      "amount": "148376.99",
+      "nature": "Entrada",
+      "date": "1874966400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240043",
+      "description": "Saldo Inicial",
+      "amount": "-992014.02",
+      "nature": "Entrada",
+      "date": "1877558400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330043",
+      "description": "Saldo Inicial",
+      "amount": "150573.58",
+      "nature": "Entrada",
+      "date": "1877558400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240044",
+      "description": "Saldo Inicial",
+      "amount": "-1025514.02",
+      "nature": "Entrada",
+      "date": "1880236800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330044",
+      "description": "Saldo Inicial",
+      "amount": "152770.17",
+      "nature": "Entrada",
+      "date": "1880236800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240045",
+      "description": "Saldo Inicial",
+      "amount": "-1059014.02",
+      "nature": "Entrada",
+      "date": "1882915200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330045",
+      "description": "Saldo Inicial",
+      "amount": "154966.76",
+      "nature": "Entrada",
+      "date": "1882915200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240046",
+      "description": "Saldo Inicial",
+      "amount": "-1092514.02",
+      "nature": "Entrada",
+      "date": "1885507200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330046",
+      "description": "Saldo Inicial",
+      "amount": "157163.35",
+      "nature": "Entrada",
+      "date": "1885507200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240047",
+      "description": "Saldo Inicial",
+      "amount": "-1126014.02",
+      "nature": "Entrada",
+      "date": "1888185600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330047",
+      "description": "Saldo Inicial",
+      "amount": "159359.94",
+      "nature": "Entrada",
+      "date": "1888185600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240048",
+      "description": "Saldo Inicial",
+      "amount": "-1159514.02",
+      "nature": "Entrada",
+      "date": "1890777600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330048",
+      "description": "Saldo Inicial",
+      "amount": "161556.53",
+      "nature": "Entrada",
+      "date": "1890777600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330049",
+      "description": "Saldo Inicial",
+      "amount": "163753.12",
+      "nature": "Entrada",
+      "date": "1893456000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240049",
+      "description": "Saldo Inicial",
+      "amount": "-1193014.02",
+      "nature": "Entrada",
+      "date": "1893456000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330050",
+      "description": "Saldo Inicial",
+      "amount": "165949.71",
+      "nature": "Entrada",
+      "date": "1896134400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240050",
+      "description": "Saldo Inicial",
+      "amount": "-1226514.02",
+      "nature": "Entrada",
+      "date": "1896134400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330051",
+      "description": "Saldo Inicial",
+      "amount": "168146.30",
+      "nature": "Entrada",
+      "date": "1898553600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240051",
+      "description": "Saldo Inicial",
+      "amount": "-1260014.02",
+      "nature": "Entrada",
+      "date": "1898553600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240052",
+      "description": "Saldo Inicial",
+      "amount": "-1293514.02",
+      "nature": "Entrada",
+      "date": "1901232000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330052",
+      "description": "Saldo Inicial",
+      "amount": "170342.89",
+      "nature": "Entrada",
+      "date": "1901232000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330053",
+      "description": "Saldo Inicial",
+      "amount": "172539.48",
+      "nature": "Entrada",
+      "date": "1903824000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240053",
+      "description": "Saldo Inicial",
+      "amount": "-1327014.02",
+      "nature": "Entrada",
+      "date": "1903824000000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240054",
+      "description": "Saldo Inicial",
+      "amount": "-1360514.02",
+      "nature": "Entrada",
+      "date": "1906502400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330054",
+      "description": "Saldo Inicial",
+      "amount": "174736.07",
+      "nature": "Entrada",
+      "date": "1906502400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240055",
+      "description": "Saldo Inicial",
+      "amount": "-1394014.02",
+      "nature": "Entrada",
+      "date": "1909094400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330055",
+      "description": "Saldo Inicial",
+      "amount": "176932.66",
+      "nature": "Entrada",
+      "date": "1909094400000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240056",
+      "description": "Saldo Inicial",
+      "amount": "-1427514.02",
+      "nature": "Entrada",
+      "date": "1911772800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330056",
+      "description": "Saldo Inicial",
+      "amount": "179129.25",
+      "nature": "Entrada",
+      "date": "1911772800000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240057",
+      "description": "Saldo Inicial",
+      "amount": "-1461014.02",
+      "nature": "Entrada",
+      "date": "1914451200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330057",
+      "description": "Saldo Inicial",
+      "amount": "181325.84",
+      "nature": "Entrada",
+      "date": "1914451200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240058",
+      "description": "Saldo Inicial",
+      "amount": "-1494514.02",
+      "nature": "Entrada",
+      "date": "1917043200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330058",
+      "description": "Saldo Inicial",
+      "amount": "183522.43",
+      "nature": "Entrada",
+      "date": "1917043200000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240059",
+      "description": "Saldo Inicial",
+      "amount": "-1528014.02",
+      "nature": "Entrada",
+      "date": "1919721600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330059",
+      "description": "Saldo Inicial",
+      "amount": "185719.02",
+      "nature": "Entrada",
+      "date": "1919721600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "240060",
+      "description": "Saldo Inicial",
+      "amount": "-1561514.02",
+      "nature": "Entrada",
+      "date": "1922313600000",
+      "isPaid": "1"
+    },
+    {
+      "id": "330060",
+      "description": "Saldo Inicial",
+      "amount": "187915.61",
+      "nature": "Entrada",
+      "date": "1922313600000",
+      "isPaid": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tnature\tdate\tisPaid\n16\tSaldo Inicial\t1981.05\tEntrada\t1767225600000\t1\n330001\tSaldo Inicial\t3397.21\tEntrada\t1767225600000\t1\n240002\tSaldo Inicial\t1957.69\tEntrada\t1769904000000\t1\n240003\tSaldo Inicial\t4926.58\tEntrada\t1772323200000\t1\n330003\tSaldo Inicial\t37583.58\tEntrada\t1772323200000\t1\n240004\tSaldo Inicial\t5812.52\tEntrada\t1775001600000\t1\n330004\tSaldo Inicial\t40492.81\tEntrada\t1775001600000\t1\n330005\tSaldo Inicial\t43402.04\tEntrada\t1777593600000\t1\n240005\tSaldo Inicial\t6698.46\tEntrada\t1777593600000\t1\n240006\tSaldo Inicial\t7484.40\tEntrada\t1780272000000\t1\n330006\tSaldo Inicial\t46311.27\tEntrada\t1780272000000\t1\n240007\tSaldo Inicial\t8270.34\tEntrada\t1782864000000\t1\n330007\tSaldo Inicial\t49220.50\tEntrada\t1782864000000\t1\n330008\tSaldo Inicial\t52129.73\tEntrada\t1785542400000\t1\n240008\tSaldo Inicial\t9056.28\tEntrada\t1785542400000\t1\n240009\tSaldo Inicial\t9842.22\tEntrada\t1788220800000\t1\n330009\tSaldo Inicial\t55038.96\tEntrada\t1788220800000\t1\n330010\tSaldo Inicial\t57948.19\tEntrada\t1790812800000\t1\n240010\tSaldo Inicial\t10628.16\tEntrada\t1790812800000\t1\n330011\tSaldo Inicial\t60857.42\tEntrada\t1793491200000\t1\n240011\tSaldo Inicial\t11414.10\tEntrada\t1793491200000\t1\n240012\tSaldo Inicial\t12200.04\tEntrada\t1796083200000\t1\n330012\tSaldo Inicial\t63766.65\tEntrada\t1796083200000\t1\n240013\tSaldo Inicial\t12985.98\tEntrada\t1798761600000\t1\n330013\tSaldo Inicial\t66675.88\tEntrada\t1798761600000\t1\n240014\tSaldo Inicial\t-20514.02\tEntrada\t1801440000000\t1\n330014\tSaldo Inicial\t69872.47\tEntrada\t1801440000000\t1\n240015\tSaldo Inicial\t-54014.02\tEntrada\t1803859200000\t1\n330015\tSaldo Inicial\t73069.06\tEntrada\t1803859200000\t1\n240016\tSaldo Inicial\t-87514.02\tEntrada\t1806537600000\t1\n330016\tSaldo Inicial\t76265.65\tEntrada\t1806537600000\t1\n330017\tSaldo Inicial\t79462.24\tEntrada\t1809129600000\t1\n240017\tSaldo Inicial\t-121014.02\tEntrada\t1809129600000\t1\n240018\tSaldo Inicial\t-154514.02\tEntrada\t1811808000000\t1\n330018\tSaldo Inicial\t82658.83\tEntrada\t1811808000000\t1\n240019\tSaldo Inicial\t-188014.02\tEntrada\t1814400000000\t1\n330019\tSaldo Inicial\t85855.42\tEntrada\t1814400000000\t1\n240020\tSaldo Inicial\t-221514.02\tEntrada\t1817078400000\t1\n330020\tSaldo Inicial\t89052.01\tEntrada\t1817078400000\t1\n330021\tSaldo Inicial\t92248.60\tEntrada\t1819756800000\t1\n240021\tSaldo Inicial\t-255014.02\tEntrada\t1819756800000\t1\n240022\tSaldo Inicial\t-288514.02\tEntrada\t1822348800000\t1\n330022\tSaldo Inicial\t95445.19\tEntrada\t1822348800000\t1\n240023\tSaldo Inicial\t-322014.02\tEntrada\t1825027200000\t1\n330023\tSaldo Inicial\t98641.78\tEntrada\t1825027200000\t1\n240024\tSaldo Inicial\t-355514.02\tEntrada\t1827619200000\t1\n330024\tSaldo Inicial\t101838.37\tEntrada\t1827619200000\t1\n330025\tSaldo Inicial\t105034.96\tEntrada\t1830297600000\t1\n240025\tSaldo Inicial\t-389014.02\tEntrada\t1830297600000\t1\n240026\tSaldo Inicial\t-422514.02\tEntrada\t1832976000000\t1\n330026\tSaldo Inicial\t108231.55\tEntrada\t1832976000000\t1\n330027\tSaldo Inicial\t111428.14\tEntrada\t1835481600000\t1\n240027\tSaldo Inicial\t-456014.02\tEntrada\t1835481600000\t1\n330028\tSaldo Inicial\t114624.73\tEntrada\t1838160000000\t1\n240028\tSaldo Inicial\t-489514.02\tEntrada\t1838160000000\t1\n330029\tSaldo Inicial\t117821.32\tEntrada\t1840752000000\t1\n240029\tSaldo Inicial\t-523014.02\tEntrada\t1840752000000\t1\n240030\tSaldo Inicial\t-556514.02\tEntrada\t1843430400000\t1\n330030\tSaldo Inicial\t121017.91\tEntrada\t1843430400000\t1\n330031\tSaldo Inicial\t124214.50\tEntrada\t1846022400000\t1\n240031\tSaldo Inicial\t-590014.02\tEntrada\t1846022400000\t1\n240032\tSaldo Inicial\t-623514.02\tEntrada\t1848700800000\t1\n330032\tSaldo Inicial\t126411.09\tEntrada\t1848700800000\t1\n240033\tSaldo Inicial\t-657014.02\tEntrada\t1851379200000\t1\n330033\tSaldo Inicial\t128607.68\tEntrada\t1851379200000\t1\n330034\tSaldo Inicial\t130804.27\tEntrada\t1853971200000\t1\n240034\tSaldo Inicial\t-690514.02\tEntrada\t1853971200000\t1\n240035\tSaldo Inicial\t-724014.02\tEntrada\t1856649600000\t1\n330035\tSaldo Inicial\t133000.86\tEntrada\t1856649600000\t1\n330036\tSaldo Inicial\t135197.45\tEntrada\t1859241600000\t1\n240036\tSaldo Inicial\t-757514.02\tEntrada\t1859241600000\t1\n330037\tSaldo Inicial\t137394.04\tEntrada\t1861920000000\t1\n240037\tSaldo Inicial\t-791014.02\tEntrada\t1861920000000\t1\n330038\tSaldo Inicial\t139590.63\tEntrada\t1864598400000\t1\n240038\tSaldo Inicial\t-824514.02\tEntrada\t1864598400000\t1\n240039\tSaldo Inicial\t-858014.02\tEntrada\t1867017600000\t1\n330039\tSaldo Inicial\t141787.22\tEntrada\t1867017600000\t1\n330040\tSaldo Inicial\t143983.81\tEntrada\t1869696000000\t1\n240040\tSaldo Inicial\t-891514.02\tEntrada\t1869696000000\t1\n240041\tSaldo Inicial\t-925014.02\tEntrada\t1872288000000\t1\n330041\tSaldo Inicial\t146180.40\tEntrada\t1872288000000\t1\n240042\tSaldo Inicial\t-958514.02\tEntrada\t1874966400000\t1\n330042\tSaldo Inicial\t148376.99\tEntrada\t1874966400000\t1\n240043\tSaldo Inicial\t-992014.02\tEntrada\t1877558400000\t1\n330043\tSaldo Inicial\t150573.58\tEntrada\t1877558400000\t1\n240044\tSaldo Inicial\t-1025514.02\tEntrada\t1880236800000\t1\n330044\tSaldo Inicial\t152770.17\tEntrada\t1880236800000\t1\n240045\tSaldo Inicial\t-1059014.02\tEntrada\t1882915200000\t1\n330045\tSaldo Inicial\t154966.76\tEntrada\t1882915200000\t1\n240046\tSaldo Inicial\t-1092514.02\tEntrada\t1885507200000\t1\n330046\tSaldo Inicial\t157163.35\tEntrada\t1885507200000\t1\n240047\tSaldo Inicial\t-1126014.02\tEntrada\t1888185600000\t1\n330047\tSaldo Inicial\t159359.94\tEntrada\t1888185600000\t1\n240048\tSaldo Inicial\t-1159514.02\tEntrada\t1890777600000\t1\n330048\tSaldo Inicial\t161556.53\tEntrada\t1890777600000\t1\n330049\tSaldo Inicial\t163753.12\tEntrada\t1893456000000\t1\n240049\tSaldo Inicial\t-1193014.02\tEntrada\t1893456000000\t1\n330050\tSaldo Inicial\t165949.71\tEntrada\t1896134400000\t1\n240050\tSaldo Inicial\t-1226514.02\tEntrada\t1896134400000\t1\n330051\tSaldo Inicial\t168146.30\tEntrada\t1898553600000\t1\n240051\tSaldo Inicial\t-1260014.02\tEntrada\t1898553600000\t1\n240052\tSaldo Inicial\t-1293514.02\tEntrada\t1901232000000\t1\n330052\tSaldo Inicial\t170342.89\tEntrada\t1901232000000\t1\n330053\tSaldo Inicial\t172539.48\tEntrada\t1903824000000\t1\n240053\tSaldo Inicial\t-1327014.02\tEntrada\t1903824000000\t1\n240054\tSaldo Inicial\t-1360514.02\tEntrada\t1906502400000\t1\n330054\tSaldo Inicial\t174736.07\tEntrada\t1906502400000\t1\n240055\tSaldo Inicial\t-1394014.02\tEntrada\t1909094400000\t1\n330055\tSaldo Inicial\t176932.66\tEntrada\t1909094400000\t1\n240056\tSaldo Inicial\t-1427514.02\tEntrada\t1911772800000\t1\n330056\tSaldo Inicial\t179129.25\tEntrada\t1911772800000\t1\n240057\tSaldo Inicial\t-1461014.02\tEntrada\t1914451200000\t1\n330057\tSaldo Inicial\t181325.84\tEntrada\t1914451200000\t1\n240058\tSaldo Inicial\t-1494514.02\tEntrada\t1917043200000\t1\n330058\tSaldo Inicial\t183522.43\tEntrada\t1917043200000\t1\n240059\tSaldo Inicial\t-1528014.02\tEntrada\t1919721600000\t1\n330059\tSaldo Inicial\t185719.02\tEntrada\t1919721600000\t1\n240060\tSaldo Inicial\t-1561514.02\tEntrada\t1922313600000\t1\n330060\tSaldo Inicial\t187915.61\tEntrada\t1922313600000\t1\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}
