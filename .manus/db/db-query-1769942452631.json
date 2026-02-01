@@ -1,0 +1,20 @@
+{
+  "query": "SELECT nature, COUNT(*) as total, SUM(CAST(amount AS DECIMAL(10,2))) as sum_amount\nFROM transactions \nWHERE isPaid = 1 AND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nGROUP BY nature;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT nature, COUNT(*) as total, SUM(CAST(amount AS DECIMAL(10,2))) as sum_amount\nFROM transactions \nWHERE isPaid = 1 AND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nGROUP BY nature;",
+  "rows": [
+    {
+      "nature": "Saída",
+      "total": "254",
+      "sum_amount": "127694.37"
+    },
+    {
+      "nature": "Entrada",
+      "total": "33",
+      "sum_amount": "198667.81"
+    }
+  ],
+  "messages": [],
+  "stdout": "nature\ttotal\tsum_amount\nSaída\t254\t127694.37\nEntrada\t33\t198667.81\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

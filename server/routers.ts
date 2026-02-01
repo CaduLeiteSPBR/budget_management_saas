@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
+import { sql } from "drizzle-orm";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -423,7 +424,7 @@ export const appRouter = router({
       return await db.getUserBalance(ctx.user.id);
     }),
 
-    // Fonte Única da Verdade: Cálculo de resumo financeiro no backend
+    // Fonte Única da Verdade: Cálculo de resumo financeiro no backend (SQL DIRETO)
     getFinancialSummary: protectedProcedure
       .input(z.object({
         selectedMonths: z.array(z.number()),
@@ -431,85 +432,68 @@ export const appRouter = router({
       }))
       .query(async ({ ctx, input }) => {
         const { selectedMonths, selectedYear } = input;
-        
-        // Buscar todas as transações do usuário
-        const allTransactions = await db.getUserTransactions(ctx.user.id);
+        const database = await db.getDb();
+        if (!database) throw new Error("Database not available");
         
         // Calcular fim do dia atual (23:59:59 UTC)
         const now = new Date();
         const endOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999);
         
-        console.log('[getFinancialSummary] Calculando resumo financeiro:', {
+        console.log('[getFinancialSummary] Calculando resumo financeiro (SQL DIRETO):', {
           userId: ctx.user.id,
           selectedMonths,
           selectedYear,
-          endOfToday: new Date(endOfToday).toISOString(),
-          totalTransactions: allTransactions.length
+          endOfToday: new Date(endOfToday).toISOString()
         });
         
-        // Filtrar transações pagas até hoje (23:59:59 UTC)
-        const paidTransactionsUntilToday = allTransactions.filter(t => t.isPaid && t.date <= endOfToday);
+        // SQL DIRETO: Calcular saldo atual (todas transações pagas até hoje)
+        const currentBalanceResult = await database.execute(sql`
+          SELECT 
+            SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as currentBalance,
+            COUNT(CASE WHEN nature = 'Entrada' THEN 1 END) as totalEntradas,
+            COUNT(CASE WHEN nature = 'Saída' THEN 1 END) as totalSaidas
+          FROM transactions
+          WHERE userId = ${ctx.user.id}
+          AND isPaid = 1
+          AND date <= ${endOfToday}
+        `);
         
-        console.log('[getFinancialSummary] Transações pagas até hoje:', {
-          count: paidTransactionsUntilToday.length,
-          transactions: paidTransactionsUntilToday.map(t => ({
-            id: t.id,
-            description: t.description,
-            amount: t.amount,
-            nature: t.nature,
-            date: new Date(t.date).toISOString(),
-            isPaid: t.isPaid
-          }))
-        });
+        const currentBalanceRow = (currentBalanceResult[0] as unknown as any[])[0] || {};
+        const currentBalance = Number(currentBalanceRow.currentBalance || 0);
         
-        // Calcular saldo atual (soma de todas as transações pagas até hoje)
-        const currentBalance = paidTransactionsUntilToday.reduce((sum, t) => {
-          const amount = Number(t.amount);
-          return sum + (t.nature === "Entrada" ? amount : -amount);
-        }, 0);
-        
-        console.log('[getFinancialSummary] Saldo atual calculado:', {
+        console.log('[getFinancialSummary] Saldo atual calculado (SQL DIRETO):', {
           currentBalance,
-          entradas: paidTransactionsUntilToday.filter(t => t.nature === "Entrada").length,
-          saidas: paidTransactionsUntilToday.filter(t => t.nature === "Saída").length
+          entradas: currentBalanceRow.totalEntradas || 0,
+          saidas: currentBalanceRow.totalSaidas || 0
         });
         
-        // Filtrar transações do período selecionado
-        const periodTransactions = allTransactions.filter(t => {
-          const tDate = new Date(t.date);
-          const tMonth = tDate.getUTCMonth() + 1;
-          const tYear = tDate.getUTCFullYear();
-          return selectedMonths.includes(tMonth) && tYear === selectedYear;
-        });
+        // SQL DIRETO: Calcular entradas e saídas do período selecionado
+        const startOfPeriod = Date.UTC(selectedYear, selectedMonths[0] - 1, 1, 0, 0, 0, 0);
+        const endOfPeriod = Date.UTC(selectedYear, selectedMonths[selectedMonths.length - 1], 0, 23, 59, 59, 999);
         
-        console.log('[getFinancialSummary] Transações do período:', {
-          count: periodTransactions.length,
-          period: `${selectedMonths.join(', ')}/${selectedYear}`
-        });
+        const periodResult = await database.execute(sql`
+          SELECT 
+            SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE 0 END) as periodIncome,
+            SUM(CASE WHEN nature = 'Saída' THEN CAST(amount AS DECIMAL(10,2)) ELSE 0 END) as periodExpense,
+            COUNT(*) as periodTransactionsCount
+          FROM transactions
+          WHERE userId = ${ctx.user.id}
+          AND date >= ${startOfPeriod}
+          AND date <= ${endOfPeriod}
+        `);
         
-        // Calcular entradas e saídas do período
-        const periodIncome = periodTransactions
-          .filter(t => t.nature === "Entrada")
-          .reduce((sum, t) => sum + Number(t.amount), 0);
+        const periodRow = (periodResult[0] as unknown as any[])[0] || {};
+        const periodIncome = Number(periodRow.periodIncome || 0);
+        const periodExpense = Number(periodRow.periodExpense || 0);
+        const endOfPeriodBalance = periodIncome - periodExpense;
+        const periodTransactionsCount = Number(periodRow.periodTransactionsCount || 0);
         
-        const periodExpense = periodTransactions
-          .filter(t => t.nature === "Saída")
-          .reduce((sum, t) => sum + Number(t.amount), 0);
-        
-        // Calcular saldo no fim do período (saldo progressivo)
-        const sortedPeriodTransactions = periodTransactions.slice().sort((a, b) => a.date - b.date);
-        let endOfPeriodBalance = 0;
-        sortedPeriodTransactions.forEach((t) => {
-          const amount = Number(t.amount);
-          endOfPeriodBalance += t.nature === "Entrada" ? amount : -amount;
-        });
-        
-        console.log('[getFinancialSummary] Resumo final:', {
+        console.log('[getFinancialSummary] Resumo final (SQL DIRETO):', {
           currentBalance,
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
-          periodTransactionsCount: periodTransactions.length
+          periodTransactionsCount
         });
         
         return {
@@ -517,9 +501,52 @@ export const appRouter = router({
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
-          periodTransactionsCount: periodTransactions.length
+          periodTransactionsCount
         };
       }),
+
+    // DEBUG: Listar TODAS as transações pagas até hoje (SQL DIRETO)
+    getAllPaidTransactions: protectedProcedure.query(async ({ ctx }) => {
+      const database = await db.getDb();
+      if (!database) throw new Error("Database not available");
+      
+      const now = new Date();
+      const endOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999);
+      
+      console.log('[getAllPaidTransactions] Buscando todas transações pagas até hoje (SQL DIRETO)');
+      
+      const result = await database.execute(sql`
+        SELECT 
+          t.id,
+          t.description,
+          t.amount,
+          t.nature,
+          t.date,
+          t.isPaid,
+          c.name as categoryName
+        FROM transactions t
+        LEFT JOIN categories c ON t.categoryId = c.id
+        WHERE t.userId = ${ctx.user.id}
+        AND t.isPaid = 1
+        AND t.date <= ${endOfToday}
+        ORDER BY CAST(t.amount AS DECIMAL(10,2)) DESC
+      `);
+      
+      const transactions = result[0] as unknown as any[];
+      
+      console.log('[getAllPaidTransactions] Total encontrado:', transactions.length);
+      
+      return transactions.map((t: any) => ({
+        id: t.id,
+        description: t.description,
+        amount: t.amount,
+        nature: t.nature,
+        date: t.date,
+        isPaid: t.isPaid,
+        categoryName: t.categoryName || 'Sem categoria',
+        dateReadable: new Date(t.date).toLocaleDateString('pt-BR')
+      }));
+    }),
 
     // Inicializar saldos iniciais automáticos (Fev/2026 - Dez/2030)
     initializeBalances: protectedProcedure.mutation(async ({ ctx }) => {

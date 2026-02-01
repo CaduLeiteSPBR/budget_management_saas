@@ -561,3 +561,23 @@
 - [x] Substituir por trpc.transactions.getFinancialSummary.useQuery()
 - [ ] Validar com Excel (R$ 30.259,92 esperado) - aguardando teste do usuário
 - [ ] Analisar logs do backend para identificar divergência
+
+
+## Correção: Saldo Inicial Duplicado no Dia 01/02/2026
+- [ ] Identificado problema: Dois lançamentos de "Saldo Inicial" no dia 01/02
+- [ ] ID 330002: R$ 34.674,35 (duplicado, a ser excluído)
+- [ ] ID 240002: R$ 1.957,69 (correto, manter)
+- [ ] Excluir ID 330002 via SQL DELETE
+- [ ] Validar saldo corrigido: R$ 30.259,92 (esperado no Excel)
+
+
+## Implementação: SQL Direto + Aba Debug Saldo
+- [x] Modificar getFinancialSummary para usar SQL direto (sem Drizzle ORM)
+- [x] Criar procedure getAllPaidTransactions (retorna TODAS transações pagas até hoje)
+- [x] Criar aba "Debug Saldo" no Dashboard
+- [x] Listar transações: ID, Descrição, Valor, Natureza, Data, Categoria
+- [x] Ordenar por valor decrescente
+- [x] Adicionar botão de exclusão individual para cada transação
+- [x] Criar componente DebugSaldoTab com tabela completa
+- [x] Adicionar resumo: Total transações, Entradas, Saídas, Saldo Calculado
+- [ ] Identificar e remover transações fantasmagóricas (aguardando validação do usuário)

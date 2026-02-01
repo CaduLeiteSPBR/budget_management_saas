@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as total_sem_categoria\nFROM transactions \nWHERE isPaid = 1 \nAND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nAND categoryId IS NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT COUNT(*) as total_sem_categoria\nFROM transactions \nWHERE isPaid = 1 \nAND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nAND categoryId IS NULL;",
+  "rows": [
+    {
+      "total_sem_categoria": "6"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_sem_categoria\n6\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

@@ -1,0 +1,98 @@
+{
+  "query": "SELECT id, description, amount, nature, isPaid, FROM_UNIXTIME(date/1000) as date_readable \nFROM transactions \nWHERE date >= UNIX_TIMESTAMP('2026-02-01 00:00:00') * 1000 \nAND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nORDER BY amount DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT id, description, amount, nature, isPaid, FROM_UNIXTIME(date/1000) as date_readable \nFROM transactions \nWHERE date >= UNIX_TIMESTAMP('2026-02-01 00:00:00') * 1000 \nAND date <= UNIX_TIMESTAMP('2026-02-01 23:59:59') * 1000\nORDER BY amount DESC;",
+  "rows": [
+    {
+      "id": "330002",
+      "description": "Saldo Inicial",
+      "amount": "34674.35",
+      "nature": "Entrada",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "30002",
+      "description": "Salário (2/12)",
+      "amount": "32888.10",
+      "nature": "Entrada",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "30038",
+      "description": "Condomínio (2/12)",
+      "amount": "9928.67",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "60100",
+      "description": "Líquido Proporcional Férias - Resgate",
+      "amount": "7500.00",
+      "nature": "Entrada",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "240002",
+      "description": "Saldo Inicial",
+      "amount": "1957.69",
+      "nature": "Entrada",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "60003",
+      "description": "Prevent Senior (2/12)",
+      "amount": "1281.41",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "20",
+      "description": "Van Helô (2/12)",
+      "amount": "645.00",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "210001",
+      "description": "Reembolso Five9",
+      "amount": "343.49",
+      "nature": "Entrada",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "30014",
+      "description": "Loja (2/12)",
+      "amount": "220.00",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "30026",
+      "description": "Vivo Internet e Celular (2/12)",
+      "amount": "206.00",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    },
+    {
+      "id": "60039",
+      "description": "Claro - Celular Corporativo (2/12)",
+      "amount": "148.28",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date_readable": "2026-02-01 00:00:00.0000"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tnature\tisPaid\tdate_readable\n330002\tSaldo Inicial\t34674.35\tEntrada\t1\t2026-02-01 00:00:00.0000\n30002\tSalário (2/12)\t32888.10\tEntrada\t1\t2026-02-01 00:00:00.0000\n30038\tCondomínio (2/12)\t9928.67\tSaída\t1\t2026-02-01 00:00:00.0000\n60100\tLíquido Proporcional Férias - Resgate\t7500.00\tEntrada\t1\t2026-02-01 00:00:00.0000\n240002\tSaldo Inicial\t1957.69\tEntrada\t1\t2026-02-01 00:00:00.0000\n60003\tPrevent Senior (2/12)\t1281.41\tSaída\t1\t2026-02-01 00:00:00.0000\n20\tVan Helô (2/12)\t645.00\tSaída\t1\t2026-02-01 00:00:00.0000\n210001\tReembolso Five9\t343.49\tEntrada\t1\t2026-02-01 00:00:00.0000\n30014\tLoja (2/12)\t220.00\tSaída\t1\t2026-02-01 00:00:00.0000\n30026\tVivo Internet e Celular (2/12)\t206.00\tSaída\t1\t2026-02-01 00:00:00.0000\n60039\tClaro - Celular Corporativo (2/12)\t148.28\tSaída\t1\t2026-02-01 00:00:00.0000\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}
