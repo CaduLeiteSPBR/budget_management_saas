@@ -510,7 +510,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                       <TableCell>
                         <Badge
                           variant={transaction.nature === "Entrada" ? "default" : "destructive"}
-                          className={transaction.nature === "Entrada" ? "bg-income hover:bg-income" : "bg-expense hover:bg-expense"}
+                          className={transaction.nature === "Entrada" ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
                         >
                           {transaction.nature === "Entrada" ? (
                             <ArrowUpCircle className="w-3 h-3 mr-1" />
@@ -542,12 +542,12 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                         )}
                       </TableCell>
                       <TableCell className="text-right font-semibold">
-                        <span className={transaction.nature === "Entrada" ? "text-income" : "text-expense"}>
+                        <span className={transaction.nature === "Entrada" ? "text-green-600" : "text-red-600"}>
                           {formatCurrency(transaction.amount)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right font-bold">
-                        <span className={transaction.balance >= 0 ? "text-income" : "text-expense"}>
+                        <span className={transaction.balance >= 0 ? "text-green-600" : "text-red-600"}>
                           {formatCurrency(transaction.balance)}
                         </span>
                       </TableCell>

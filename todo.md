@@ -632,3 +632,12 @@
 - [x] Modificar lógica: buscar Saldo Inicial do início do ano (01/01), não o mais recente
 - [x] Somar TODAS as movimentações desde 01/01 até hoje
 - [x] Validar saldo final: R$ 30.259,92 ✅ (CORRETO!)
+
+
+## Padronização: Identidade Visual (Cores de Natureza)
+- [x] Aplicar cores nos valores do TransactionsList: text-green-600 (Entrada), text-red-600 (Saída)
+- [x] Aplicar cores nos badges de natureza: bg-green-600 (Entrada), bg-red-600 (Saída)
+- [x] Ícones ArrowUpCircle/ArrowDownCircle ficam brancos dentro dos badges coloridos
+- [x] Preservar indicação de status de pagamento (pago/pendente)
+- [x] Remover aba "Debug Saldo" do Dashboard (import, TabsTrigger, TabsContent)
+- [x] Excluir componente DebugSaldoTab.tsx
