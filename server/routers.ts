@@ -446,22 +446,48 @@ export const appRouter = router({
           endOfToday: new Date(endOfToday).toISOString()
         });
         
-        // SQL DIRETO: Calcular saldo atual (todas transações pagas até hoje)
+        // SALDO PROGRESSIVO: Buscar Saldo Inicial mais recente
+        const saldoInicialResult = await database.execute(sql`
+          SELECT id, amount, date
+          FROM transactions
+          WHERE userId = ${ctx.user.id}
+          AND description LIKE '%Saldo Inicial%'
+          AND isPaid = 1
+          ORDER BY date DESC
+          LIMIT 1
+        `);
+        
+        const saldoInicial = (saldoInicialResult[0] as unknown as any[])[0] || null;
+        const saldoInicialValue = saldoInicial ? Number(saldoInicial.amount) : 0;
+        const saldoInicialDate = saldoInicial ? saldoInicial.date : 0;
+        
+        console.log('[getFinancialSummary] Saldo Inicial encontrado:', {
+          id: saldoInicial?.id || 'N/A',
+          valor: saldoInicialValue,
+          data: saldoInicial ? new Date(saldoInicialDate).toISOString() : 'N/A'
+        });
+        
+        // SQL DIRETO: Calcular saldo atual = Saldo Inicial + (Entradas - Saídas) >= data do Saldo Inicial
         const currentBalanceResult = await database.execute(sql`
           SELECT 
-            SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as currentBalance,
+            SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao,
             COUNT(CASE WHEN nature = 'Entrada' THEN 1 END) as totalEntradas,
             COUNT(CASE WHEN nature = 'Saída' THEN 1 END) as totalSaidas
           FROM transactions
           WHERE userId = ${ctx.user.id}
           AND isPaid = 1
+          AND date >= ${saldoInicialDate}
           AND date <= ${endOfToday}
+          AND description NOT LIKE '%Saldo Inicial%'
         `);
         
         const currentBalanceRow = (currentBalanceResult[0] as unknown as any[])[0] || {};
-        const currentBalance = Number(currentBalanceRow.currentBalance || 0);
+        const movimentacao = Number(currentBalanceRow.movimentacao || 0);
+        const currentBalance = saldoInicialValue + movimentacao;
         
-        console.log('[getFinancialSummary] Saldo atual calculado (SQL DIRETO):', {
+        console.log('[getFinancialSummary] Saldo atual calculado (PROGRESSIVO):', {
+          saldoInicial: saldoInicialValue,
+          movimentacao,
           currentBalance,
           entradas: currentBalanceRow.totalEntradas || 0,
           saidas: currentBalanceRow.totalSaidas || 0

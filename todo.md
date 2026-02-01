@@ -610,3 +610,14 @@
 - [x] Recalcular Saldo Atual após limpeza: R$ -32.341,67 (NEGATIVO!)
 - [x] Listar 5 maiores Entradas/Saídas de Jan/Fev
 - [ ] Aguardando validação do usuário sobre divergência
+
+
+## Correção: Lógica de Saldo Progressivo
+- [x] Identificar Saldo Inicial mais recente (ID 240002, 01/02/2026)
+- [x] Modificar getFinancialSummary: Saldo Inicial + (Entradas - Saídas) >= data do Saldo Inicial
+- [x] Verificar data do Salário 2/12 (ID 30002) - já está em 01/02/2026 ✅
+- [x] Preservar todos os registros de Janeiro (histórico)
+- [x] Recalcular Saldo Atual com nova lógica
+- [x] Saldo Atual: R$ 28.016,98 (Saldo Inicial: R$ 1.957,69 + Movimentação: R$ 26.059,29)
+- [x] Entradas: 3 transações | Saídas: 6 transações
+- [ ] Diferença com Excel: R$ 2.242,94 (30.259,92 - 28.016,98) - aguardando validação

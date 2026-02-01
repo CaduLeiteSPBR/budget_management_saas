@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, description, amount, date, FROM_UNIXTIME(date/1000) as readable_date FROM transactions WHERE id = 30002;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT id, description, amount, date, FROM_UNIXTIME(date/1000) as readable_date FROM transactions WHERE id = 30002;",
+  "rows": [
+    {
+      "id": "30002",
+      "description": "Salário (2/12)",
+      "amount": "30645.16",
+      "date": "1769904000000",
+      "readable_date": "2026-02-01 00:00:00.0000"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tdate\treadable_date\n30002\tSalário (2/12)\t30645.16\t1769904000000\t2026-02-01 00:00:00.0000\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}
