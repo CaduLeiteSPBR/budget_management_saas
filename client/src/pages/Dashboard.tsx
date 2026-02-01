@@ -138,7 +138,13 @@ export default function Dashboard() {
   const periodBalance = periodIncome - periodExpense;
   
   // Calcular saldo atual (todas as transações pagas até hoje)
-  const currentBalance = transactions?.filter(t => t.isPaid && t.date <= Date.now())
+  // Usar fim do dia atual (23:59:59 UTC) para incluir todas as transações de hoje
+  const endOfToday = useMemo(() => {
+    const now = new Date();
+    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999);
+  }, []);
+  
+  const currentBalance = transactions?.filter(t => t.isPaid && t.date <= endOfToday)
     .reduce((sum, t) => sum + (t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount)), 0) || 0;
   
   // Calcular saldo no fim do mês (saldo progressivo das transações do período selecionado, ordenadas por data)

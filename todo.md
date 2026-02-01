@@ -540,3 +540,12 @@
 - [x] Garantir scroll único no nível da janela (window)
 - [x] Correção de indentação JSX após remoção de estrutura Flexbox
 - [x] Servidor reiniciado para aplicar mudanças
+
+
+## Bug: Dessincronização de Saldo no Widget de Resumo (Top Cards)
+- [x] Identificado problema: Widget usava Date.now() ao invés de fim do dia (23:59:59 UTC)
+- [x] Verificar invalidação de cache nas mutations (todas corretas: list + balance)
+- [x] Confirmar consistência de fuso horário UTC entre Widget e Lista
+- [x] Corrigir lógica de agregação: usar endOfToday (23:59:59 UTC) ao invés de Date.now()
+- [x] Widget agora inclui todas as transações do dia atual (até 23:59:59)
+- [ ] Testar sincronização após edição de data/valor de lançamento (aguardando validação)
