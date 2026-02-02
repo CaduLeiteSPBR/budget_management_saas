@@ -36,6 +36,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
   const [filterNature, setFilterNature] = useState<string>("all");
   const [filterDivision, setFilterDivision] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleteRecurringId, setDeleteRecurringId] = useState<number | null>(null);
@@ -226,6 +227,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     if (filterNature !== "all" && t.nature !== filterNature) return false;
     if (filterDivision !== "all" && t.division !== filterDivision) return false;
     if (filterType !== "all" && t.type !== filterType) return false;
+    if (filterCategory !== "all" && t.categoryName !== filterCategory) return false;
     if (searchTerm && !t.description.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   });
@@ -298,12 +300,13 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     };
   });
 
-  const hasActiveFilters = filterNature !== "all" || filterDivision !== "all" || filterType !== "all" || searchTerm;
+  const hasActiveFilters = filterNature !== "all" || filterDivision !== "all" || filterType !== "all" || filterCategory !== "all" || searchTerm;
 
   const clearFilters = () => {
     setFilterNature("all");
     setFilterDivision("all");
     setFilterType("all");
+    setFilterCategory("all");
     setSearchTerm("");
   };
 
@@ -357,50 +360,87 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Input
-                placeholder="Buscar descrição..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="space-y-4">
+            {/* Linha 1: Busca + Botões */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Buscar descrição..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
 
-            <Select value={filterNature} onValueChange={setFilterNature}>
-              <SelectTrigger>
-                <SelectValue placeholder="Natureza" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="Entrada">Entradas</SelectItem>
-                <SelectItem value="Saída">Saídas</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Linha 2: Filtros alinhados com colunas da tabela */}
+            <div className="grid grid-cols-[1fr_120px_120px_120px_150px_1fr_1fr_80px] gap-4">
+              {/* Espaço para Data */}
+              <div></div>
+              
+              {/* Espaço para Descrição */}
+              <div></div>
 
-            <Select value={filterDivision} onValueChange={setFilterDivision}>
-              <SelectTrigger>
-                <SelectValue placeholder="Divisão" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="Pessoal">Pessoal</SelectItem>
-                <SelectItem value="Familiar">Familiar</SelectItem>
-                <SelectItem value="Investimento">Investimento</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Filtro Natureza (alinhado com coluna Natureza) */}
+              <Select value={filterNature} onValueChange={setFilterNature}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Natureza" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="Entrada">Entradas</SelectItem>
+                  <SelectItem value="Saída">Saídas</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="Essencial">Essencial</SelectItem>
-                <SelectItem value="Importante">Importante</SelectItem>
-                <SelectItem value="Conforto">Conforto</SelectItem>
-                <SelectItem value="Investimento">Investimento</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Filtro Divisão (alinhado com coluna Divisão) */}
+              <Select value={filterDivision} onValueChange={setFilterDivision}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Divisão" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="Pessoal">Pessoal</SelectItem>
+                  <SelectItem value="Familiar">Familiar</SelectItem>
+                  <SelectItem value="Investimento">Investimento</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Filtro Tipo (alinhado com coluna Tipo) */}
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="Essencial">Essencial</SelectItem>
+                  <SelectItem value="Importante">Importante</SelectItem>
+                  <SelectItem value="Conforto">Conforto</SelectItem>
+                  <SelectItem value="Investimento">Investimento</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Filtro Categoria (alinhado com coluna Categoria) */}
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {Array.from(new Set(transactions?.map(t => t.categoryName).filter(Boolean))).sort().map(category => (
+                    <SelectItem key={category} value={category!}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Espaço para Valor */}
+              <div></div>
+
+              {/* Espaço para Saldo */}
+              <div></div>
+
+              {/* Espaço para Ações */}
+              <div></div>
+            </div>
           </div>
 
           {/* Tabela */}

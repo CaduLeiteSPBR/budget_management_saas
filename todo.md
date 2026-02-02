@@ -641,3 +641,16 @@
 - [x] Preservar indicação de status de pagamento (pago/pendente)
 - [x] Remover aba "Debug Saldo" do Dashboard (import, TabsTrigger, TabsContent)
 - [x] Excluir componente DebugSaldoTab.tsx
+
+
+## Feature: Filtro por Categoria + Alinhamento Vertical
+- [x] Adicionar filtro "Categoria" na tela de Lançamentos (dropdown com todas as categorias)
+- [x] Extrair lista única de categorias das transações carregadas
+- [x] Aplicar filtro de categoria na query de transações (linha 230)
+- [x] Alinhar filtros verticalmente com colunas da tabela:
+  - [x] Filtro "Natureza" alinhado com coluna "Natureza"
+  - [x] Filtro "Divisão" alinhado com coluna "Divisão"
+  - [x] Filtro "Tipo" alinhado com coluna "Tipo"
+  - [x] Filtro "Categoria" alinhado com coluna "Categoria"
+- [x] Reorganizar layout: grid com colunas fixas [1fr_120px_120px_120px_150px_1fr_1fr_80px]
+- [x] Reduzir altura dos filtros (h-9) para melhor alinhamento visual
