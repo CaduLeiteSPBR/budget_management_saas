@@ -58,6 +58,46 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
     }
   });
 
+  // Distribuição por Categoria (Gráfico de Pizza)
+  const categoryMap = new Map<string, number>();
+  periodTransactions.forEach(t => {
+    if (t.nature === "Saída" && t.isPaid && t.categoryName) {
+      const current = categoryMap.get(t.categoryName) || 0;
+      categoryMap.set(t.categoryName, current + Number(t.amount));
+    }
+  });
+
+  // Paleta de cores para categorias (12 cores vibrantes)
+  const categoryColors = [
+    "#3b82f6", "#8b5cf6", "#10b981", "#ef4444", "#f59e0b", "#06b6d4",
+    "#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16", "#a855f7"
+  ];
+
+  const totalExpense = Array.from(categoryMap.values()).reduce((sum, val) => sum + val, 0);
+  let categoryData = Array.from(categoryMap.entries())
+    .map(([name, value], index) => ({
+      name,
+      value,
+      percentage: (value / totalExpense) * 100,
+      color: categoryColors[index % categoryColors.length]
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Agrupar categorias < 3% em "Outros"
+  const mainCategories = categoryData.filter(c => c.percentage >= 3);
+  const smallCategories = categoryData.filter(c => c.percentage < 3);
+  
+  if (smallCategories.length > 0) {
+    const othersValue = smallCategories.reduce((sum, c) => sum + c.value, 0);
+    const othersPercentage = (othersValue / totalExpense) * 100;
+    categoryData = [
+      ...mainCategories,
+      { name: "Outros", value: othersValue, percentage: othersPercentage, color: "#6b7280" }
+    ];
+  } else {
+    categoryData = mainCategories;
+  }
+
   // Projeção de 12 meses
   const now = new Date();
   const projectionData = [];
@@ -150,7 +190,7 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Distribuição por Divisão */}
         <Card className="glass border-border">
           <CardHeader>
@@ -169,7 +209,11 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value)}`}
+                  label={(entry) => {
+                    const total = divisionData.reduce((sum, d) => sum + d.value, 0);
+                    const percentage = ((entry.value / total) * 100).toFixed(1);
+                    return `${entry.name}: ${percentage}% - ${formatCurrency(entry.value)}`;
+                  }}
                 >
                   {divisionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -199,9 +243,43 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value)}`}
+                  label={(entry) => {
+                    const total = typeData.reduce((sum, d) => sum + d.value, 0);
+                    const percentage = ((entry.value / total) * 100).toFixed(1);
+                    return `${entry.name}: ${percentage}% - ${formatCurrency(entry.value)}`;
+                  }}
                 >
                   {typeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Distribuição por Categoria */}
+        <Card className="glass border-border">
+          <CardHeader>
+            <CardTitle>Distribuição por Categoria</CardTitle>
+            <CardDescription>Gastos pagos do mês atual por categoria</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={(entry) => `${entry.name}: ${entry.percentage.toFixed(1)}% - ${formatCurrency(entry.value)}`}
+                >
+                  {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>

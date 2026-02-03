@@ -654,3 +654,15 @@
   - [x] Filtro "Categoria" alinhado com coluna "Categoria"
 - [x] Reorganizar layout: grid com colunas fixas [1fr_120px_120px_120px_150px_1fr_1fr_80px]
 - [x] Reduzir altura dos filtros (h-9) para melhor alinhamento visual
+
+
+## Feature: Refinamento da Visão Geral - Gráfico de Categorias + Rótulos Melhorados
+- [x] Criar novo gráfico "Distribuição por Categoria" (pizza)
+- [x] Agrupar valores por category.name (consolidar categorias com mesmo nome)
+- [x] Filtrar apenas transações de Saída marcadas como Pagas no período
+- [x] Melhorar rótulos dos gráficos existentes (Divisão e Tipo)
+- [x] Exibir Nome + % + Valor nos rótulos (ex: "Moradia: 25% - R$ 2.500,00")
+- [x] Implementar agrupamento automático de categorias < 3% em "Outros" (cor cinza #6b7280)
+- [x] Aplicar mesma padronização de rótulos no gráfico de Categorias
+- [x] Manter paleta de cores consistente (12 cores vibrantes + cinza para Outros)
+- [x] Alterar layout para grid de 3 colunas (Divisão, Tipo, Categoria)
