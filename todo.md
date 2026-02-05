@@ -666,3 +666,10 @@
 - [x] Aplicar mesma padronização de rótulos no gráfico de Categorias
 - [x] Manter paleta de cores consistente (12 cores vibrantes + cinza para Outros)
 - [x] Alterar layout para grid de 3 colunas (Divisão, Tipo, Categoria)
+
+## Bug: Widgets não atualizam após criar/editar/excluir lançamentos
+- [x] Adicionar invalidação de getFinancialSummary nas mutations de create
+- [x] Adicionar invalidação de getFinancialSummary nas mutations de update
+- [x] Adicionar invalidação de getFinancialSummary nas mutations de delete
+- [x] Adicionar invalidação de getFinancialSummary nas mutations de deleteRecurringSeries
+- [x] Adicionar invalidação após importação de fatura (handleImportComplete)

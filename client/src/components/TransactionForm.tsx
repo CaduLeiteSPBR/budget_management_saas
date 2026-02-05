@@ -63,6 +63,7 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
       toast.success("Lançamento criado com sucesso!");
       utils.transactions.list.invalidate();
       utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
       resetForm();
       onSuccess?.();
     },
@@ -76,6 +77,7 @@ export default function TransactionForm({ transactionId, onSuccess, onCancel }: 
       toast.success("Lançamento atualizado com sucesso!");
       utils.transactions.list.invalidate();
       utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
       onSuccess?.();
     },
     onError: (error) => {

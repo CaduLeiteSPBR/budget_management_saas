@@ -63,6 +63,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
       toast.success("Lançamento excluído com sucesso!");
       utils.transactions.list.invalidate();
       utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
       setDeleteId(null);
     },
     onError: (error) => {
@@ -75,6 +76,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
       toast.success("Lançamento recorrente excluído com sucesso!");
       utils.transactions.list.invalidate();
       utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
       setDeleteRecurringId(null);
       setDeleteRecurringDescription("");
     },
@@ -88,6 +90,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
       toast.success(`Lançamento e ${result.deletedCount - 1} parcelas futuras removidas com sucesso!`);
       utils.transactions.list.invalidate();
       utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
       setDeleteRecurringId(null);
       setDeleteRecurringDescription("");
     },
@@ -155,6 +158,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     setImportBankName("");
     utils.transactions.list.invalidate();
     utils.transactions.balance.invalidate();
+    utils.transactions.getFinancialSummary.invalidate();
   };
 
   const handleImportCancel = () => {
