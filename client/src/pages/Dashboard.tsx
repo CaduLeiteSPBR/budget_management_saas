@@ -19,7 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Bug,
-  Trash2
+  Trash2,
+  TriangleAlert
 } from "lucide-react";
 import { Link } from "wouter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -126,10 +127,12 @@ export default function Dashboard() {
   );
 
   // Usar valores do backend (Fonte Única da Verdade)
+  const initialBalance = financialSummary?.initialBalance || 0;
   const currentBalance = financialSummary?.currentBalance || 0;
   const periodIncome = financialSummary?.periodIncome || 0;
   const periodExpense = financialSummary?.periodExpense || 0;
   const endOfPeriodBalance = financialSummary?.endOfPeriodBalance || 0;
+  const minimumBalance = financialSummary?.minimumBalance || 0;
   const periodBalance = periodIncome - periodExpense;
   
   // Filtrar transações do período para exibição na lista (apenas para UI)
@@ -317,25 +320,27 @@ export default function Dashboard() {
             </Button>
         </div>
         
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats Cards - 6 Widgets */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+          {/* 1. Saldo Inicial */}
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo Atual
+                Saldo Inicial
               </CardTitle>
               <Wallet className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(currentBalance)}
+                {formatCurrency(initialBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Saldo real até hoje
+                Início do período
               </p>
             </CardContent>
           </Card>
 
+          {/* 2. Entradas do Mês */}
           <Card className="glass border-income hover:border-income transition-all glow-income">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -353,6 +358,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+          {/* 3. Saídas do Mês */}
           <Card className="glass border-expense hover:border-expense transition-all glow-expense">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -370,6 +376,63 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+          {/* 4. Saldo Mínimo */}
+          <Card className={`glass transition-all ${
+            minimumBalance < 0 
+              ? 'border-red-500 border-2 animate-pulse' 
+              : 'border-border hover:border-primary/50'
+          }`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Saldo Mínimo
+              </CardTitle>
+              {minimumBalance < 0 ? (
+                <TriangleAlert className="w-4 h-4 text-red-500" />
+              ) : (
+                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                minimumBalance < 0 ? 'text-red-500' : ''
+              }`}>
+                {formatCurrency(minimumBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Menor saldo diário
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 5. Saldo Atual */}
+          <Card className={`glass transition-all ${
+            currentBalance < 0 
+              ? 'border-red-500 border-2 animate-pulse' 
+              : 'border-border hover:border-primary/50'
+          }`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Saldo Atual
+              </CardTitle>
+              {currentBalance < 0 ? (
+                <TriangleAlert className="w-4 h-4 text-red-500" />
+              ) : (
+                <Wallet className="w-4 h-4 text-muted-foreground" />
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${
+                currentBalance < 0 ? 'text-red-500' : ''
+              }`}>
+                {formatCurrency(currentBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Saldo real até hoje
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 6. Saldo no Fim do Mês */}
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">

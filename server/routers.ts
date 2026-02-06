@@ -516,19 +516,87 @@ export const appRouter = router({
         const endOfPeriodBalance = periodIncome - periodExpense;
         const periodTransactionsCount = Number(periodRow.periodTransactionsCount || 0);
         
+        // SQL DIRETO: Calcular Saldo Inicial do período (primeiro dia do primeiro mês selecionado)
+        const firstDayOfPeriod = Date.UTC(selectedYear, selectedMonths[0] - 1, 1, 0, 0, 0, 0);
+        
+        // Buscar todas as transações até o dia anterior ao período para calcular saldo inicial
+        const initialBalanceResult = await database.execute(sql`
+          SELECT 
+            SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao
+          FROM transactions
+          WHERE userId = ${ctx.user.id}
+          AND isPaid = 1
+          AND date < ${firstDayOfPeriod}
+        `);
+        
+        const initialBalanceRow = (initialBalanceResult[0] as unknown as any[])[0] || {};
+        const initialBalanceMovimentacao = Number(initialBalanceRow.movimentacao || 0);
+        const initialBalance = saldoInicialValue + initialBalanceMovimentacao;
+        
+        console.log('[getFinancialSummary] Saldo Inicial do período calculado:', {
+          firstDayOfPeriod: new Date(firstDayOfPeriod).toISOString(),
+          saldoInicialAno: saldoInicialValue,
+          movimentacaoAteInicioPeriodo: initialBalanceMovimentacao,
+          initialBalance
+        });
+        
+        // SQL DIRETO: Calcular Saldo Mínimo (menor saldo diário do período)
+        // Buscar todas as transações do período ordenadas por data
+        const transactionsForMinResult = await database.execute(sql`
+          SELECT 
+            date,
+            nature,
+            CAST(amount AS DECIMAL(10,2)) as amount
+          FROM transactions
+          WHERE userId = ${ctx.user.id}
+          AND isPaid = 1
+          AND date >= ${startOfPeriod}
+          AND date <= ${endOfPeriod}
+          ORDER BY date ASC, id ASC
+        `);
+        
+        const transactionsForMin = transactionsForMinResult[0] as unknown as any[];
+        
+        // Calcular saldo diário progressivo e encontrar o mínimo
+        let currentDayBalance = initialBalance;
+        let minimumBalance = initialBalance; // Começa com saldo inicial
+        
+        for (const tx of transactionsForMin) {
+          const amount = Number(tx.amount);
+          if (tx.nature === 'Entrada') {
+            currentDayBalance += amount;
+          } else {
+            currentDayBalance -= amount;
+          }
+          
+          if (currentDayBalance < minimumBalance) {
+            minimumBalance = currentDayBalance;
+          }
+        }
+        
+        console.log('[getFinancialSummary] Saldo Mínimo calculado:', {
+          initialBalance,
+          transacoesAnalisadas: transactionsForMin.length,
+          minimumBalance
+        });
+        
         console.log('[getFinancialSummary] Resumo final (SQL DIRETO):', {
+          initialBalance,
           currentBalance,
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
+          minimumBalance,
           periodTransactionsCount
         });
         
         return {
+          initialBalance,
           currentBalance,
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
+          minimumBalance,
           periodTransactionsCount
         };
       }),

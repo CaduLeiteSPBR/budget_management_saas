@@ -673,3 +673,11 @@
 - [x] Adicionar invalidação de getFinancialSummary nas mutations de delete
 - [x] Adicionar invalidação de getFinancialSummary nas mutations de deleteRecurringSeries
 - [x] Adicionar invalidação após importação de fatura (handleImportComplete)
+
+## Feature: Expansão de Widgets de Resumo (6 Cards)
+- [x] Adicionar cálculo de Saldo Inicial (primeiro dia do mês) no getFinancialSummary
+- [x] Adicionar cálculo de Saldo Mínimo (menor saldo diário do período) no getFinancialSummary
+- [x] Reorganizar layout para 6 widgets: Saldo Inicial, Entradas, Saídas, Saldo Mínimo, Saldo Atual, Saldo Fim do Mês
+- [x] Implementar alertas visuais para valores negativos (borda vermelha + ícone TriangleAlert)
+- [x] Ajustar grid responsivo para acomodar 6 cards (grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6)
+- [x] Testar cálculos com dados reais do usuário
