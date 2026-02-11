@@ -209,12 +209,34 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => {
+                  label={(props: any) => {
+                    const RADIAN = Math.PI / 180;
+                    const { cx, cy, midAngle, innerRadius, outerRadius, name, value } = props;
                     const total = divisionData.reduce((sum, d) => sum + d.value, 0);
-                    const percentage = ((entry.value / total) * 100).toFixed(1);
-                    return `${percentage}%`;
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    
+                    // Percentual dentro da pizza
+                    const radiusInner = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const xInner = cx + radiusInner * Math.cos(-midAngle * RADIAN);
+                    const yInner = cy + radiusInner * Math.sin(-midAngle * RADIAN);
+                    
+                    // Nome + Valor fora da pizza
+                    const radiusOuter = outerRadius + 30;
+                    const xOuter = cx + radiusOuter * Math.cos(-midAngle * RADIAN);
+                    const yOuter = cy + radiusOuter * Math.sin(-midAngle * RADIAN);
+                    
+                    return (
+                      <>
+                        <text x={xInner} y={yInner} fill="white" textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="bold">
+                          {percentage}%
+                        </text>
+                        <text x={xOuter} y={yOuter} fill="currentColor" textAnchor={xOuter > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12">
+                          {name}: {formatCurrency(value)}
+                        </text>
+                      </>
+                    );
                   }}
-                  labelLine={false}
+                  labelLine={true}
                 >
                   {divisionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -223,14 +245,6 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)} 
                   labelFormatter={(name) => `${name}`}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value, entry: any) => {
-                    const percentage = entry.payload?.percentage || 0;
-                    return `${value} (${percentage.toFixed(1)}%)`;
-                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -255,12 +269,34 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => {
+                  label={(props: any) => {
+                    const RADIAN = Math.PI / 180;
+                    const { cx, cy, midAngle, innerRadius, outerRadius, name, value } = props;
                     const total = typeData.reduce((sum, d) => sum + d.value, 0);
-                    const percentage = ((entry.value / total) * 100).toFixed(1);
-                    return `${percentage}%`;
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    
+                    // Percentual dentro da pizza
+                    const radiusInner = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const xInner = cx + radiusInner * Math.cos(-midAngle * RADIAN);
+                    const yInner = cy + radiusInner * Math.sin(-midAngle * RADIAN);
+                    
+                    // Nome + Valor fora da pizza
+                    const radiusOuter = outerRadius + 30;
+                    const xOuter = cx + radiusOuter * Math.cos(-midAngle * RADIAN);
+                    const yOuter = cy + radiusOuter * Math.sin(-midAngle * RADIAN);
+                    
+                    return (
+                      <>
+                        <text x={xInner} y={yInner} fill="white" textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="bold">
+                          {percentage}%
+                        </text>
+                        <text x={xOuter} y={yOuter} fill="currentColor" textAnchor={xOuter > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12">
+                          {name}: {formatCurrency(value)}
+                        </text>
+                      </>
+                    );
                   }}
-                  labelLine={false}
+                  labelLine={true}
                 >
                   {typeData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -269,14 +305,6 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)} 
                   labelFormatter={(name) => `${name}`}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value, entry: any) => {
-                    const percentage = entry.payload?.percentage || 0;
-                    return `${value} (${percentage.toFixed(1)}%)`;
-                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -301,8 +329,32 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => `${entry.percentage.toFixed(1)}%`}
-                  labelLine={false}
+                  label={(props: any) => {
+                    const RADIAN = Math.PI / 180;
+                    const { cx, cy, midAngle, innerRadius, outerRadius, name, value, percentage } = props;
+                    
+                    // Percentual dentro da pizza
+                    const radiusInner = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const xInner = cx + radiusInner * Math.cos(-midAngle * RADIAN);
+                    const yInner = cy + radiusInner * Math.sin(-midAngle * RADIAN);
+                    
+                    // Nome + Valor fora da pizza
+                    const radiusOuter = outerRadius + 30;
+                    const xOuter = cx + radiusOuter * Math.cos(-midAngle * RADIAN);
+                    const yOuter = cy + radiusOuter * Math.sin(-midAngle * RADIAN);
+                    
+                    return (
+                      <>
+                        <text x={xInner} y={yInner} fill="white" textAnchor="middle" dominantBaseline="central" fontSize="14" fontWeight="bold">
+                          {percentage.toFixed(1)}%
+                        </text>
+                        <text x={xOuter} y={yOuter} fill="currentColor" textAnchor={xOuter > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12">
+                          {name}: {formatCurrency(value)}
+                        </text>
+                      </>
+                    );
+                  }}
+                  labelLine={true}
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -311,14 +363,6 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)} 
                   labelFormatter={(name) => `${name}`}
-                />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value, entry: any) => {
-                    const percentage = entry.payload?.percentage || 0;
-                    return `${value} (${percentage.toFixed(1)}%)`;
-                  }}
                 />
               </PieChart>
             </ResponsiveContainer>

@@ -686,3 +686,8 @@
 - [x] Adicionar botão de recalcular widgets à direita do seletor de período no Dashboard
 - [x] Ajustar gráficos de pizza para exibir percentuais dentro do gráfico (não na label externa)
 - [x] Melhorar legenda dos gráficos de pizza para se ajustar dinamicamente (Legend com nome + percentual)
+
+## Bug: Gráficos de pizza com layout incorreto
+- [x] Mover percentuais para DENTRO das fatias da pizza (usando label customizado com cálculo trigonométrico)
+- [x] Alterar labels externas para mostrar "Nome: R$ Valor" em vez de percentuais
+- [x] Remover componente Legend da parte inferior dos 3 gráficos
