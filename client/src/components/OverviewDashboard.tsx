@@ -212,14 +212,26 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   label={(entry) => {
                     const total = divisionData.reduce((sum, d) => sum + d.value, 0);
                     const percentage = ((entry.value / total) * 100).toFixed(1);
-                    return `${entry.name}: ${percentage}% - ${formatCurrency(entry.value)}`;
+                    return `${percentage}%`;
                   }}
+                  labelLine={false}
                 >
                   {divisionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)} 
+                  labelFormatter={(name) => `${name}`}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value, entry: any) => {
+                    const percentage = entry.payload?.percentage || 0;
+                    return `${value} (${percentage.toFixed(1)}%)`;
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -246,14 +258,26 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   label={(entry) => {
                     const total = typeData.reduce((sum, d) => sum + d.value, 0);
                     const percentage = ((entry.value / total) * 100).toFixed(1);
-                    return `${entry.name}: ${percentage}% - ${formatCurrency(entry.value)}`;
+                    return `${percentage}%`;
                   }}
+                  labelLine={false}
                 >
                   {typeData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)} 
+                  labelFormatter={(name) => `${name}`}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value, entry: any) => {
+                    const percentage = entry.payload?.percentage || 0;
+                    return `${value} (${percentage.toFixed(1)}%)`;
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -277,13 +301,25 @@ export default function OverviewDashboard({ selectedMonths, selectedYear }: Over
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
-                  label={(entry) => `${entry.name}: ${entry.percentage.toFixed(1)}% - ${formatCurrency(entry.value)}`}
+                  label={(entry) => `${entry.percentage.toFixed(1)}%`}
+                  labelLine={false}
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)} 
+                  labelFormatter={(name) => `${name}`}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value, entry: any) => {
+                    const percentage = entry.payload?.percentage || 0;
+                    return `${value} (${percentage.toFixed(1)}%)`;
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>

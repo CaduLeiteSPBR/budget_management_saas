@@ -20,7 +20,8 @@ import {
   ChevronRight,
   Bug,
   Trash2,
-  TriangleAlert
+  TriangleAlert,
+  RefreshCw
 } from "lucide-react";
 import { Link } from "wouter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -317,6 +318,21 @@ export default function Dashboard() {
               onClick={() => handleNavigate('next')}
             >
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            
+            {/* Botão Recalcular Widgets */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-2 ml-2"
+              onClick={() => {
+                // Forçar refetch do financialSummary
+                trpc.useUtils().transactions.getFinancialSummary.invalidate();
+              }}
+              title="Recalcular widgets de resumo financeiro"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="hidden md:inline">Recalcular</span>
             </Button>
         </div>
         

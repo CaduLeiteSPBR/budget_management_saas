@@ -681,3 +681,8 @@
 - [x] Implementar alertas visuais para valores negativos (borda vermelha + ícone TriangleAlert)
 - [x] Ajustar grid responsivo para acomodar 6 cards (grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6)
 - [x] Testar cálculos com dados reais do usuário
+
+## Feature: Melhorias Visuais (Editor Visual)
+- [x] Adicionar botão de recalcular widgets à direita do seletor de período no Dashboard
+- [x] Ajustar gráficos de pizza para exibir percentuais dentro do gráfico (não na label externa)
+- [x] Melhorar legenda dos gráficos de pizza para se ajustar dinamicamente (Legend com nome + percentual)
