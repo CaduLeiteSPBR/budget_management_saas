@@ -697,3 +697,6 @@
 - [x] Garantir que seletor de período e widgets fixem apenas após scroll além das abas
 - [x] Remover sticky do header (título + logo rolam normalmente)
 - [x] Adicionar sticky englobando período + widgets + TabsList
+
+## Feature: Remover botão Admin do header
+- [x] Remover botão "Admin" do canto superior direito do Dashboard

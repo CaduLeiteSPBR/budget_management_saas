@@ -182,14 +182,7 @@ export default function Dashboard() {
                   <span className="hidden md:inline">Categorias</span>
                 </Button>
               </Link>
-              {user?.role === 'admin' && (
-                <Link href="/admin">
-                  <Button variant="outline" size="sm">
-                    <Users className="w-4 h-4 mr-2" />
-                    Admin
-                  </Button>
-                </Link>
-              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
