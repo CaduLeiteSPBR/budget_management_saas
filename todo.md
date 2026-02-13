@@ -691,3 +691,9 @@
 - [x] Mover percentuais para DENTRO das fatias da pizza (usando label customizado com cálculo trigonométrico)
 - [x] Alterar labels externas para mostrar "Nome: R$ Valor" em vez de percentuais
 - [x] Remover componente Legend da parte inferior dos 3 gráficos
+
+## Feature: Ajustar posição sticky no Dashboard
+- [x] Mover área sticky para começar após as abas de navegação (Visão Geral/Lançamentos/Cartões)
+- [x] Garantir que seletor de período e widgets fixem apenas após scroll além das abas
+- [x] Remover sticky do header (título + logo rolam normalmente)
+- [x] Adicionar sticky englobando período + widgets + TabsList

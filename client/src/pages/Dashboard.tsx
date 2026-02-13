@@ -165,7 +165,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
+      <header className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -210,8 +210,12 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Navigation Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+        {/* Sticky Section: Período + Widgets + TabsList */}
+        <div className="sticky top-0 z-40 bg-background pb-6 -mx-4 px-4">
         {/* Seletor de Período */}
-        <div className="mb-6 flex items-center gap-4">
+        <div className="mb-6 flex items-center gap-4 pt-2">
             <span className="text-sm font-medium text-muted-foreground">Período:</span>
             
             {/* Botão Navegar para Trás */}
@@ -467,8 +471,6 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Navigation Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="glass-strong">
             <TabsTrigger value="overview">
               <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -484,6 +486,8 @@ export default function Dashboard() {
             </TabsTrigger>
 
           </TabsList>
+        </div>
+        {/* End Sticky Section */}
 
           <TabsContent value="overview" className="space-y-6">
             <OverviewDashboard selectedMonths={selectedMonths} selectedYear={selectedYear} />
