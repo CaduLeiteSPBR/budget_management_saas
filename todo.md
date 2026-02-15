@@ -700,3 +700,7 @@
 
 ## Feature: Remover botão Admin do header
 - [x] Remover botão "Admin" do canto superior direito do Dashboard
+
+## Feature: Remover sticky em dispositivos móveis
+- [x] Alterar classe sticky para ser condicional (apenas desktop - lg:sticky lg:top-0 lg:z-40)
+- [x] Em mobile, todo conteúdo rola normalmente sem fixação

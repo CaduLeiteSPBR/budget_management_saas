@@ -206,7 +206,7 @@ export default function Dashboard() {
         {/* Navigation Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
         {/* Sticky Section: Período + Widgets + TabsList */}
-        <div className="sticky top-0 z-40 bg-background pb-6 -mx-4 px-4">
+        <div className="lg:sticky lg:top-0 lg:z-40 bg-background pb-6 -mx-4 px-4">
         {/* Seletor de Período */}
         <div className="mb-6 flex items-center gap-4 pt-2">
             <span className="text-sm font-medium text-muted-foreground">Período:</span>
