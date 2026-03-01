@@ -704,3 +704,6 @@
 ## Feature: Remover sticky em dispositivos móveis
 - [x] Alterar classe sticky para ser condicional (apenas desktop - lg:sticky lg:top-0 lg:z-40)
 - [x] Em mobile, todo conteúdo rola normalmente sem fixação
+
+## Bug: Saldo Mínimo com valor incorreto (negativo indevido)
+- [x] Corrigir ordenação no cálculo diário: entradas processadas antes das saídas no mesmo dia (agrupamento por dia + ORDER BY CASE nature)

@@ -552,26 +552,33 @@ export const appRouter = router({
           AND isPaid = 1
           AND date >= ${startOfPeriod}
           AND date <= ${endOfPeriod}
-          ORDER BY date ASC, id ASC
+          ORDER BY date ASC, CASE WHEN nature = 'Entrada' THEN 0 ELSE 1 END ASC, id ASC
         `);
         
         const transactionsForMin = transactionsForMinResult[0] as unknown as any[];
         
         // Calcular saldo diário progressivo e encontrar o mínimo
+        // Dentro do mesmo dia: entradas são processadas primeiro (ORDER BY CASE nature), depois saidas
+        // O saldo mínimo é verificado apenas após processar TODAS as transações do dia
         let currentDayBalance = initialBalance;
         let minimumBalance = initialBalance; // Começa com saldo inicial
         
+        // Agrupar por dia para verificar saldo apenas ao final de cada dia
+        const txByDay = new Map<string, typeof transactionsForMin>();
         for (const tx of transactionsForMin) {
-          const amount = Number(tx.amount);
-          if (tx.nature === 'Entrada') {
-            currentDayBalance += amount;
-          } else {
-            currentDayBalance -= amount;
-          }
-          
-          if (currentDayBalance < minimumBalance) {
-            minimumBalance = currentDayBalance;
-          }
+          const day = String(tx.date);
+          if (!txByDay.has(day)) txByDay.set(day, []);
+          txByDay.get(day)!.push(tx);
+        }
+        
+        for (const [, dayTxs] of Array.from(txByDay)) {
+          // Processar entradas primeiro, depois saídas
+          const entradas = dayTxs.filter((t: any) => t.nature === 'Entrada');
+          const saidas = dayTxs.filter((t: any) => t.nature !== 'Entrada');
+          for (const tx of entradas) currentDayBalance += Number(tx.amount);
+          for (const tx of saidas) currentDayBalance -= Number(tx.amount);
+          // Verificar saldo mínimo ao final do dia (após entradas e saídas)
+          if (currentDayBalance < minimumBalance) minimumBalance = currentDayBalance;
         }
         
         console.log('[getFinancialSummary] Saldo Mínimo calculado:', {
