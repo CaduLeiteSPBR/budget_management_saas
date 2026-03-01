@@ -707,3 +707,6 @@
 
 ## Bug: Saldo Mínimo com valor incorreto (negativo indevido)
 - [x] Corrigir ordenação no cálculo diário: entradas processadas antes das saídas no mesmo dia (agrupamento por dia + ORDER BY CASE nature)
+
+## Bug: Saldo Inicial do mês incorreto
+- [x] Corrigir cálculo do initialBalance: excluir transação 'Saldo Inicial' da soma de movimentações (estava sendo duplicada), adicionar filtro date >= saldoInicialDate
