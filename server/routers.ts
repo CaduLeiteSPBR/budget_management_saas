@@ -571,57 +571,7 @@ export const appRouter = router({
           initialBalance
         });
         
-        // SQL DIRETO: Calcular Saldo Mínimo a partir de HOJE (menor saldo diário do período a partir da data atual)
-        // Começa com o saldo atual (currentBalance) e projeta para frente usando transações pagas a partir de hoje
-        const startOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0);
-        const transactionsForMinResult = await database.execute(sql`
-          SELECT 
-            date,
-            nature,
-            CAST(amount AS DECIMAL(10,2)) as amount
-          FROM transactions
-          WHERE userId = ${ctx.user.id}
-          AND isPaid = 1
-          AND date >= ${startOfToday}
-          AND date <= ${endOfPeriod}
-          ORDER BY date ASC, CASE WHEN nature = 'Entrada' THEN 0 ELSE 1 END ASC, id ASC
-        `);
-        
-        const transactionsForMin = transactionsForMinResult[0] as unknown as any[];
-        
-        // Calcular saldo diário progressivo a partir do saldo atual e encontrar o mínimo
-        // Dentro do mesmo dia: entradas são processadas primeiro, depois saídas
-        // O saldo mínimo é verificado apenas após processar TODAS as transações do dia
-        let currentDayBalance = currentBalance; // Começa com saldo atual (hoje)
-        let minimumBalance = currentBalance; // Começa com saldo atual
-        let minimumBalanceDate: number | null = null; // Data em que ocorre o saldo mínimo
-        
-        // Agrupar por dia para verificar saldo apenas ao final de cada dia
-        const txByDay = new Map<string, typeof transactionsForMin>();
-        for (const tx of transactionsForMin) {
-          const day = String(tx.date);
-          if (!txByDay.has(day)) txByDay.set(day, []);
-          txByDay.get(day)!.push(tx);
-        }
-        
-        for (const [dayKey, dayTxs] of Array.from(txByDay)) {
-          // Processar entradas primeiro, depois saídas
-          const entradas = dayTxs.filter((t: any) => t.nature === 'Entrada');
-          const saidas = dayTxs.filter((t: any) => t.nature !== 'Entrada');
-          for (const tx of entradas) currentDayBalance += Number(tx.amount);
-          for (const tx of saidas) currentDayBalance -= Number(tx.amount);
-          // Verificar saldo mínimo ao final do dia (após entradas e saídas)
-          if (currentDayBalance < minimumBalance) {
-            minimumBalance = currentDayBalance;
-            minimumBalanceDate = Number(dayKey);
-          }
-        }
-        
-        console.log('[getFinancialSummary] Saldo Mínimo calculado:', {
-          initialBalance,
-          transacoesAnalisadas: transactionsForMin.length,
-          minimumBalance
-        });
+        // NOTA: Saldo Mínimo agora é calculado no frontend usando dados da tabela de Lançamentos
         
         console.log('[getFinancialSummary] Resumo final (SQL DIRETO):', {
           initialBalance,
@@ -629,7 +579,6 @@ export const appRouter = router({
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
-          minimumBalance,
           periodTransactionsCount
         });
         

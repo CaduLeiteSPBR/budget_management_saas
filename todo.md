@@ -726,3 +726,4 @@
 - [x] Remover cálculo de minimumBalance e minimumBalanceDate do backend (getFinancialSummary)
 - [x] Implementar cálculo no frontend: filtrar transações pagas a partir de hoje, calcular saldo progressivo dia a dia
 - [x] Exibir data e valor correto do Saldo Mínimo no widget (usando useMemo)
+- [x] Reiniciar servidor para limpar cache e aplicar alterações
