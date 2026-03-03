@@ -716,3 +716,8 @@
 - [x] Criar endpoint tRPC de login por e-mail/senha (publicProcedure - trpc.auth.loginWithPassword)
 - [x] Criar tela de login com formulário alternativo (e-mail + senha) com toggle entre Google e E-mail
 - [x] Cadastrar usuário caduleitenet@gmail.com com senha Cabala99@ no banco (bcrypt hash)
+
+## Feature: Saldo Mínimo a partir de hoje com data
+- [x] Calcular Saldo Mínimo apenas a partir da data atual (startOfToday, usando currentBalance como base)
+- [x] Retornar minimumBalanceDate (timestamp) no getFinancialSummary
+- [x] Exibir data formatada no widget (ex: 'Em 15/03/2026') ou 'A partir de hoje' quando não há variação

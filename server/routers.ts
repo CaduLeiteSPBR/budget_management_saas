@@ -571,8 +571,9 @@ export const appRouter = router({
           initialBalance
         });
         
-        // SQL DIRETO: Calcular Saldo Mínimo (menor saldo diário do período)
-        // Buscar todas as transações do período ordenadas por data
+        // SQL DIRETO: Calcular Saldo Mínimo a partir de HOJE (menor saldo diário do período a partir da data atual)
+        // Começa com o saldo atual (currentBalance) e projeta para frente usando transações pagas a partir de hoje
+        const startOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0);
         const transactionsForMinResult = await database.execute(sql`
           SELECT 
             date,
@@ -581,18 +582,19 @@ export const appRouter = router({
           FROM transactions
           WHERE userId = ${ctx.user.id}
           AND isPaid = 1
-          AND date >= ${startOfPeriod}
+          AND date >= ${startOfToday}
           AND date <= ${endOfPeriod}
           ORDER BY date ASC, CASE WHEN nature = 'Entrada' THEN 0 ELSE 1 END ASC, id ASC
         `);
         
         const transactionsForMin = transactionsForMinResult[0] as unknown as any[];
         
-        // Calcular saldo diário progressivo e encontrar o mínimo
-        // Dentro do mesmo dia: entradas são processadas primeiro (ORDER BY CASE nature), depois saidas
+        // Calcular saldo diário progressivo a partir do saldo atual e encontrar o mínimo
+        // Dentro do mesmo dia: entradas são processadas primeiro, depois saídas
         // O saldo mínimo é verificado apenas após processar TODAS as transações do dia
-        let currentDayBalance = initialBalance;
-        let minimumBalance = initialBalance; // Começa com saldo inicial
+        let currentDayBalance = currentBalance; // Começa com saldo atual (hoje)
+        let minimumBalance = currentBalance; // Começa com saldo atual
+        let minimumBalanceDate: number | null = null; // Data em que ocorre o saldo mínimo
         
         // Agrupar por dia para verificar saldo apenas ao final de cada dia
         const txByDay = new Map<string, typeof transactionsForMin>();
@@ -602,14 +604,17 @@ export const appRouter = router({
           txByDay.get(day)!.push(tx);
         }
         
-        for (const [, dayTxs] of Array.from(txByDay)) {
+        for (const [dayKey, dayTxs] of Array.from(txByDay)) {
           // Processar entradas primeiro, depois saídas
           const entradas = dayTxs.filter((t: any) => t.nature === 'Entrada');
           const saidas = dayTxs.filter((t: any) => t.nature !== 'Entrada');
           for (const tx of entradas) currentDayBalance += Number(tx.amount);
           for (const tx of saidas) currentDayBalance -= Number(tx.amount);
           // Verificar saldo mínimo ao final do dia (após entradas e saídas)
-          if (currentDayBalance < minimumBalance) minimumBalance = currentDayBalance;
+          if (currentDayBalance < minimumBalance) {
+            minimumBalance = currentDayBalance;
+            minimumBalanceDate = Number(dayKey);
+          }
         }
         
         console.log('[getFinancialSummary] Saldo Mínimo calculado:', {
@@ -635,6 +640,7 @@ export const appRouter = router({
           periodExpense,
           endOfPeriodBalance,
           minimumBalance,
+          minimumBalanceDate, // Data (timestamp) em que ocorre o saldo mínimo
           periodTransactionsCount
         };
       }),

@@ -134,6 +134,7 @@ export default function Dashboard() {
   const periodExpense = financialSummary?.periodExpense || 0;
   const endOfPeriodBalance = financialSummary?.endOfPeriodBalance || 0;
   const minimumBalance = financialSummary?.minimumBalance || 0;
+  const minimumBalanceDate = financialSummary?.minimumBalanceDate || null;
   const periodBalance = periodIncome - periodExpense;
   
   // Filtrar transações do período para exibição na lista (apenas para UI)
@@ -412,7 +413,10 @@ export default function Dashboard() {
                 {formatCurrency(minimumBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Menor saldo diário
+                {minimumBalanceDate
+                  ? `Em ${new Date(minimumBalanceDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}`
+                  : 'A partir de hoje'
+                }
               </p>
             </CardContent>
           </Card>
