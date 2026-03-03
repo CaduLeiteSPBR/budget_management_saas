@@ -145,23 +145,21 @@ export default function Dashboard() {
     today.setUTCHours(0, 0, 0, 0);
     const todayTime = today.getTime();
 
-    // Filtrar transações pagas a partir de hoje, do período selecionado
-    const futureTransactions = transactions.filter((t) => {
+    // Filtrar TODAS as transacoes pagas do periodo selecionado (nao apenas futuras)
+    const periodTransactionsAll = transactions.filter((t) => {
       const tDate = new Date(t.date);
       tDate.setUTCHours(0, 0, 0, 0);
-      const tTime = tDate.getTime();
       const tMonth = tDate.getUTCMonth() + 1;
       const tYear = tDate.getUTCFullYear();
       return (
         t.isPaid &&
-        tTime >= todayTime &&
         selectedMonths.includes(tMonth) &&
         tYear === selectedYear
       );
     });
 
     // Ordenar por data, depois por tipo (entradas primeiro)
-    futureTransactions.sort((a, b) => {
+    periodTransactionsAll.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       if (dateA !== dateB) return dateA - dateB;
@@ -171,17 +169,17 @@ export default function Dashboard() {
       return aIsIncome - bIsIncome;
     });
 
-    // Calcular saldo progressivo dia a dia
-    let dayBalance = currentBalance;
-    let minBalance = currentBalance;
+    // Calcular saldo progressivo dia a dia DESDE O INICIO DO MES
+    let dayBalance = initialBalance; // Começar com saldo inicial do período
+    let minBalance = initialBalance;
     let minDate: number | null = null;
     let currentDay: number | null = null;
 
-    for (const tx of futureTransactions) {
+    for (const tx of periodTransactionsAll) {
       const txDate = new Date(tx.date).getTime();
-      // Se mudou de dia, verificar saldo mínimo
+      // Se mudou de dia, verificar saldo mínimo (mas apenas se >= hoje)
       if (currentDay !== null && currentDay !== txDate) {
-        if (dayBalance < minBalance) {
+        if (currentDay >= todayTime && dayBalance < minBalance) {
           minBalance = dayBalance;
           minDate = currentDay;
         }
@@ -196,14 +194,14 @@ export default function Dashboard() {
       }
     }
 
-    // Verificar saldo final do último dia
-    if (currentDay !== null && dayBalance < minBalance) {
+    // Verificar saldo final do último dia (se >= hoje)
+    if (currentDay !== null && currentDay >= todayTime && dayBalance < minBalance) {
       minBalance = dayBalance;
       minDate = currentDay;
     }
 
     return { minimumBalance: minBalance, minimumBalanceDate: minDate };
-  }, [transactions, currentBalance, selectedMonths, selectedYear]);
+  }, [transactions, initialBalance, selectedMonths, selectedYear]);
   
   // Filtrar transações do período para exibição na lista (apenas para UI)
   const periodTransactions = useMemo(() => {

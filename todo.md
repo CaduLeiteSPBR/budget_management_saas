@@ -727,3 +727,7 @@
 - [x] Implementar cálculo no frontend: filtrar transações pagas a partir de hoje, calcular saldo progressivo dia a dia
 - [x] Exibir data e valor correto do Saldo Mínimo no widget (usando useMemo)
 - [x] Reiniciar servidor para limpar cache e aplicar alterações
+
+## Bug: Saldo Mínimo com lógica incorreta (não considera ordem correta de transações do mês)
+- [x] Corrigir: começar do Saldo Inicial, processar TODAS as transações do mês em ordem, encontrar menor saldo a partir de hoje
+- [x] Resultado esperado: R$ 2.748,17 em 23/03 (CORRIGIDO - agora exibe valor correto)
