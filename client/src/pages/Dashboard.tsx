@@ -133,9 +133,77 @@ export default function Dashboard() {
   const periodIncome = financialSummary?.periodIncome || 0;
   const periodExpense = financialSummary?.periodExpense || 0;
   const endOfPeriodBalance = financialSummary?.endOfPeriodBalance || 0;
-  const minimumBalance = financialSummary?.minimumBalance || 0;
-  const minimumBalanceDate = financialSummary?.minimumBalanceDate || null;
   const periodBalance = periodIncome - periodExpense;
+
+  // Calcular Saldo Mínimo a partir de hoje usando dados da tabela
+  const { minimumBalance, minimumBalanceDate } = useMemo(() => {
+    if (!transactions || transactions.length === 0) {
+      return { minimumBalance: currentBalance, minimumBalanceDate: null };
+    }
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
+
+    // Filtrar transações pagas a partir de hoje, do período selecionado
+    const futureTransactions = transactions.filter((t) => {
+      const tDate = new Date(t.date);
+      tDate.setUTCHours(0, 0, 0, 0);
+      const tTime = tDate.getTime();
+      const tMonth = tDate.getUTCMonth() + 1;
+      const tYear = tDate.getUTCFullYear();
+      return (
+        t.isPaid &&
+        tTime >= todayTime &&
+        selectedMonths.includes(tMonth) &&
+        tYear === selectedYear
+      );
+    });
+
+    // Ordenar por data, depois por tipo (entradas primeiro)
+    futureTransactions.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateA - dateB;
+      // Entradas (0) antes de Saídas (1)
+      const aIsIncome = a.nature === 'Entrada' ? 0 : 1;
+      const bIsIncome = b.nature === 'Entrada' ? 0 : 1;
+      return aIsIncome - bIsIncome;
+    });
+
+    // Calcular saldo progressivo dia a dia
+    let dayBalance = currentBalance;
+    let minBalance = currentBalance;
+    let minDate: number | null = null;
+    let currentDay: number | null = null;
+
+    for (const tx of futureTransactions) {
+      const txDate = new Date(tx.date).getTime();
+      // Se mudou de dia, verificar saldo mínimo
+      if (currentDay !== null && currentDay !== txDate) {
+        if (dayBalance < minBalance) {
+          minBalance = dayBalance;
+          minDate = currentDay;
+        }
+      }
+      currentDay = txDate;
+      // Aplicar transação
+      const amount = Number(tx.amount) || 0;
+      if (tx.nature === 'Entrada') {
+        dayBalance += amount;
+      } else {
+        dayBalance -= amount;
+      }
+    }
+
+    // Verificar saldo final do último dia
+    if (currentDay !== null && dayBalance < minBalance) {
+      minBalance = dayBalance;
+      minDate = currentDay;
+    }
+
+    return { minimumBalance: minBalance, minimumBalanceDate: minDate };
+  }, [transactions, currentBalance, selectedMonths, selectedYear]);
   
   // Filtrar transações do período para exibição na lista (apenas para UI)
   const periodTransactions = useMemo(() => {

@@ -721,3 +721,8 @@
 - [x] Calcular Saldo Mínimo apenas a partir da data atual (startOfToday, usando currentBalance como base)
 - [x] Retornar minimumBalanceDate (timestamp) no getFinancialSummary
 - [x] Exibir data formatada no widget (ex: 'Em 15/03/2026') ou 'A partir de hoje' quando não há variação
+
+## Bug: Saldo Mínimo calculado incorretamente (incluindo transações do passado)
+- [x] Remover cálculo de minimumBalance e minimumBalanceDate do backend (getFinancialSummary)
+- [x] Implementar cálculo no frontend: filtrar transações pagas a partir de hoje, calcular saldo progressivo dia a dia
+- [x] Exibir data e valor correto do Saldo Mínimo no widget (usando useMemo)

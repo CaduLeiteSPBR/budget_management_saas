@@ -639,8 +639,6 @@ export const appRouter = router({
           periodIncome,
           periodExpense,
           endOfPeriodBalance,
-          minimumBalance,
-          minimumBalanceDate, // Data (timestamp) em que ocorre o saldo mínimo
           periodTransactionsCount
         };
       }),
