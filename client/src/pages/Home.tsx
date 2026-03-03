@@ -2,6 +2,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Wallet, 
   TrendingUp, 
@@ -10,14 +12,36 @@ import {
   ArrowRight,
   BarChart3,
   Target,
-  Zap
+  Zap,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  LogIn,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Home() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, refresh } = useAuth();
   const [, setLocation] = useLocation();
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const loginMutation = trpc.auth.loginWithPassword.useMutation({
+    onSuccess: async () => {
+      toast.success("Login realizado com sucesso!");
+      await refresh?.();
+      setLocation("/dashboard");
+    },
+    onError: (err) => {
+      toast.error(err.message || "E-mail ou senha inválidos.");
+    },
+  });
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
@@ -32,6 +56,11 @@ export default function Home() {
       </div>
     );
   }
+
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({ email, password });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,16 +84,97 @@ export default function Home() {
               dashboards avançados e controle total sobre suas finanças pessoais e familiares.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a href={getLoginUrl()}>
-                <Button size="lg" className="text-lg px-8 glow-primary">
-                  Começar Agora
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </a>
-              <Button size="lg" variant="outline" className="text-lg px-8 glass">
-                Ver Demonstração
-              </Button>
+            {/* Login Options */}
+            <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+              {!showEmailForm ? (
+                <>
+                  <a href={getLoginUrl()} className="w-full">
+                    <Button size="lg" className="w-full text-lg glow-primary">
+                      <LogIn className="w-5 h-5 mr-2" />
+                      Entrar com Google
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </a>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full text-lg glass"
+                    onClick={() => setShowEmailForm(true)}
+                  >
+                    <Mail className="w-5 h-5 mr-2" />
+                    Entrar com E-mail
+                  </Button>
+                </>
+              ) : (
+                <Card className="w-full glass-strong border-primary/20">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-primary" />
+                      Login com E-mail
+                    </CardTitle>
+                    <CardDescription>
+                      Digite seu e-mail e senha para acessar
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleEmailLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">E-mail</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="pl-10"
+                            required
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Senha</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="pl-10 pr-10"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full glow-primary"
+                        disabled={loginMutation.isPending}
+                      >
+                        {loginMutation.isPending ? "Entrando..." : "Entrar"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full text-sm text-muted-foreground"
+                        onClick={() => setShowEmailForm(false)}
+                      >
+                        ← Voltar para opções de login
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>

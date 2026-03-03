@@ -13,6 +13,7 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  passwordHash: varchar("passwordHash", { length: 255 }), // Para login por e-mail/senha
 });
 
 export type User = typeof users.$inferSelect;

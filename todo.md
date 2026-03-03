@@ -710,3 +710,9 @@
 
 ## Bug: Saldo Inicial do mês incorreto
 - [x] Corrigir cálculo do initialBalance: excluir transação 'Saldo Inicial' da soma de movimentações (estava sendo duplicada), adicionar filtro date >= saldoInicialDate
+
+## Feature: Login por E-mail e Senha
+- [x] Adicionar campo passwordHash na tabela users e rodar migration
+- [x] Criar endpoint tRPC de login por e-mail/senha (publicProcedure - trpc.auth.loginWithPassword)
+- [x] Criar tela de login com formulário alternativo (e-mail + senha) com toggle entre Google e E-mail
+- [x] Cadastrar usuário caduleitenet@gmail.com com senha Cabala99@ no banco (bcrypt hash)

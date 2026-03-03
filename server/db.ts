@@ -128,6 +128,19 @@ export async function updateUserRole(userId: number, role: "user" | "admin") {
   await db.update(users).set({ role }).where(eq(users.id, userId));
 }
 
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function setUserPasswordHash(userId: number, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+}
+
 // ==================== CATEGORIES ====================
 
 export async function createCategory(data: InsertCategory): Promise<Category> {

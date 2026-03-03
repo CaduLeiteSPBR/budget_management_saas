@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -7,6 +7,8 @@ import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 import { sql } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { sdk } from "./_core/sdk";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -26,6 +28,32 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+
+    loginWithPassword: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await db.getUserByEmail(input.email);
+        if (!user || !user.passwordHash) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'E-mail ou senha inválidos.' });
+        }
+        const valid = await bcrypt.compare(input.password, user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'E-mail ou senha inválidos.' });
+        }
+        // Atualizar lastSignedIn
+        await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+        // Criar sessão JWT igual ao OAuth
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || '',
+          expiresInMs: ONE_YEAR_MS,
+        });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true };
+      }),
   }),
 
   // ==================== ADMIN ====================
