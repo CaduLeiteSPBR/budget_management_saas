@@ -731,3 +731,12 @@
 ## Bug: Saldo Mínimo com lógica incorreta (não considera ordem correta de transações do mês)
 - [x] Corrigir: começar do Saldo Inicial, processar TODAS as transações do mês em ordem, encontrar menor saldo a partir de hoje
 - [x] Resultado esperado: R$ 2.748,17 em 23/03 (CORRIGIDO - agora exibe valor correto)
+
+## Bug: Saldo Mínimo em Produção Mostra Valor Incorreto
+- [ ] Investigar discrepância: dev mostra R$ 2.750,88 (correto), produção mostra R$ 154,94 (Saldo Inicial)
+- [ ] Possível causa: cache, build, ou diferença de dados entre ambientes
+
+## Feature: Redesenho Visual dos 6 Widgets
+- [x] Melhorar layout dos widgets para melhor harmonia com valores altos
+- [x] Reorganizar conteúdo para evitar deslocamento e desorganização
+- [x] Manter responsividade e legibilidade em todos os tamanhos de tela

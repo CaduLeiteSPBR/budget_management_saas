@@ -145,14 +145,13 @@ export default function Dashboard() {
     today.setUTCHours(0, 0, 0, 0);
     const todayTime = today.getTime();
 
-    // Filtrar TODAS as transacoes pagas do periodo selecionado (nao apenas futuras)
+    // Filtrar TODAS as transacoes (pagas e agendadas) do periodo selecionado
     const periodTransactionsAll = transactions.filter((t) => {
       const tDate = new Date(t.date);
       tDate.setUTCHours(0, 0, 0, 0);
       const tMonth = tDate.getUTCMonth() + 1;
       const tYear = tDate.getUTCFullYear();
       return (
-        t.isPaid &&
         selectedMonths.includes(tMonth) &&
         tYear === selectedYear
       );
@@ -401,20 +400,22 @@ export default function Dashboard() {
         </div>
         
         {/* Stats Cards - 6 Widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           {/* 1. Saldo Inicial */}
           <Card className="glass border-border hover:border-primary/50 transition-all">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo Inicial
-              </CardTitle>
-              <Wallet className="w-4 h-4 text-muted-foreground" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Inicial
+                </CardTitle>
+                <Wallet className="w-4 h-4 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-3xl font-bold tracking-tight">
                 {formatCurrency(initialBalance)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 Início do período
               </p>
             </CardContent>
@@ -422,17 +423,19 @@ export default function Dashboard() {
 
           {/* 2. Entradas do Mês */}
           <Card className="glass border-income hover:border-income transition-all glow-income">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Entradas do Mês
-              </CardTitle>
-              <ArrowUpCircle className="w-4 h-4 text-income" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-income uppercase tracking-wider">
+                  Entradas
+                </CardTitle>
+                <ArrowUpCircle className="w-4 h-4 text-income" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-income">
+              <div className="text-3xl font-bold text-income tracking-tight">
                 {formatCurrency(periodIncome)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 {periodTransactions.filter(t => t.nature === "Entrada").length} transações
               </p>
             </CardContent>
@@ -440,17 +443,19 @@ export default function Dashboard() {
 
           {/* 3. Saídas do Mês */}
           <Card className="glass border-expense hover:border-expense transition-all glow-expense">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saídas do Mês
-              </CardTitle>
-              <ArrowDownCircle className="w-4 h-4 text-expense" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-expense uppercase tracking-wider">
+                  Saídas
+                </CardTitle>
+                <ArrowDownCircle className="w-4 h-4 text-expense" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-expense">
+              <div className="text-3xl font-bold text-expense tracking-tight">
                 {formatCurrency(periodExpense)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 {periodTransactions.filter(t => t.nature === "Saída").length} transações
               </p>
             </CardContent>
@@ -462,23 +467,25 @@ export default function Dashboard() {
               ? 'border-red-500 border-2 animate-pulse' 
               : 'border-border hover:border-primary/50'
           }`}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo Mínimo
-              </CardTitle>
-              {minimumBalance < 0 ? (
-                <TriangleAlert className="w-4 h-4 text-red-500" />
-              ) : (
-                <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              )}
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Mínimo
+                </CardTitle>
+                {minimumBalance < 0 ? (
+                  <TriangleAlert className="w-4 h-4 text-red-500" />
+                ) : (
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${
+              <div className={`text-3xl font-bold tracking-tight ${
                 minimumBalance < 0 ? 'text-red-500' : ''
               }`}>
                 {formatCurrency(minimumBalance)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 {minimumBalanceDate
                   ? `Em ${new Date(minimumBalanceDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}`
                   : 'A partir de hoje'
@@ -493,23 +500,25 @@ export default function Dashboard() {
               ? 'border-red-500 border-2 animate-pulse' 
               : 'border-border hover:border-primary/50'
           }`}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo Atual
-              </CardTitle>
-              {currentBalance < 0 ? (
-                <TriangleAlert className="w-4 h-4 text-red-500" />
-              ) : (
-                <Wallet className="w-4 h-4 text-muted-foreground" />
-              )}
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Atual
+                </CardTitle>
+                {currentBalance < 0 ? (
+                  <TriangleAlert className="w-4 h-4 text-red-500" />
+                ) : (
+                  <Wallet className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${
+              <div className={`text-3xl font-bold tracking-tight ${
                 currentBalance < 0 ? 'text-red-500' : ''
               }`}>
                 {formatCurrency(currentBalance)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 Saldo real até hoje
               </p>
             </CardContent>
@@ -517,18 +526,20 @@ export default function Dashboard() {
 
           {/* 6. Saldo no Fim do Mês */}
           <Card className="glass border-border hover:border-primary/50 transition-all">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Saldo no Fim do Mês
-              </CardTitle>
-              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Fim do Mês
+                </CardTitle>
+                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
+              <div className={`text-3xl font-bold tracking-tight ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
                 {formatCurrency(endOfPeriodBalance)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Projeção com lançamentos futuros
+              <p className="text-xs text-muted-foreground mt-2">
+                Projeção com lançamentos
               </p>
             </CardContent>
           </Card>
