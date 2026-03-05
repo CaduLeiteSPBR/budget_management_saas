@@ -412,7 +412,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold tracking-tight">
+              <div className="text-2xl font-bold tracking-tight">
                 {formatCurrency(initialBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -432,7 +432,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-income tracking-tight">
+              <div className="text-2xl font-bold text-income tracking-tight">
                 {formatCurrency(periodIncome)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -452,7 +452,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-expense tracking-tight">
+              <div className="text-2xl font-bold text-expense tracking-tight">
                 {formatCurrency(periodExpense)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -480,7 +480,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold tracking-tight ${
+              <div className={`text-2xl font-bold tracking-tight ${
                 minimumBalance < 0 ? 'text-red-500' : ''
               }`}>
                 {formatCurrency(minimumBalance)}
@@ -513,7 +513,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold tracking-tight ${
+              <div className={`text-2xl font-bold tracking-tight ${
                 currentBalance < 0 ? 'text-red-500' : ''
               }`}>
                 {formatCurrency(currentBalance)}
@@ -535,7 +535,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold tracking-tight ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
+              <div className={`text-2xl font-bold tracking-tight ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
                 {formatCurrency(endOfPeriodBalance)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">

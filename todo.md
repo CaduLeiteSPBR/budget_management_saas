@@ -755,3 +755,8 @@
 - [x] Adicionar ícone de relógio (Clock) para indicar pendência
 - [x] Aplicar indicador na listagem de transações (TransactionsList)
 - [x] Testar indicador em diferentes períodos e estados
+
+## Bug: Valores dos widgets ultrapassam limites da caixa
+- [x] Reduzir tamanho da fonte dos valores (text-3xl → text-2xl ou menor)
+- [x] Garantir que todos os valores caibam dentro dos widgets
+- [x] Manter legibilidade e proporção visual
