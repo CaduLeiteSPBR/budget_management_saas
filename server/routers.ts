@@ -498,6 +498,8 @@ export const appRouter = router({
         });
         
         // SQL DIRETO: Calcular saldo atual = Saldo Inicial + (Entradas - Saídas) >= data do Saldo Inicial
+        // REGRA: Transações com date <= hoje são automaticamente consideradas pagas
+        // Transações futuras (date > hoje) respeitam o campo isPaid
         const currentBalanceResult = await database.execute(sql`
           SELECT 
             SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao,
@@ -505,7 +507,7 @@ export const appRouter = router({
             COUNT(CASE WHEN nature = 'Saída' THEN 1 END) as totalSaidas
           FROM transactions
           WHERE userId = ${ctx.user.id}
-          AND isPaid = 1
+          AND (date <= ${endOfToday} OR isPaid = 1)
           AND date >= ${saldoInicialDate}
           AND date <= ${endOfToday}
           AND description NOT LIKE '%Saldo Inicial%'
@@ -547,14 +549,15 @@ export const appRouter = router({
         // SQL DIRETO: Calcular Saldo Inicial do período (primeiro dia do primeiro mês selecionado)
         const firstDayOfPeriod = Date.UTC(selectedYear, selectedMonths[0] - 1, 1, 0, 0, 0, 0);
         
-        // Buscar todas as transações pagas até o dia anterior ao período para calcular saldo inicial
+        // Buscar todas as transações até o dia anterior ao período para calcular saldo inicial
+        // REGRA: Transações com date < hoje são automaticamente consideradas pagas
         // Excluir a própria transação de 'Saldo Inicial' para não duplicá-la
         const initialBalanceResult = await database.execute(sql`
           SELECT 
             SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao
           FROM transactions
           WHERE userId = ${ctx.user.id}
-          AND isPaid = 1
+          AND (date < ${firstDayOfPeriod} OR isPaid = 1)
           AND date >= ${saldoInicialDate}
           AND date < ${firstDayOfPeriod}
           AND description NOT LIKE '%Saldo Inicial%'

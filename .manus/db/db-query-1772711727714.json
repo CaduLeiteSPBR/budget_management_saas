@@ -1,0 +1,120 @@
+{
+  "query": "SELECT id, description, amount, nature, isPaid, date, division, type, categoryId FROM transactions WHERE description LIKE '%Studio Klabin%' OR description LIKE '%Enel%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT id, description, amount, nature, isPaid, date, division, type, categoryId FROM transactions WHERE description LIKE '%Studio Klabin%' OR description LIKE '%Enel%' LIMIT 10;",
+  "rows": [
+    {
+      "id": "60051",
+      "description": "Studio Klabin (1/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1767571200000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60052",
+      "description": "Studio Klabin (2/12)",
+      "amount": "3417.86",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1770249600000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60053",
+      "description": "Studio Klabin (3/12)",
+      "amount": "3413.27",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1772668800000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60054",
+      "description": "Studio Klabin (4/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1775347200000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60055",
+      "description": "Studio Klabin (5/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1777939200000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60056",
+      "description": "Studio Klabin (6/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1780617600000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60057",
+      "description": "Studio Klabin (7/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1783209600000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60058",
+      "description": "Studio Klabin (8/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1785888000000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60059",
+      "description": "Studio Klabin (9/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1788566400000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    },
+    {
+      "id": "60060",
+      "description": "Studio Klabin (10/12)",
+      "amount": "3418.29",
+      "nature": "Saída",
+      "isPaid": "1",
+      "date": "1791158400000",
+      "division": "Investimento",
+      "type": "Investimento",
+      "categoryId": "60005"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tnature\tisPaid\tdate\tdivision\ttype\tcategoryId\n60051\tStudio Klabin (1/12)\t3418.29\tSaída\t1\t1767571200000\tInvestimento\tInvestimento\t60005\n60052\tStudio Klabin (2/12)\t3417.86\tSaída\t1\t1770249600000\tInvestimento\tInvestimento\t60005\n60053\tStudio Klabin (3/12)\t3413.27\tSaída\t1\t1772668800000\tInvestimento\tInvestimento\t60005\n60054\tStudio Klabin (4/12)\t3418.29\tSaída\t1\t1775347200000\tInvestimento\tInvestimento\t60005\n60055\tStudio Klabin (5/12)\t3418.29\tSaída\t1\t1777939200000\tInvestimento\tInvestimento\t60005\n60056\tStudio Klabin (6/12)\t3418.29\tSaída\t1\t1780617600000\tInvestimento\tInvestimento\t60005\n60057\tStudio Klabin (7/12)\t3418.29\tSaída\t1\t1783209600000\tInvestimento\tInvestimento\t60005\n60058\tStudio Klabin (8/12)\t3418.29\tSaída\t1\t1785888000000\tInvestimento\tInvestimento\t60005\n60059\tStudio Klabin (9/12)\t3418.29\tSaída\t1\t1788566400000\tInvestimento\tInvestimento\t60005\n60060\tStudio Klabin (10/12)\t3418.29\tSaída\t1\t1791158400000\tInvestimento\tInvestimento\t60005\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

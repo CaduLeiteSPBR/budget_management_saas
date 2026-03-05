@@ -740,3 +740,11 @@
 - [x] Melhorar layout dos widgets para melhor harmonia com valores altos
 - [x] Reorganizar conteúdo para evitar deslocamento e desorganização
 - [x] Manter responsividade e legibilidade em todos os tamanhos de tela
+
+## Bug: Lógica de isPaid incorreta (transações passadas não consideradas como pagas)
+- [x] Corrigir lógica: transações com data <= hoje devem ser automaticamente consideradas como pagas
+- [x] Remover filtro isPaid = 1 do cálculo do Saldo Atual
+- [x] Adicionar filtro date <= endOfToday para considerar como paga automaticamente
+- [x] Aplicar mesma lógica em todos os cálculos de saldo (currentBalance, initialBalance)
+- [x] Validar que transações futuras (date > hoje) ainda respeitam o campo isPaid
+- [x] Testar: Saldo Atual passou de R$ 26.211,43 para R$ 26.144,14 (valor correto do banco)
