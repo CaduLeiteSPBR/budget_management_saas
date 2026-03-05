@@ -760,3 +760,10 @@
 - [x] Reduzir tamanho da fonte dos valores (text-3xl → text-2xl ou menor)
 - [x] Garantir que todos os valores caibam dentro dos widgets
 - [x] Manter legibilidade e proporção visual
+
+## Feature: Atualizar automaticamente isPaid ao carregar lançamentos
+- [x] Ao carregar TransactionsList, verificar transações com tag "Agendado" (date > hoje e isPaid = 0)
+- [x] Identificar transações que agora têm data <= hoje
+- [x] Automaticamente marcar essas transações como pagas (isPaid = 1)
+- [x] Remover tag "Agendado" dessas transações
+- [x] Atualizar lista sem necessidade de refresh manual

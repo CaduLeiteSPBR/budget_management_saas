@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,15 +42,13 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
   const [deleteRecurringId, setDeleteRecurringId] = useState<number | null>(null);
   const [deleteRecurringDescription, setDeleteRecurringDescription] = useState<string>("");
   const [sortField, setSortField] = useState<"date" | "description" | "amount" | "nature">("date");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Ordem ascendente (cronológica)
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   
-  // Estados para importação de faturas
   const [importedTransactions, setImportedTransactions] = useState<any[]>([]);
   const [importPaymentDate, setImportPaymentDate] = useState<number>(0);
   const [importBankName, setImportBankName] = useState<string>("");
   const [showValidation, setShowValidation] = useState(false);
 
-  // Calcular startDate e endDate baseado nos meses recebidos via props
   const minMonth = Math.min(...selectedMonths);
   const maxMonth = Math.max(...selectedMonths);
   const startDate = Date.UTC(selectedYear, minMonth - 1, 1);
@@ -99,6 +97,36 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     },
   });
 
+  const updateIsPaidMutation = trpc.transactions.update.useMutation({
+    onSuccess: () => {
+      utils.transactions.list.invalidate();
+      utils.transactions.balance.invalidate();
+      utils.transactions.getFinancialSummary.invalidate();
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar isPaid:", error.message);
+    },
+  });
+
+  useEffect(() => {
+    if (!transactions) return;
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime();
+
+    const scheduledTransactionsThatExpired = transactions.filter(
+      (t) => t.date <= todayTimestamp && !t.isPaid
+    );
+
+    scheduledTransactionsThatExpired.forEach((transaction) => {
+      updateIsPaidMutation.mutate({
+        id: transaction.id,
+        isPaid: true,
+      });
+    });
+  }, [transactions]);
+
   const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -107,21 +135,17 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
   };
 
   const formatDate = (timestamp: number) => {
-    // Use UTC to avoid timezone issues
     const date = new Date(timestamp);
     return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   };
 
   const handleDelete = (id: number) => {
-    // Encontrar a transação para verificar se é recorrente
     const transaction = sortedTransactions?.find(t => t.id === id);
     
     if (transaction && transaction.recurringGroupId) {
-      // É recorrente - abrir dialog especial
       setDeleteRecurringId(id);
       setDeleteRecurringDescription(transaction.description);
     } else {
-      // Não é recorrente - usar dialog padrão
       setDeleteId(id);
     }
   };
@@ -161,56 +185,34 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     utils.transactions.getFinancialSummary.invalidate();
   };
 
-  const handleImportCancel = () => {
-    setShowValidation(false);
-    setImportedTransactions([]);
-    setImportPaymentDate(0);
-    setImportBankName("");
-  };
-
-  // Função para alternar ordenação
-  const handleSort = (field: typeof sortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
-
-  // Função para exportar para CSV
   const handleExport = () => {
     if (!sortedTransactions || sortedTransactions.length === 0) {
       toast.error("Nenhum lançamento para exportar");
       return;
     }
 
-    // Cabeçalho do CSV
-    const headers = ["Data", "Descrição", "Valor", "Natureza", "Divisão", "Tipo", "Categoria"];
-    
-    // Linhas de dados
+    const headers = ["Data", "Descrição", "Natureza", "Divisão", "Tipo", "Categoria", "Valor", "Notas"];
     const rows = sortedTransactions.map(t => [
       formatDate(t.date),
-      `"${t.description.replace(/"/g, '""')}"`, // Escapar aspas
-      Number(t.amount).toFixed(2),
+      t.description,
       t.nature,
-      t.division || "",
-      t.type || "",
-      t.categoryName || ""
+      t.division || "-",
+      t.type || "-",
+      t.categoryName || "-",
+      t.amount,
+      t.notes || ""
     ]);
 
-    // Montar CSV
     const csvContent = [
       headers.join(","),
       ...rows.map(row => row.join(","))
     ].join("\n");
 
-    // Criar blob e fazer download
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" }); // BOM para Excel
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
     link.setAttribute("href", url);
     link.setAttribute("download", `lancamentos_${today}.csv`);
     link.style.visibility = "hidden";
@@ -221,11 +223,9 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     toast.success(`${sortedTransactions.length} lançamentos exportados com sucesso!`);
   };
 
-  // Filtrar transações
   const filteredTransactions = transactions?.filter((t) => {
-    // Filtrar por meses selecionados
     const transactionDate = new Date(t.date);
-    const transactionMonth = transactionDate.getUTCMonth() + 1; // 1-12
+    const transactionMonth = transactionDate.getUTCMonth() + 1;
     if (!selectedMonths.includes(transactionMonth)) return false;
     
     if (filterNature !== "all" && t.nature !== filterNature) return false;
@@ -236,9 +236,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
     return true;
   });
 
-  // Ordenar transações com múltiplos critérios
   const sortedTransactions = [...(filteredTransactions || [])].sort((a, b) => {
-    // Forçar Saldo Inicial (isSystemGenerated) sempre primeiro
     const aIsSystem = (a as any).isSystemGenerated || false;
     const bIsSystem = (b as any).isSystemGenerated || false;
     
@@ -262,131 +260,63 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
         break;
     }
     
-    // Aplicar ordem principal
     const primaryComparison = sortOrder === "asc" ? comparison : -comparison;
     if (primaryComparison !== 0) return primaryComparison;
     
-    // Critérios secundários (sempre ascendente): Data → Natureza → Divisão → Tipo → Categoria
-    
-    // 1. Data
     if (sortField !== "date") {
       const dateComp = a.date - b.date;
       if (dateComp !== 0) return dateComp;
     }
     
-    // 2. Natureza (Entrada antes de Saída)
     if (sortField !== "nature") {
       const natureComp = a.nature.localeCompare(b.nature);
       if (natureComp !== 0) return natureComp;
     }
-    
-    // 3. Divisão
-    const divisionComp = (a.division || "").localeCompare(b.division || "");
-    if (divisionComp !== 0) return divisionComp;
-    
-    // 4. Tipo
-    const typeComp = (a.type || "").localeCompare(b.type || "");
-    if (typeComp !== 0) return typeComp;
-    
-    // 5. Categoria
-    const categoryComp = (a.categoryName || "").localeCompare(b.categoryName || "");
-    return categoryComp;
+
+    return 0;
   });
 
-  // Calcular saldo acumulado
-  let runningBalance = 0;
-  const transactionsWithBalance = sortedTransactions.map((t) => {
-    const amount = Number(t.amount);
-    runningBalance += t.nature === "Entrada" ? amount : -amount;
-    return {
-      ...t,
-      balance: runningBalance,
-    };
+  const transactionsWithBalance = sortedTransactions.map((transaction, index) => {
+    let balance = 0;
+    for (let i = 0; i <= index; i++) {
+      const t = sortedTransactions[i];
+      balance += t.nature === "Entrada" ? Number(t.amount) : -Number(t.amount);
+    }
+    return { ...transaction, balance };
   });
 
-  const hasActiveFilters = filterNature !== "all" || filterDivision !== "all" || filterType !== "all" || filterCategory !== "all" || searchTerm;
-
-  const clearFilters = () => {
-    setFilterNature("all");
-    setFilterDivision("all");
-    setFilterType("all");
-    setFilterCategory("all");
-    setSearchTerm("");
+  const handleSort = (field: "date" | "description" | "amount" | "nature") => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="glass border-border">
-        <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">Carregando transações...</div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Calcular saldo inicial e final do período
-  const initialBalance = 0; // TODO: buscar saldo anterior ao período
-  let periodBalance = initialBalance;
-  transactionsWithBalance.forEach((t) => {
-    const amount = Number(t.amount);
-    periodBalance += t.nature === "Entrada" ? amount : -amount;
-  });
-  const finalBalance = periodBalance;
+  const uniqueDivisions = Array.from(new Set(transactions?.map(t => t.division).filter(Boolean) || [])) as string[];
+  const uniqueTypes = Array.from(new Set(transactions?.map(t => t.type).filter(Boolean) || [])) as string[];
+  const uniqueCategories = Array.from(new Set(transactions?.map(t => t.categoryName).filter(Boolean) || [])) as string[];
 
   return (
-    <>
-      {/* Cards de Saldo */}
-
-
-      <Card className="glass border-border">
+    <div className="space-y-4">
+      <Card>
         <CardHeader>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <CardTitle>Lançamentos</CardTitle>
-              <CardDescription>
-                {transactionsWithBalance?.length || 0} transação(ões) encontrada(s)
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleExport} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Exportar
-              </Button>
-              <Button onClick={() => onEdit?.(0)} variant="default">
-                Novo Lançamento
-              </Button>
-              <InvoiceImport onTransactionsExtracted={handleTransactionsExtracted} />
-            </div>
-          </div>
-
-
-
+          <CardTitle>Lançamentos</CardTitle>
+          <CardDescription>Gerencie suas transações financeiras</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Filtros */}
-          <div className="space-y-4">
-            {/* Linha 1: Busca + Botões */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Input
-                  placeholder="Buscar descrição..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Linha 2: Filtros alinhados com colunas da tabela */}
-            <div className="grid grid-cols-[1fr_120px_120px_120px_150px_1fr_1fr_80px] gap-4">
-              {/* Espaço para Data */}
-              <div></div>
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2 flex-wrap">
+              <Input
+                placeholder="Buscar por descrição..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 min-w-[200px]"
+              />
               
-              {/* Espaço para Descrição */}
-              <div></div>
-
-              {/* Filtro Natureza (alinhado com coluna Natureza) */}
               <Select value={filterNature} onValueChange={setFilterNature}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Natureza" />
                 </SelectTrigger>
                 <SelectContent>
@@ -396,59 +326,84 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                 </SelectContent>
               </Select>
 
-              {/* Filtro Divisão (alinhado com coluna Divisão) */}
               <Select value={filterDivision} onValueChange={setFilterDivision}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Divisão" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="Pessoal">Pessoal</SelectItem>
-                  <SelectItem value="Familiar">Familiar</SelectItem>
-                  <SelectItem value="Investimento">Investimento</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Filtro Tipo (alinhado com coluna Tipo) */}
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="Essencial">Essencial</SelectItem>
-                  <SelectItem value="Importante">Importante</SelectItem>
-                  <SelectItem value="Conforto">Conforto</SelectItem>
-                  <SelectItem value="Investimento">Investimento</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Filtro Categoria (alinhado com coluna Categoria) */}
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {Array.from(new Set(transactions?.map(t => t.categoryName).filter(Boolean))).sort().map(category => (
-                    <SelectItem key={category} value={category!}>{category}</SelectItem>
+                  {uniqueDivisions.map(div => (
+                    <SelectItem key={div} value={div}>{div}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {/* Espaço para Valor */}
-              <div></div>
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {uniqueTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-              {/* Espaço para Saldo */}
-              <div></div>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {uniqueCategories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-              {/* Espaço para Ações */}
-              <div></div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFilterNature("all");
+                  setFilterDivision("all");
+                  setFilterType("all");
+                  setFilterCategory("all");
+                  setSearchTerm("");
+                }}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Limpar
+              </Button>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-auto p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExport}
+                    className="w-full justify-start"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar como CSV
+                  </Button>
+                </PopoverContent>
+              </Popover>
+
+              <InvoiceImport onTransactionsExtracted={handleTransactionsExtracted} />
             </div>
           </div>
 
-          {/* Tabela */}
-          {transactionsWithBalance && transactionsWithBalance.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8">Carregando lançamentos...</div>
+          ) : (
             <div className="rounded-md border border-border overflow-hidden">
               <Table>
                 <TableHeader>
@@ -459,37 +414,17 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                     >
                       <div className="flex items-center gap-2">
                         Data
-                        {sortField === "date" && (
-                          sortOrder === "asc" ? 
-                            <span className="text-primary">↑</span> : 
-                            <span className="text-primary">↓</span>
-                        )}
+                        {sortField === "date" && (sortOrder === "asc" ? " ↑" : " ↓")}
                       </div>
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none hover:bg-accent/50"
-                      onClick={() => handleSort("description")}
-                    >
-                      <div className="flex items-center gap-2">
-                        Descrição
-                        {sortField === "description" && (
-                          sortOrder === "asc" ? 
-                            <span className="text-primary">↑</span> : 
-                            <span className="text-primary">↓</span>
-                        )}
-                      </div>
-                    </TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead 
                       className="cursor-pointer select-none hover:bg-accent/50"
                       onClick={() => handleSort("nature")}
                     >
                       <div className="flex items-center gap-2">
                         Natureza
-                        {sortField === "nature" && (
-                          sortOrder === "asc" ? 
-                            <span className="text-primary">↑</span> : 
-                            <span className="text-primary">↓</span>
-                        )}
+                        {sortField === "nature" && (sortOrder === "asc" ? " ↑" : " ↓")}
                       </div>
                     </TableHead>
                     <TableHead>Divisão</TableHead>
@@ -501,11 +436,7 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                     >
                       <div className="flex items-center justify-end gap-2">
                         Valor
-                        {sortField === "amount" && (
-                          sortOrder === "asc" ? 
-                            <span className="text-primary">↑</span> : 
-                            <span className="text-primary">↓</span>
-                        )}
+                        {sortField === "amount" && (sortOrder === "asc" ? " ↑" : " ↓")}
                       </div>
                     </TableHead>
                     <TableHead className="text-right">Saldo</TableHead>
@@ -514,26 +445,24 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                 </TableHeader>
                 <TableBody>
                   {transactionsWithBalance.map((transaction, index) => {
-                    // Determinar cor alternada baseada em mudança de data
                     let isNewDateGroup = false;
                     if (index === 0) {
                       isNewDateGroup = true;
                     } else {
-                      const prevDate = new Date(transactionsWithBalance[index - 1].date).toDateString();
                       const currentDate = new Date(transaction.date).toDateString();
-                      isNewDateGroup = prevDate !== currentDate;
+                      const prevDate = new Date(transactionsWithBalance[index - 1].date).toDateString();
+                      isNewDateGroup = currentDate !== prevDate;
                     }
-                    
-                    // Contar quantos grupos de data já passaram
+
                     let dateGroupIndex = 0;
                     for (let i = 0; i < index; i++) {
-                      const prevDate = new Date(transactionsWithBalance[i].date).toDateString();
-                      const currentDate = new Date(transactionsWithBalance[i + 1]?.date || transaction.date).toDateString();
-                      if (prevDate !== currentDate) {
+                      const currentDate = new Date(transactionsWithBalance[i].date).toDateString();
+                      const nextDate = new Date(transactionsWithBalance[i + 1]?.date || 0).toDateString();
+                      if (currentDate !== nextDate) {
                         dateGroupIndex++;
                       }
                     }
-                    
+
                     const rowBgClass = dateGroupIndex % 2 === 0 ? "" : "bg-muted/30";
                     
                     return (
@@ -628,42 +557,10 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                 </TableBody>
               </Table>
             </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Filter className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">Nenhuma transação encontrada</p>
-              <p className="text-sm mt-2">
-                {hasActiveFilters
-                  ? "Tente ajustar os filtros ou limpar para ver todas as transações"
-                  : "Comece criando seu primeiro lançamento"}
-              </p>
-            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Dialog de confirmação de exclusão */}
-      <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Dialog de exclusão de recorrente */}
       <DeleteRecurringDialog
         open={deleteRecurringId !== null}
         onOpenChange={(open) => {
@@ -677,16 +574,32 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
         transactionDescription={deleteRecurringDescription}
       />
 
-      {/* Validação de importação */}
-      {showValidation && importedTransactions.length > 0 && (
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {showValidation && (
         <InvoiceValidation
           transactions={importedTransactions}
           paymentDate={importPaymentDate}
           bankName={importBankName}
           onComplete={handleImportComplete}
-          onCancel={handleImportCancel}
+          onCancel={() => setShowValidation(false)}
         />
       )}
-    </>
+    </div>
   );
 }
