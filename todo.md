@@ -748,3 +748,10 @@
 - [x] Aplicar mesma lógica em todos os cálculos de saldo (currentBalance, initialBalance)
 - [x] Validar que transações futuras (date > hoje) ainda respeitam o campo isPaid
 - [x] Testar: Saldo Atual passou de R$ 26.211,43 para R$ 26.144,14 (valor correto do banco)
+
+## Feature: Indicador Visual para Transações Agendadas
+- [x] Adicionar badge "Agendado" para transações futuras (date > hoje e isPaid = 0)
+- [x] Usar cor âmbar/amarelo para destacar transações agendadas
+- [x] Adicionar ícone de relógio (Clock) para indicar pendência
+- [x] Aplicar indicador na listagem de transações (TransactionsList)
+- [x] Testar indicador em diferentes períodos e estados

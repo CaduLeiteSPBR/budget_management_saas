@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download } from "lucide-react";
+import { Edit, Trash2, Filter, X, ArrowUpCircle, ArrowDownCircle, Download, Clock } from "lucide-react";
 import { toast } from "sonner";
 import InvoiceImport from "@/components/InvoiceImport";
 import InvoiceValidation from "@/components/InvoiceValidation";
@@ -543,7 +543,15 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{transaction.description}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium">{transaction.description}</div>
+                            {transaction.date > Date.now() && !transaction.isPaid && (
+                              <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs gap-1">
+                                <Clock className="w-3 h-3" />
+                                Agendado
+                              </Badge>
+                            )}
+                          </div>
                           {transaction.notes && (
                             <div className="text-xs text-muted-foreground mt-1">
                               {transaction.notes}
