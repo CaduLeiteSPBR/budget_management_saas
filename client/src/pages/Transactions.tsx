@@ -75,12 +75,10 @@ export default function Transactions() {
                 </p>
               </div>
             </div>
-            {!showForm && (
-              <Button onClick={handleNewTransaction} className="gap-2">
-                <Plus className="w-4 h-4" />
-                Novo Lançamento
-              </Button>
-            )}
+            <Button onClick={handleNewTransaction} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Lançamento
+            </Button>
           </div>
         </div>
       </header>

@@ -772,3 +772,4 @@
 - [x] Investigar onde o botão estava antes das mudanças
 - [x] Restaurar botão "Novo Lançamento" na tela de lançamentos
 - [x] Verificar se o botão está funcionando corretamente
+- [x] Confirmar que o botão está visível na página /transactions
