@@ -773,3 +773,8 @@
 - [x] Restaurar botão "Novo Lançamento" na tela de lançamentos
 - [x] Verificar se o botão está funcionando corretamente
 - [x] Confirmar que o botão está visível na página /transactions
+
+## Bug: Botão "Novo Lançamento" não aparece na aba Lançamentos do Dashboard
+- [x] Adicionar botão "Novo Lançamento" na aba Lançamentos do Dashboard
+- [x] Implementar lógica para abrir formulário de novo lançamento
+- [x] Garantir que o botão está sempre visível na aba Lançamentos

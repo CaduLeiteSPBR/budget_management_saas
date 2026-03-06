@@ -568,6 +568,18 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Lançamentos</h2>
+                <p className="text-sm text-muted-foreground">Gerencie suas transações financeiras</p>
+              </div>
+              {!showTransactionForm && (
+                <Button onClick={() => setShowTransactionForm(true)} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Novo Lançamento
+                </Button>
+              )}
+            </div>
             {showTransactionForm ? (
               <TransactionForm
                 transactionId={editingTransactionId}
