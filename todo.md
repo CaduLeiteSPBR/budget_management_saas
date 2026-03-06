@@ -767,3 +767,8 @@
 - [x] Automaticamente marcar essas transações como pagas (isPaid = 1)
 - [x] Remover tag "Agendado" dessas transações
 - [x] Atualizar lista sem necessidade de refresh manual
+
+## Bug: Botão "Novo Lançamento" desapareceu da tela
+- [x] Investigar onde o botão estava antes das mudanças
+- [x] Restaurar botão "Novo Lançamento" na tela de lançamentos
+- [x] Verificar se o botão está funcionando corretamente
