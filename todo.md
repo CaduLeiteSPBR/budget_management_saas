@@ -784,3 +784,11 @@
 - [x] Remover lógica de atualização automática de isPaid ao carregar lançamentos
 - [x] Remover ícone Clock dos imports se não for mais usado
 - [x] Testar que transações futuras não mostram mais indicador visual
+
+## Bug: Cálculo incorreto do Saldo Mínimo e Saldo Inicial em períodos subsequentes
+- [x] Saldo Mínimo de Abril mostra -R$ 10.945,49 mas deveria ser -R$ 14.087,70 (falta somar saldo final de março)
+- [x] Saldo Inicial de Abril deveria ser atualizado automaticamente para o saldo final do mês anterior
+- [x] Investigar lógica de cálculo do minBalance no backend (routers.ts)
+- [x] Corrigir para incluir saldo anterior no cálculo do saldo mínimo
+- [x] Implementar atualização automática do initialBalance baseado no período anterior
+- [x] Atualizar transacção de Saldo Inicial de Abril para o valor correto (R$ 3.142,21)

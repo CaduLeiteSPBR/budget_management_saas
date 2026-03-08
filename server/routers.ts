@@ -550,16 +550,15 @@ export const appRouter = router({
         const firstDayOfPeriod = Date.UTC(selectedYear, selectedMonths[0] - 1, 1, 0, 0, 0, 0);
         
         // Buscar todas as transações até o dia anterior ao período para calcular saldo inicial
-        // REGRA: Transações com date < hoje são automaticamente consideradas pagas
+        // REGRA: Transações com date < firstDayOfPeriod são automaticamente consideradas pagas
         // Excluir a própria transação de 'Saldo Inicial' para não duplicá-la
         const initialBalanceResult = await database.execute(sql`
           SELECT 
             SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao
           FROM transactions
           WHERE userId = ${ctx.user.id}
-          AND (date < ${firstDayOfPeriod} OR isPaid = 1)
-          AND date >= ${saldoInicialDate}
           AND date < ${firstDayOfPeriod}
+          AND date >= ${saldoInicialDate}
           AND description NOT LIKE '%Saldo Inicial%'
         `);
         

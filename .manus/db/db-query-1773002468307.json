@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE transactions \nSET amount = 3142.21\nWHERE userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nAND description LIKE '%Saldo Inicial%'\nAND MONTH(FROM_UNIXTIME(date/1000)) = 4\nAND YEAR(FROM_UNIXTIME(date/1000)) = 2026;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute UPDATE transactions \nSET amount = 3142.21\nWHERE userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nAND description LIKE '%Saldo Inicial%'\nAND MONTH(FROM_UNIXTIME(date/1000)) = 4\nAND YEAR(FROM_UNIXTIME(date/1000)) = 2026;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 62
+}

@@ -1,0 +1,60 @@
+{
+  "query": "SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes,\n  YEAR(FROM_UNIXTIME(t.date/1000)) as ano\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nORDER BY t.date DESC\nLIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes,\n  YEAR(FROM_UNIXTIME(t.date/1000)) as ano\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nORDER BY t.date DESC\nLIMIT 5;",
+  "rows": [
+    {
+      "id": "330138",
+      "description": "Teste",
+      "amount": "100.00",
+      "nature": "Saída",
+      "date": "1924905600000",
+      "data_formatada": "31/12/2030",
+      "mes": "12",
+      "ano": "2030"
+    },
+    {
+      "id": "270059",
+      "description": "Previsão CC Sicredi Visa",
+      "amount": "10000.00",
+      "nature": "Saída",
+      "date": "1924214400000",
+      "data_formatada": "23/12/2030",
+      "mes": "12",
+      "ano": "2030"
+    },
+    {
+      "id": "270177",
+      "description": "Previsão CC C6 Mastercard (Fatura Total: R$ 15000.00)",
+      "amount": "8400.00",
+      "nature": "Saída",
+      "date": "1923955200000",
+      "data_formatada": "20/12/2030",
+      "mes": "12",
+      "ano": "2030"
+    },
+    {
+      "id": "270118",
+      "description": "Previsão CC C6 Mastercard",
+      "amount": "15000.00",
+      "nature": "Saída",
+      "date": "1923955200000",
+      "data_formatada": "20/12/2030",
+      "mes": "12",
+      "ano": "2030"
+    },
+    {
+      "id": "540059",
+      "description": "Studio Klabin - Enel",
+      "amount": "90.00",
+      "nature": "Saída",
+      "date": "1923350400000",
+      "data_formatada": "13/12/2030",
+      "mes": "12",
+      "ano": "2030"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tnature\tdate\tdata_formatada\tmes\tano\n330138\tTeste\t100.00\tSaída\t1924905600000\t31/12/2030\t12\t2030\n270059\tPrevisão CC Sicredi Visa\t10000.00\tSaída\t1924214400000\t23/12/2030\t12\t2030\n270177\tPrevisão CC C6 Mastercard (Fatura Total: R$ 15000.00)\t8400.00\tSaída\t1923955200000\t20/12/2030\t12\t2030\n270118\tPrevisão CC C6 Mastercard\t15000.00\tSaída\t1923955200000\t20/12/2030\t12\t2030\n540059\tStudio Klabin - Enel\t90.00\tSaída\t1923350400000\t13/12/2030\t12\t2030\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

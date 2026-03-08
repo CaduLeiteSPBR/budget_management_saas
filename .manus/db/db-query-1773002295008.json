@@ -1,0 +1,19 @@
+{
+  "query": "SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nORDER BY t.date ASC\nLIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'caduleitenet@gmail.com')\nORDER BY t.date ASC\nLIMIT 1;",
+  "rows": [
+    {
+      "id": "810004",
+      "description": "Saldo Inicial",
+      "amount": "0.00",
+      "nature": "Entrada",
+      "date": "1738368000000",
+      "data_formatada": "01/02/2025",
+      "mes": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdescription\tamount\tnature\tdate\tdata_formatada\tmes\n810004\tSaldo Inicial\t0.00\tEntrada\t1738368000000\t01/02/2025\t2\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

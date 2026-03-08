@@ -1,0 +1,9 @@
+{
+  "query": "SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  t.isSystemGenerated,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes,\n  YEAR(FROM_UNIXTIME(t.date/1000)) as ano\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'adri_assis@hotmail.com')\nAND t.isSystemGenerated = 1\nORDER BY t.date DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT \n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  t.isSystemGenerated,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada,\n  MONTH(FROM_UNIXTIME(t.date/1000)) as mes,\n  YEAR(FROM_UNIXTIME(t.date/1000)) as ano\nFROM transactions t\nWHERE t.userId = (SELECT id FROM users WHERE email = 'adri_assis@hotmail.com')\nAND t.isSystemGenerated = 1\nORDER BY t.date DESC;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 50
+}

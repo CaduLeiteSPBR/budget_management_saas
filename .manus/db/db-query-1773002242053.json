@@ -1,0 +1,190 @@
+{
+  "query": "SELECT \n  u.email,\n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada\nFROM transactions t\nJOIN users u ON t.userId = u.id\nWHERE t.description LIKE '%Saldo%'\nORDER BY u.email, t.date DESC\nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT \n  u.email,\n  t.id,\n  t.description,\n  t.amount,\n  t.nature,\n  t.date,\n  DATE_FORMAT(FROM_UNIXTIME(t.date/1000), '%d/%m/%Y') as data_formatada\nFROM transactions t\nJOIN users u ON t.userId = u.id\nWHERE t.description LIKE '%Saldo%'\nORDER BY u.email, t.date DESC\nLIMIT 20;",
+  "rows": [
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390058",
+      "description": "Saldo Inicial",
+      "amount": "886859.82",
+      "nature": "Entrada",
+      "date": "1922313600000",
+      "data_formatada": "01/12/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390057",
+      "description": "Saldo Inicial",
+      "amount": "870449.82",
+      "nature": "Entrada",
+      "date": "1919721600000",
+      "data_formatada": "01/11/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390056",
+      "description": "Saldo Inicial",
+      "amount": "854039.82",
+      "nature": "Entrada",
+      "date": "1917043200000",
+      "data_formatada": "01/10/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390055",
+      "description": "Saldo Inicial",
+      "amount": "837629.82",
+      "nature": "Entrada",
+      "date": "1914451200000",
+      "data_formatada": "01/09/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390054",
+      "description": "Saldo Inicial",
+      "amount": "821219.82",
+      "nature": "Entrada",
+      "date": "1911772800000",
+      "data_formatada": "01/08/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390053",
+      "description": "Saldo Inicial",
+      "amount": "804809.82",
+      "nature": "Entrada",
+      "date": "1909094400000",
+      "data_formatada": "01/07/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390052",
+      "description": "Saldo Inicial",
+      "amount": "788399.82",
+      "nature": "Entrada",
+      "date": "1906502400000",
+      "data_formatada": "01/06/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390051",
+      "description": "Saldo Inicial",
+      "amount": "771989.82",
+      "nature": "Entrada",
+      "date": "1903824000000",
+      "data_formatada": "01/05/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390050",
+      "description": "Saldo Inicial",
+      "amount": "755579.82",
+      "nature": "Entrada",
+      "date": "1901232000000",
+      "data_formatada": "01/04/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390049",
+      "description": "Saldo Inicial",
+      "amount": "739169.82",
+      "nature": "Entrada",
+      "date": "1898553600000",
+      "data_formatada": "01/03/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390048",
+      "description": "Saldo Inicial",
+      "amount": "722759.82",
+      "nature": "Entrada",
+      "date": "1896134400000",
+      "data_formatada": "01/02/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390047",
+      "description": "Saldo Inicial",
+      "amount": "706349.82",
+      "nature": "Entrada",
+      "date": "1893456000000",
+      "data_formatada": "01/01/2030"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390046",
+      "description": "Saldo Inicial",
+      "amount": "689939.82",
+      "nature": "Entrada",
+      "date": "1890777600000",
+      "data_formatada": "01/12/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390045",
+      "description": "Saldo Inicial",
+      "amount": "673529.82",
+      "nature": "Entrada",
+      "date": "1888185600000",
+      "data_formatada": "01/11/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390044",
+      "description": "Saldo Inicial",
+      "amount": "657119.82",
+      "nature": "Entrada",
+      "date": "1885507200000",
+      "data_formatada": "01/10/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390043",
+      "description": "Saldo Inicial",
+      "amount": "640709.82",
+      "nature": "Entrada",
+      "date": "1882915200000",
+      "data_formatada": "01/09/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390042",
+      "description": "Saldo Inicial",
+      "amount": "624299.82",
+      "nature": "Entrada",
+      "date": "1880236800000",
+      "data_formatada": "01/08/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390041",
+      "description": "Saldo Inicial",
+      "amount": "607889.82",
+      "nature": "Entrada",
+      "date": "1877558400000",
+      "data_formatada": "01/07/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390040",
+      "description": "Saldo Inicial",
+      "amount": "591479.82",
+      "nature": "Entrada",
+      "date": "1874966400000",
+      "data_formatada": "01/06/2029"
+    },
+    {
+      "email": "caduleitenet@gmail.com",
+      "id": "390039",
+      "description": "Saldo Inicial",
+      "amount": "575069.82",
+      "nature": "Entrada",
+      "date": "1872288000000",
+      "data_formatada": "01/05/2029"
+    }
+  ],
+  "messages": [],
+  "stdout": "email\tid\tdescription\tamount\tnature\tdate\tdata_formatada\ncaduleitenet@gmail.com\t390058\tSaldo Inicial\t886859.82\tEntrada\t1922313600000\t01/12/2030\ncaduleitenet@gmail.com\t390057\tSaldo Inicial\t870449.82\tEntrada\t1919721600000\t01/11/2030\ncaduleitenet@gmail.com\t390056\tSaldo Inicial\t854039.82\tEntrada\t1917043200000\t01/10/2030\ncaduleitenet@gmail.com\t390055\tSaldo Inicial\t837629.82\tEntrada\t1914451200000\t01/09/2030\ncaduleitenet@gmail.com\t390054\tSaldo Inicial\t821219.82\tEntrada\t1911772800000\t01/08/2030\ncaduleitenet@gmail.com\t390053\tSaldo Inicial\t804809.82\tEntrada\t1909094400000\t01/07/2030\ncaduleitenet@gmail.com\t390052\tSaldo Inicial\t788399.82\tEntrada\t1906502400000\t01/06/2030\ncaduleitenet@gmail.com\t390051\tSaldo Inicial\t771989.82\tEntrada\t1903824000000\t01/05/2030\ncaduleitenet@gmail.com\t390050\tSaldo Inicial\t755579.82\tEntrada\t1901232000000\t01/04/2030\ncaduleitenet@gmail.com\t390049\tSaldo Inicial\t739169.82\tEntrada\t1898553600000\t01/03/2030\ncaduleitenet@gmail.com\t390048\tSaldo Inicial\t722759.82\tEntrada\t1896134400000\t01/02/2030\ncaduleitenet@gmail.com\t390047\tSaldo Inicial\t706349.82\tEntrada\t1893456000000\t01/01/2030\ncaduleitenet@gmail.com\t390046\tSaldo Inicial\t689939.82\tEntrada\t1890777600000\t01/12/2029\ncaduleitenet@gmail.com\t390045\tSaldo Inicial\t673529.82\tEntrada\t1888185600000\t01/11/2029\ncaduleitenet@gmail.com\t390044\tSaldo Inicial\t657119.82\tEntrada\t1885507200000\t01/10/2029\ncaduleitenet@gmail.com\t390043\tSaldo Inicial\t640709.82\tEntrada\t1882915200000\t01/09/2029\ncaduleitenet@gmail.com\t390042\tSaldo Inicial\t624299.82\tEntrada\t1880236800000\t01/08/2029\ncaduleitenet@gmail.com\t390041\tSaldo Inicial\t607889.82\tEntrada\t1877558400000\t01/07/2029\ncaduleitenet@gmail.com\t390040\tSaldo Inicial\t591479.82\tEntrada\t1874966400000\t01/06/2029\ncaduleitenet@gmail.com\t390039\tSaldo Inicial\t575069.82\tEntrada\t1872288000000\t01/05/2029\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

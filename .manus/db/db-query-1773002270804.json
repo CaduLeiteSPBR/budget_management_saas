@@ -1,0 +1,9 @@
+{
+  "query": "SELECT \n  u.id,\n  u.email,\n  COUNT(t.id) as total_transacoes\nFROM users u\nLEFT JOIN transactions t ON u.id = t.userId\nWHERE u.email = 'adri_assis@hotmail.com'\nGROUP BY u.id, u.email;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 26x2gGqtj2qmxT9.dbac34d63271 --database BpLVoFkZmNnvLiHEa2tSFD --execute SELECT \n  u.id,\n  u.email,\n  COUNT(t.id) as total_transacoes\nFROM users u\nLEFT JOIN transactions t ON u.id = t.userId\nWHERE u.email = 'adri_assis@hotmail.com'\nGROUP BY u.id, u.email;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 54
+}
