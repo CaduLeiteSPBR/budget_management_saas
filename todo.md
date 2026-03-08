@@ -778,3 +778,9 @@
 - [x] Adicionar botão "Novo Lançamento" na aba Lançamentos do Dashboard
 - [x] Implementar lógica para abrir formulário de novo lançamento
 - [x] Garantir que o botão está sempre visível na aba Lançamentos
+
+## Feature: Remover conceito de "Agendado"
+- [x] Remover badge/flag visual "Agendado" do componente TransactionsList
+- [x] Remover lógica de atualização automática de isPaid ao carregar lançamentos
+- [x] Remover ícone Clock dos imports se não for mais usado
+- [x] Testar que transações futuras não mostram mais indicador visual
