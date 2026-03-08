@@ -804,3 +804,8 @@
 - [x] Manter título e linha de período fixos no topo
 - [x] Permitir rolagem do conteúdo abaixo (widgets e seções)
 - [x] Aplicar sticky positioning ao header
+
+## Bug: Widgets permanecem fixos ao fazer scroll
+- [x] Remover sticky dos widgets
+- [x] Manter apenas header (título + período) sticky
+- [x] Widgets devem rolar junto com o conteúdo
