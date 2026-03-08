@@ -792,3 +792,15 @@
 - [x] Corrigir para incluir saldo anterior no cálculo do saldo mínimo
 - [x] Implementar atualização automática do initialBalance baseado no período anterior
 - [x] Atualizar transacção de Saldo Inicial de Abril para o valor correto (R$ 3.142,21)
+
+## Feature: Atualiza\u00e7\u00e3o Autom\u00e1tica de Saldos Iniciais de Per\u00edodos Subsequentes
+- [ ] Criar fun\u00e7\u00e3o que recalcula saldos iniciais de todos os meses seguintes
+- [ ] Integrar fun\u00e7\u00e3o no procedimento de cria\u00e7\u00e3o de transa\u00e7\u00f5es
+- [ ] Integrar fun\u00e7\u00e3o no procedimento de atualiza\u00e7\u00e3o de transa\u00e7\u00f5es
+- [ ] Integrar fun\u00e7\u00e3o no procedimento de dele\u00e7\u00e3o de transa\u00e7\u00f5es
+- [ ] Testar com m\u00faltiplos per\u00edodos para garantir propaga\u00e7\u00e3o correta
+
+## Feature: Header Sticky no Dashboard
+- [x] Manter título e linha de período fixos no topo
+- [x] Permitir rolagem do conteúdo abaixo (widgets e seções)
+- [x] Aplicar sticky positioning ao header

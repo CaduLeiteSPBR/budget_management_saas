@@ -200,6 +200,64 @@ export async function deleteCategory(id: number, userId: number) {
 
 // ==================== TRANSACTIONS ====================
 
+// Função auxiliar para atualizar automaticamente saldos iniciais de períodos subsequentes
+export async function updateSubsequentInitialBalances(userId: number, transactionDate: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  try {
+    // Determinar o mês e ano da transação
+    const txDateObj = new Date(transactionDate);
+    const txMonth = txDateObj.getUTCMonth() + 1;
+    const txYear = txDateObj.getUTCFullYear();
+    
+    // Encontrar o saldo inicial do ano (primeira transação de Saldo Inicial)
+    const [saldoInicial] = await db.execute(sql`
+      SELECT amount, date FROM transactions
+      WHERE userId = ${userId}
+      AND description LIKE '%Saldo Inicial%'
+      ORDER BY date ASC
+      LIMIT 1
+    `) as any[];
+    
+    if (!saldoInicial) return;
+    
+    const saldoInicialValue = Number(saldoInicial.amount);
+    const saldoInicialDate = saldoInicial.date;
+    
+    // Para cada mês a partir do mês da transação + 1
+    for (let month = txMonth + 1; month <= 12; month++) {
+      const firstDayOfMonth = Date.UTC(txYear, month - 1, 1, 0, 0, 0, 0);
+      
+      // Calcular saldo inicial do mês (saldo final do mês anterior)
+      const [balanceResult] = await db.execute(sql`
+        SELECT 
+          SUM(CASE WHEN nature = 'Entrada' THEN CAST(amount AS DECIMAL(10,2)) ELSE -CAST(amount AS DECIMAL(10,2)) END) as movimentacao
+        FROM transactions
+        WHERE userId = ${userId}
+        AND date < ${firstDayOfMonth}
+        AND date >= ${saldoInicialDate}
+        AND description NOT LIKE '%Saldo Inicial%'
+      `) as any[];
+      
+      const movimentacao = Number(balanceResult?.movimentacao || 0);
+      const newInitialBalance = saldoInicialValue + movimentacao;
+      
+      // Atualizar a transação de Saldo Inicial do mês
+      await db.execute(sql`
+        UPDATE transactions
+        SET amount = ${newInitialBalance}
+        WHERE userId = ${userId}
+        AND description LIKE '%Saldo Inicial%'
+        AND MONTH(FROM_UNIXTIME(date/1000)) = ${month}
+        AND YEAR(FROM_UNIXTIME(date/1000)) = ${txYear}
+      `);
+    }
+  } catch (error) {
+    console.error('[updateSubsequentInitialBalances] Error:', error);
+  }
+}
+
 export async function createTransaction(data: InsertTransaction): Promise<Transaction> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -234,6 +292,12 @@ export async function createTransaction(data: InsertTransaction): Promise<Transa
   
   const [newTransaction] = await db.select().from(transactions).where(eq(transactions.id, insertId));
   if (!newTransaction) throw new Error("Failed to retrieve created transaction");
+  
+  // Atualizar saldos iniciais de períodos subsequentes
+  if (data.userId && data.date) {
+    await updateSubsequentInitialBalances(data.userId, data.date);
+  }
+  
   return newTransaction;
 }
 
@@ -285,12 +349,26 @@ export async function updateTransaction(id: number, userId: number, data: Partia
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(transactions).set(data).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+  
+  // Atualizar saldos iniciais de periodos subsequentes se a data foi alterada
+  if (data.date) {
+    await updateSubsequentInitialBalances(userId, data.date);
+  }
 }
 
 export async function deleteTransaction(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  
+  // Obter a data da transacao antes de deletar
+  const [txToDelete] = await db.select().from(transactions).where(eq(transactions.id, id));
+  
   await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+  
+  // Atualizar saldos iniciais de periodos subsequentes
+  if (txToDelete && txToDelete.date) {
+    await updateSubsequentInitialBalances(userId, txToDelete.date);
+  }
 }
 
 export async function getUserBalance(userId: number): Promise<number> {
