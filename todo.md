@@ -887,3 +887,12 @@
 - [x] Aplicar ordem de widgets baseado em widgetOrder salvo
 - [x] Atualizar tela principal imediatamente ao clicar em Salvar
 - [x] Testar reordenação com múltiplos widgets
+
+
+## Bug: Sugestões da IA com floreios e muito longas
+- [x] Refatorar prompt para gerar apenas 3 bullets objetivos
+- [x] Limitar cada bullet a máximo 15 palavras
+- [x] Remover introdução e explicações extras
+- [x] Implementar limpeza de símbolos de bullet (•, -, *)
+- [x] Criar testes para validar qualidade das sugestões
+- [x] Validar que sugestões são concisos e acionáveis

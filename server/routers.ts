@@ -1186,13 +1186,17 @@ Retorne apenas JSON válido.`,
       try {
         const response = await invokeLLM({
           messages: [
-            { role: 'system', content: 'Você é um consultor financeiro experiente. Forneça APENAS 3 sugestões práticas em bullets, sem apresentação.' },
-            { role: 'user', content: `Análise: Renda R$ ${totalIncome.toFixed(2)}, Despesas R$ ${totalExpenses.toFixed(2)}, Saldo R$ ${balance.toFixed(2)}, Burn Rate R$ ${burnRate.toFixed(2)}/dia, Ticket Médio R$ ${avgExpense.toFixed(2)}, Gastos ${expenseRatio.toFixed(1)}%, Investimentos R$ ${totalInvestments.toFixed(2)}, Cartão ${cardTrend > 0 ? '+' : ''}${cardTrend.toFixed(1)}%. Gere 3 sugestões. Responda APENAS com 3 bullets.` },
+            { role: 'system', content: 'Você é um consultor financeiro. Gere EXATAMENTE 3 sugestões curtas (máx 15 palavras cada). Sem introdução, sem explicações. Apenas bullets diretos e acionáveis.' },
+            { role: 'user', content: `Renda: R$ ${totalIncome.toFixed(2)} | Despesas: R$ ${totalExpenses.toFixed(2)} | Saldo: R$ ${balance.toFixed(2)} | Burn Rate: R$ ${burnRate.toFixed(2)}/dia | Ticket Médio: R$ ${avgExpense.toFixed(2)} | Gastos: ${expenseRatio.toFixed(1)}% | Investimentos: R$ ${totalInvestments.toFixed(2)} | Cartão: ${cardTrend > 0 ? '+' : ''}${cardTrend.toFixed(1)}%\n\nGere 3 bullets objetivos (máx 15 palavras cada). Responda APENAS com os 3 bullets, sem numeração, sem explicações.` },
           ],
         });
         const content = response.choices[0]?.message?.content || '';
         const contentStr = typeof content === 'string' ? content : '';
-        const suggestions = contentStr.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 3);
+        const suggestions = contentStr
+          .split('\n')
+          .map((line: string) => line.replace(/^[•\-*]\s*/, '').trim())
+          .filter((line: string) => line.length > 0 && line.length < 200)
+          .slice(0, 3);
         return { suggestions };
       } catch (error) {
         return { suggestions: ['Analise seus gastos', 'Estabeleça metas mensais', 'Revise suas assinaturas'] };
