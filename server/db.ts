@@ -11,6 +11,7 @@ import {
   budgets,
   aiLearning,
   creditCards,
+  dashboardPreferences,
   type Category,
   type Transaction,
   type Subscription,
@@ -19,6 +20,7 @@ import {
   type Budget,
   type AiLearning,
   type CreditCard,
+  type DashboardPreferences,
   type InsertCategory,
   type InsertTransaction,
   type InsertSubscription,
@@ -27,6 +29,7 @@ import {
   type InsertBudget,
   type InsertAiLearning,
   type InsertCreditCard,
+  type InsertDashboardPreferences,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -820,4 +823,43 @@ export async function deleteCreditCard(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(creditCards).where(and(eq(creditCards.id, id), eq(creditCards.userId, userId)));
+}
+
+
+// ==================== DASHBOARD PREFERENCES ====================
+
+export async function getDashboardPreferences(userId: number): Promise<DashboardPreferences | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [prefs] = await db
+    .select()
+    .from(dashboardPreferences)
+    .where(eq(dashboardPreferences.userId, userId))
+    .limit(1);
+  return prefs;
+}
+
+export async function saveDashboardPreferences(userId: number, data: {
+  widgetOrder: string[];
+  hiddenWidgets: string[];
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getDashboardPreferences(userId);
+  
+  const prefsData = {
+    userId,
+    widgetOrder: JSON.stringify(data.widgetOrder),
+    hiddenWidgets: JSON.stringify(data.hiddenWidgets),
+  };
+  
+  if (existing) {
+    await db
+      .update(dashboardPreferences)
+      .set(prefsData)
+      .where(eq(dashboardPreferences.userId, userId));
+  } else {
+    await db.insert(dashboardPreferences).values(prefsData);
+  }
 }

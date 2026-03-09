@@ -809,3 +809,40 @@
 - [x] Remover sticky dos widgets
 - [x] Manter apenas header (título + período) sticky
 - [x] Widgets devem rolar junto com o conteúdo
+
+
+## Feature: Dashboard Customizável com Persistência
+- [ ] Criar tabela de preferências do usuário no banco de dados
+- [ ] Adicionar campos: widgetOrder (array de widget IDs), hiddenWidgets (array de widget IDs)
+- [ ] Implementar API para salvar/carregar preferências do usuário
+- [ ] Adicionar ícone de configuração em cada widget
+- [ ] Implementar drag-and-drop para reordenar widgets
+- [ ] Adicionar botão de ocultar/mostrar em cada widget
+- [ ] Persistir preferências automaticamente ao reordenar/ocultar
+- [ ] Carregar preferências ao abrir dashboard
+- [ ] Testar persistência em múltiplas sessões
+
+## Feature: Quadro de Sugestões com IA
+- [ ] Criar procedure de geração de sugestões (análise de padrões de gasto)
+- [ ] Implementar IA para gerar 3 sugestões personalizadas
+- [ ] Criar componente SuggestionsBox na interface
+- [ ] Posicionar entre widgets e abas (Visão Geral, Lançamentos, Cartões)
+- [ ] Exibir 3 bullets com sugestões
+- [ ] Adicionar botão de refresh para gerar novas sugestões
+- [ ] Implementar cache de sugestões (atualizar 1x por dia)
+- [ ] Testar geração de sugestões com diferentes perfis de gasto
+
+
+## Feature: Dashboard Customizável com Persistência
+- [x] Criar tabela de preferências do dashboard no banco de dados
+- [x] Implementar funções de salvar e carregar preferências
+- [x] Criar componentes de reordenação de widgets
+- [x] Implementar persistência de preferências no localStorage/banco
+- [x] Testar reordenação e ocultação de widgets
+
+## Feature: Quadro de Sugestões com IA
+- [x] Implementar geração de sugestões com LLM
+- [x] Criar componente SuggestionsBox
+- [x] Adicionar botão de refresh para regenerar sugestões
+- [x] Posicionar entre widgets e abas
+- [x] Testar geração de sugestões com diferentes dados

@@ -185,3 +185,20 @@ export const creditCards = mysqlTable("credit_cards", {
 
 export type CreditCard = typeof creditCards.$inferSelect;
 export type InsertCreditCard = typeof creditCards.$inferInsert;
+
+
+/**
+ * Preferências do Dashboard do usuário
+ * Armazena ordem e visibilidade dos widgets
+ */
+export const dashboardPreferences = mysqlTable("dashboard_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  widgetOrder: text("widgetOrder").notNull(), // JSON array de widget IDs em ordem
+  hiddenWidgets: text("hiddenWidgets").notNull(), // JSON array de widget IDs ocultos
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DashboardPreferences = typeof dashboardPreferences.$inferSelect;
+export type InsertDashboardPreferences = typeof dashboardPreferences.$inferInsert;

@@ -1107,7 +1107,62 @@ Retorne apenas JSON válido.`,
         return { success: true, projection };
       }),
   }),
+
+  dashboard: router({
+    getPreferences: protectedProcedure.query(async ({ ctx }) => {
+      const prefs = await db.getDashboardPreferences(ctx.user.id);
+      if (!prefs) {
+        return {
+          widgetOrder: ['saldoInicial', 'entradas', 'saidas', 'saldoMinimo', 'saldoAtual', 'fimDoMes'],
+          hiddenWidgets: [],
+        };
+      }
+      return {
+        widgetOrder: JSON.parse(prefs.widgetOrder),
+        hiddenWidgets: JSON.parse(prefs.hiddenWidgets),
+      };
+    }),
+
+    savePreferences: protectedProcedure
+      .input(z.object({
+        widgetOrder: z.array(z.string()),
+        hiddenWidgets: z.array(z.string()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.saveDashboardPreferences(ctx.user.id, input);
+        return { success: true };
+      }),
+
+    generateSuggestions: protectedProcedure.query(async ({ ctx }) => {
+      const transactions = await db.getUserTransactions(ctx.user.id);
+      const now = new Date();
+      const currentMonth = now.getUTCMonth();
+      const currentYear = now.getUTCFullYear();
+      const monthStart = Date.UTC(currentYear, currentMonth, 1, 0, 0, 0, 0);
+      const monthEnd = Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+      const monthTransactions = transactions.filter(t => t.date >= monthStart && t.date <= monthEnd);
+      const expenses = monthTransactions.filter(t => t.nature === 'Saída');
+      const income = monthTransactions.filter(t => t.nature === 'Entrada');
+      const totalExpenses = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0);
+      try {
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'Você é um consultor financeiro. Forneça 3 sugestões práticas.' },
+            { role: 'user', content: `Renda: R$ ${totalIncome.toFixed(2)}, Gastos: R$ ${totalExpenses.toFixed(2)}, Saldo: R$ ${(totalIncome - totalExpenses).toFixed(2)}.` },
+          ],
+        });
+        const content = response.choices[0]?.message?.content || '';
+        const contentStr = typeof content === 'string' ? content : '';
+        const suggestions = contentStr.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 3);
+        return { suggestions };
+      } catch (error) {
+        return { suggestions: ['Analise seus gastos', 'Estabeleça metas mensais', 'Revise suas assinaturas'] };
+      }
+    }),
+  }),
 });
+
 
 // Função auxiliar para ajustar data em meses curtos (regra do dia 31)
 function adjustDateForShortMonths(originalDay: number, targetYear: number, targetMonth: number): number {

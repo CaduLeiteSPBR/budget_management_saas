@@ -37,6 +37,7 @@ import OverviewDashboard from "@/components/OverviewDashboard";
 import TransactionsList from "@/components/TransactionsList";
 import TransactionForm from "@/components/TransactionForm";
 import CreditCardsTab from "@/components/CreditCardsTab";
+import { SuggestionsBox } from "@/components/SuggestionsBox";
 
 
 export default function Dashboard() {
@@ -543,6 +544,11 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Quadro de Sugestões */}
+        <div className="mb-8">
+          <SuggestionsBox />
         </div>
 
           <TabsList className="glass-strong">
