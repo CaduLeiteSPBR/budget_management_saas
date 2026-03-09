@@ -880,3 +880,10 @@
 - [x] Aplicar ocultação de widgets baseado em hiddenWidgets
 - [x] Reordenar widgets baseado em widgetOrder salvo
 - [x] Testar ocultação e reordenação funcionando corretamente
+
+
+## Bug: Reordenação de widgets não funciona
+- [x] Criar mapeamento de widgets para renderização dinâmica
+- [x] Aplicar ordem de widgets baseado em widgetOrder salvo
+- [x] Atualizar tela principal imediatamente ao clicar em Salvar
+- [x] Testar reordenação com múltiplos widgets

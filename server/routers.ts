@@ -1113,7 +1113,7 @@ Retorne apenas JSON válido.`,
       const prefs = await db.getDashboardPreferences(ctx.user.id);
       if (!prefs) {
         return {
-          widgetOrder: ['saldoInicial', 'entradas', 'saidas', 'saldoMinimo', 'saldoAtual', 'fimDoMes'],
+          widgetOrder: ['saldoInicial', 'entradas', 'saidas', 'fimDoMes', 'saldoAtual', 'saldoMinimo'],
           hiddenWidgets: [],
         };
       }
@@ -1122,6 +1122,16 @@ Retorne apenas JSON válido.`,
         hiddenWidgets: JSON.parse(prefs.hiddenWidgets),
       };
     }),
+
+    updatePreferences: protectedProcedure
+      .input(z.object({
+        widgetOrder: z.array(z.string()),
+        hiddenWidgets: z.array(z.string()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.saveDashboardPreferences(ctx.user.id, input);
+        return { success: true };
+      }),
 
     savePreferences: protectedProcedure
       .input(z.object({
