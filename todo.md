@@ -846,3 +846,30 @@
 - [x] Adicionar botão de refresh para regenerar sugestões
 - [x] Posicionar entre widgets e abas
 - [x] Testar geração de sugestões com diferentes dados
+
+
+## Feature: Botão "Personalizar Dashboard"
+- [ ] Criar modal de personalização com checkboxes para cada widget
+- [ ] Implementar drag-and-drop para reordenação de widgets
+- [ ] Salvar preferências automaticamente ao alterar
+- [ ] Testar persistência de preferências entre sessões
+
+## Feature: Melhorar Sugestões da IA
+- [ ] Adaptar prompt para gerar apenas 3 bullets objetivas
+- [ ] Remover apresentação e comentários do quadro
+- [ ] Testar geração de sugestões com novo formato
+
+
+## Bug: Modal de Personalização não persiste mudanças
+- [x] Implementar salvar de preferências no backend
+- [x] Recarregar widgets após salvar preferências
+- [x] Aplicar ordem e visibilidade dos widgets
+
+## Bug: Sugestões da IA muito genéricas
+- [x] Criar prompt sofisticado com análise financeira detalhada
+- [x] Analisar média de gastos e burn rate
+- [x] Analisar distribuição por categoria
+- [x] Verificar tendências de cartão de crédito
+- [x] Analisar relação entrada/saída
+- [x] Identificar aportes (investimentos)
+- [x] Gerar 3 sugestões objetivas baseadas em análise profunda

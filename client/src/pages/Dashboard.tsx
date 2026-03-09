@@ -38,12 +38,14 @@ import TransactionsList from "@/components/TransactionsList";
 import TransactionForm from "@/components/TransactionForm";
 import CreditCardsTab from "@/components/CreditCardsTab";
 import { SuggestionsBox } from "@/components/SuggestionsBox";
+import { CustomizeDashboardModal } from "@/components/CustomizeDashboardModal";
 
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<number | undefined>();
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const logoutMutation = trpc.auth.logout.useMutation();
 
   const handleLogout = async () => {
@@ -250,10 +252,20 @@ export default function Dashboard() {
                 </Button>
               </Link>
 
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowCustomizeModal(true)}
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden md:inline">Personalizar</span>
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Settings className="w-4 h-4" />
+                    <LogOut className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -617,6 +629,12 @@ export default function Dashboard() {
 
         </Tabs>
       </main>
+
+      {/* Modal de Personalização */}
+      <CustomizeDashboardModal
+        open={showCustomizeModal}
+        onOpenChange={setShowCustomizeModal}
+      />
     </div>
   );
 }

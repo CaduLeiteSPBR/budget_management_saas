@@ -1145,11 +1145,39 @@ Retorne apenas JSON válido.`,
       const income = monthTransactions.filter(t => t.nature === 'Entrada');
       const totalExpenses = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
       const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const burnRate = totalExpenses / daysInMonth;
+      const avgExpense = expenses.length > 0 ? totalExpenses / expenses.length : 0;
+      const balance = totalIncome - totalExpenses;
+      const expenseRatio = totalIncome > 0 ? (totalExpenses / totalIncome * 100) : 0;
+      
+      const categoryAnalysis = monthTransactions.reduce((acc: any, t) => {
+        const cat = t.categoryName || 'Sem categoria';
+        if (!acc[cat]) acc[cat] = { amount: 0, count: 0 };
+        acc[cat].amount += Number(t.amount);
+        acc[cat].count += 1;
+        return acc;
+      }, {});
+      
+      const investmentTransactions = transactions.filter(t => 
+        t.description?.toLowerCase().includes('aporte') ||
+        t.description?.toLowerCase().includes('investimento')
+      );
+      const totalInvestments = investmentTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+      const recentCardTransactions = transactions.filter(t => t.date >= twoWeeksAgo && t.description?.toLowerCase().includes('cartão'));
+      const olderCardTransactions = transactions.filter(t => t.date < twoWeeksAgo && t.date >= monthStart && t.description?.toLowerCase().includes('cartão'));
+      const recentCardSpend = recentCardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      const olderCardSpend = olderCardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      const cardTrend = olderCardSpend > 0 ? ((recentCardSpend - olderCardSpend) / olderCardSpend * 100) : 0;
+      
       try {
         const response = await invokeLLM({
           messages: [
-            { role: 'system', content: 'Você é um consultor financeiro. Forneça 3 sugestões práticas.' },
-            { role: 'user', content: `Renda: R$ ${totalIncome.toFixed(2)}, Gastos: R$ ${totalExpenses.toFixed(2)}, Saldo: R$ ${(totalIncome - totalExpenses).toFixed(2)}.` },
+            { role: 'system', content: 'Você é um consultor financeiro experiente. Forneça APENAS 3 sugestões práticas em bullets, sem apresentação.' },
+            { role: 'user', content: `Análise: Renda R$ ${totalIncome.toFixed(2)}, Despesas R$ ${totalExpenses.toFixed(2)}, Saldo R$ ${balance.toFixed(2)}, Burn Rate R$ ${burnRate.toFixed(2)}/dia, Ticket Médio R$ ${avgExpense.toFixed(2)}, Gastos ${expenseRatio.toFixed(1)}%, Investimentos R$ ${totalInvestments.toFixed(2)}, Cartão ${cardTrend > 0 ? '+' : ''}${cardTrend.toFixed(1)}%. Gere 3 sugestões. Responda APENAS com 3 bullets.` },
           ],
         });
         const content = response.choices[0]?.message?.content || '';
