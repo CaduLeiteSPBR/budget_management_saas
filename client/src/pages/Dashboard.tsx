@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,23 @@ export default function Dashboard() {
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<number | undefined>();
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const [hiddenWidgets, setHiddenWidgets] = useState<string[]>([]);
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(['saldoInicial', 'entradas', 'saidas', 'saldoMinimo', 'saldoAtual', 'fimDoMes']);
   const logoutMutation = trpc.auth.logout.useMutation();
+  const getPreferencesQuery = trpc.dashboard.getPreferences.useQuery();
+
+  // Carregar preferências ao montar o componente
+  useEffect(() => {
+    if (getPreferencesQuery.data) {
+      const { widgetOrder: order, hiddenWidgets: hidden } = getPreferencesQuery.data;
+      if (order && order.length > 0) {
+        setWidgetOrder(order);
+      }
+      if (hidden) {
+        setHiddenWidgets(hidden);
+      }
+    }
+  }, [getPreferencesQuery.data]);
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -415,6 +431,7 @@ export default function Dashboard() {
         {/* Stats Cards - 6 Widgets */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           {/* 1. Saldo Inicial */}
+          {!hiddenWidgets.includes('saldoInicial') && (
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -433,8 +450,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
           {/* 2. Entradas do Mês */}
+          {!hiddenWidgets.includes('entradas') && (
           <Card className="glass border-income hover:border-income transition-all glow-income">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -453,8 +472,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
           {/* 3. Saídas do Mês */}
+          {!hiddenWidgets.includes('saidas') && (
           <Card className="glass border-expense hover:border-expense transition-all glow-expense">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -473,8 +494,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
           {/* 4. Saldo Mínimo */}
+          {!hiddenWidgets.includes('saldoMinimo') && (
           <Card className={`glass transition-all ${
             minimumBalance < 0 
               ? 'border-red-500 border-2 animate-pulse' 
@@ -506,8 +529,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
           {/* 5. Saldo Atual */}
+          {!hiddenWidgets.includes('saldoAtual') && (
           <Card className={`glass transition-all ${
             currentBalance < 0 
               ? 'border-red-500 border-2 animate-pulse' 
@@ -536,8 +561,10 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
 
           {/* 6. Saldo no Fim do Mês */}
+          {!hiddenWidgets.includes('fimDoMes') && (
           <Card className="glass border-border hover:border-primary/50 transition-all">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -556,6 +583,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* Quadro de Sugestões */}

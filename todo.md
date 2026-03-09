@@ -873,3 +873,10 @@
 - [x] Analisar relação entrada/saída
 - [x] Identificar aportes (investimentos)
 - [x] Gerar 3 sugestões objetivas baseadas em análise profunda
+
+
+## Bug: Widgets ocultos não são aplicados no Dashboard
+- [x] Carregar preferências de visibilidade ao abrir Dashboard
+- [x] Aplicar ocultação de widgets baseado em hiddenWidgets
+- [x] Reordenar widgets baseado em widgetOrder salvo
+- [x] Testar ocultação e reordenação funcionando corretamente
