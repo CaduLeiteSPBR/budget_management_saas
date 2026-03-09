@@ -32,9 +32,10 @@ const WIDGETS: Widget[] = [
 interface CustomizeDashboardModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPreferencesSaved?: (hiddenWidgets: string[], widgetOrder: string[]) => void;
 }
 
-export function CustomizeDashboardModal({ open, onOpenChange }: CustomizeDashboardModalProps) {
+export function CustomizeDashboardModal({ open, onOpenChange, onPreferencesSaved }: CustomizeDashboardModalProps) {
   const [widgets, setWidgets] = useState<Widget[]>(WIDGETS);
   const [hiddenWidgets, setHiddenWidgets] = useState<string[]>([]);
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
@@ -94,14 +95,18 @@ export function CustomizeDashboardModal({ open, onOpenChange }: CustomizeDashboa
 
   const handleSave = async () => {
     try {
+      const widgetOrder = widgets.map((w) => w.id);
       await savePreferencesMutation.mutateAsync({
-        widgetOrder: widgets.map((w) => w.id),
+        widgetOrder,
         hiddenWidgets,
       });
-      console.log('Preferências salvas com sucesso!');
+      console.log('Preferencias salvas com sucesso!');
+      if (onPreferencesSaved) {
+        onPreferencesSaved(hiddenWidgets, widgetOrder);
+      }
       onOpenChange(false);
     } catch (error) {
-      console.error('Erro ao salvar preferências:', error);
+      console.error('Erro ao salvar preferencias:', error);
     }
   };
 

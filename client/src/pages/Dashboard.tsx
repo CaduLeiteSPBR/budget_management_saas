@@ -68,6 +68,11 @@ export default function Dashboard() {
     await logoutMutation.mutateAsync();
     window.location.href = "/";
   };
+
+  const handlePreferencesSaved = (newHiddenWidgets: string[], newWidgetOrder: string[]) => {
+    setHiddenWidgets(newHiddenWidgets);
+    setWidgetOrder(newWidgetOrder);
+  };
   
   // Estado do seletor de período
   const currentMonth = new Date().getUTCMonth() + 1;
@@ -662,6 +667,7 @@ export default function Dashboard() {
       <CustomizeDashboardModal
         open={showCustomizeModal}
         onOpenChange={setShowCustomizeModal}
+        onPreferencesSaved={handlePreferencesSaved}
       />
     </div>
   );
