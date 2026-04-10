@@ -1078,8 +1078,11 @@ Retorne apenas JSON válido.`,
             activeDueMonth = 0;
             activeDueYear++;
           }
+        } else {
+          console.log('[DEBUG] dueDay >= closingDay, mantendo mês');
         }
         const activeDueDate = Date.UTC(activeDueYear, activeDueMonth, card.dueDay, 0, 0, 0, 0);
+        console.log('[DEBUG updateCurrentTotal] activeDueDate:', new Date(activeDueDate).toISOString());
         
         // Determinar se a fatura já fechou
         const now = Date.now();
@@ -1418,7 +1421,11 @@ function calculateInvoiceProjection(card: {
 
   // Calcular dias transcorridos desde o fechamento
   const nowTimestamp = Date.UTC(currentYear, currentMonth, currentDay, 0, 0, 0, 0);
-  const daysSinceClosing = Math.floor((nowTimestamp - cycleStartDate) / (1000 * 60 * 60 * 24));
+  let daysSinceClosing = Math.floor((nowTimestamp - cycleStartDate) / (1000 * 60 * 60 * 24));
+  // Se é o dia de fechamento, contar como 1 dia (não 0)
+  if (currentDay === card.closingDay) {
+    daysSinceClosing = Math.max(1, daysSinceClosing);
+  }
   
   // Total de dias no ciclo
   const totalDaysInCycle = Math.floor((nextClosingDate - cycleStartDate) / (1000 * 60 * 60 * 24));

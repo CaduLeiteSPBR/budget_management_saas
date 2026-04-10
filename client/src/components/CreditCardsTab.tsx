@@ -52,7 +52,7 @@ function calculateProjection(
   let cycleStartDate: Date;
   let cycleEndDate: Date;
   
-  if (currentDay <= closingDay) {
+  if (currentDay < closingDay) {
     // Ciclo do mês atual (do dia X do mês passado até dia X deste mês)
     cycleStartDate = new Date(Date.UTC(currentYear, currentMonth - 1, closingDay));
     cycleEndDate = new Date(Date.UTC(currentYear, currentMonth, closingDay));
@@ -62,14 +62,18 @@ function calculateProjection(
     cycleEndDate = new Date(Date.UTC(currentYear, currentMonth + 1, closingDay));
   }
   
-  const daysSinceClosing = Math.floor((now.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  let daysSinceClosing = Math.floor((now.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  // Se é o dia de fechamento, contar como 1 dia (não 0)
+  if (currentDay === closingDay) {
+    daysSinceClosing = Math.max(1, daysSinceClosing);
+  }
   const totalDaysInCycle = Math.floor((cycleEndDate.getTime() - cycleStartDate.getTime()) / (1000 * 60 * 60 * 24));
   
   // Projeção variável
   const variableAmount = currentTotalAmount - recurringAmount;
   const projectedVariable = daysSinceClosing > 0 
     ? (variableAmount / daysSinceClosing) * totalDaysInCycle 
-    : 0;
+    : variableAmount;
   
   // Projeção Real (sem trava) - sempre mostra cálculo bruto
   const rawProjection = projectedVariable + recurringAmount;

@@ -825,7 +825,8 @@
 - [x] Validar que projeção = valor atual quando fatura está fechada
 
 
-## Bug Crítico: Lançamento de Fatura no Mês Errado
-- [x] Lançamento está sendo atualizado em Abril ao invés de Maio (quando hoje >= dia de fechamento)
-- [x] Corrigir identificação do ciclo ativo na procedure updateCurrentTotalAmount
-- [x] Validar que lançamento é criado/atualizado no mês correto (próximo ciclo)
+## Bug Crítico: Cálculo de Projeção Incorreto no Dia de Fechamento
+- [x] Corrigir lógica de ciclo: mudar `currentDay <= closingDay` para `currentDay < closingDay`
+- [x] Garantir que `daysSinceClosing` seja pelo menos 1 no dia de fechamento
+- [x] Aplicar correção tanto no frontend quanto no backend
+- [x] Validar que projeção agora é calculada corretamente
