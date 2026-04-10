@@ -1059,7 +1059,6 @@ Retorne apenas JSON válido.`,
         });
 
         // Buscar lançamento da fatura ativa
-        const description = `Previsão CC ${card.name} ${card.brand}`;
         const allTransactions = await db.getUserTransactions(ctx.user.id);
         
         // Calcular data de vencimento da fatura ativa
@@ -1074,9 +1073,18 @@ Retorne apenas JSON válido.`,
         }
         const activeDueDate = Date.UTC(activeDueYear, activeDueMonth, card.dueDay, 0, 0, 0, 0);
         
+        // Determinar se a fatura já fechou
+        const now = Date.now();
+        const isClosed = activeDueDate < now;
+        const prefix = isClosed ? "Fatura" : "Previsão";
+        const description = `${prefix} CC ${card.name} ${card.brand}`;
+        
         // Buscar lançamento da fatura ativa especificamente
+        // Procurar por ambas as descrições (Previsão e Fatura) para encontrar o lançamento
         const existingTransaction = allTransactions.find(t => 
-          t.description === description && 
+          (t.description.includes("Previsão CC") || t.description.includes("Fatura CC")) &&
+          t.description.includes(card.name) &&
+          t.description.includes(card.brand) &&
           t.nature === "Saída" &&
           t.date === activeDueDate
         );
@@ -1222,8 +1230,8 @@ function identifyActiveBillingCycle(closingDay: number): { year: number; month: 
   const currentMonth = now.getUTCMonth(); // 0-11
   const currentDay = now.getUTCDate();
 
-  if (currentDay <= closingDay) {
-    // Ainda estamos no ciclo do mês atual
+  if (currentDay < closingDay) {
+    // Ainda estamos no ciclo do mês anterior (antes do fechamento)
     return { year: currentYear, month: currentMonth, isClosed: false };
   } else {
     // Ciclo do mês atual está fechado, fatura ativa é do próximo mês
@@ -1258,10 +1266,15 @@ async function generateCascadeInvoices(
   const expectedValue = Number(card.expectedAmount);
   const myExpectedValue = isShared ? (expectedValue * myPercentage / 100) : expectedValue;
   
-  // Descrição dinâmica baseada em isShared (mostra finalAmount, não expectedAmount)
-  const description = isShared 
-    ? `Previsão CC ${card.name} ${card.brand} (Fatura Total: R$ ${expectedValue.toFixed(2)})`
-    : `Previsão CC ${card.name} ${card.brand}`;
+  // Função para gerar descrição dinâmica baseada no status da fatura
+  const getInvoiceDescription = (isClosed: boolean) => {
+    const prefix = isClosed ? "Fatura" : "Previsão";
+    return isShared 
+      ? `${prefix} CC ${card.name} ${card.brand} (Fatura Total: R$ ${expectedValue.toFixed(2)})`
+      : `${prefix} CC ${card.name} ${card.brand}`;
+  };
+  
+  const description = getInvoiceDescription(false); // Padrão para novos lançamentos
 
   // Identificar fatura ativa
   const activeCycle = identifyActiveBillingCycle(card.closingDay);
@@ -1290,10 +1303,15 @@ async function generateCascadeInvoices(
     }
 
     const dueDate = Date.UTC(dueYear, dueMonth, card.dueDay, 0, 0, 0, 0);
+    
+    // Determinar se a fatura já fechou (vencimento no passado)
+    const now = Date.now();
+    const isClosed = dueDate < now;
+    const invoiceDescription = getInvoiceDescription(isClosed);
 
     invoicesToCreate.push({
       userId,
-      description,
+      description: invoiceDescription,
       amount: myExpectedValue.toFixed(2),
       nature: "Saída" as const,
       division: card.division as any,
@@ -1369,13 +1387,14 @@ function calculateInvoiceProjection(card: {
   let cycleStartMonth = currentMonth;
   
   if (currentDay < card.closingDay) {
-    // Ainda estamos no ciclo anterior
+    // Ainda estamos no ciclo anterior (antes do fechamento)
     cycleStartMonth--;
     if (cycleStartMonth < 0) {
       cycleStartMonth = 11;
       cycleStartYear--;
     }
   }
+  // Se currentDay >= closingDay, o ciclo começou hoje, então cycleStartMonth/Year já está correto
 
   // Data de fechamento do ciclo atual
   const cycleStartDate = Date.UTC(cycleStartYear, cycleStartMonth, card.closingDay, 0, 0, 0, 0);

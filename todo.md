@@ -816,3 +816,10 @@
 - [x] Atualizar Dashboard para usar período correto
 - [x] Testar com diferentes datas de fechamento
 - [x] Validar que fatura anterior fica inacessoível após data de fechamento
+
+
+## Bugs: Fatura de Cartão de Crédito
+- [x] Corrigir cálculo de projeção para considerar dia de fechamento como início do próximo ciclo
+- [x] Implementar mudança automática de descrição (Previsão → Fatura) quando fatura fecha
+- [x] Atualizar lançamentos automáticos com nova descrição ao fechar fatura
+- [x] Validar que projeção = valor atual quando fatura está fechada
