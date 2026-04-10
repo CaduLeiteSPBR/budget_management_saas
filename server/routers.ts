@@ -1038,6 +1038,14 @@ Retorne apenas JSON válido.`,
         currentTotalAmount: z.string().regex(/^\d+(\.\d{1,2})?$/),
       }))
       .mutation(async ({ ctx, input }) => {
+        // Função auxiliar para comparar apenas a data (ignorar hora)
+        const isSameDate = (timestamp1: number, timestamp2: number): boolean => {
+          const date1 = new Date(timestamp1);
+          const date2 = new Date(timestamp2);
+          return date1.getUTCFullYear() === date2.getUTCFullYear() &&
+                 date1.getUTCMonth() === date2.getUTCMonth() &&
+                 date1.getUTCDate() === date2.getUTCDate();
+        };
         // Buscar cartão
         const card = await db.getCreditCardById(input.id, ctx.user.id);
         if (!card) {
@@ -1086,7 +1094,7 @@ Retorne apenas JSON válido.`,
           t.description.includes(card.name) &&
           t.description.includes(card.brand) &&
           t.nature === "Saída" &&
-          t.date === activeDueDate
+          isSameDate(t.date, activeDueDate)
         );
 
         if (existingTransaction) {

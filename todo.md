@@ -823,3 +823,9 @@
 - [x] Implementar mudança automática de descrição (Previsão → Fatura) quando fatura fecha
 - [x] Atualizar lançamentos automáticos com nova descrição ao fechar fatura
 - [x] Validar que projeção = valor atual quando fatura está fechada
+
+
+## Bug Crítico: Lançamento de Fatura no Mês Errado
+- [x] Lançamento está sendo atualizado em Abril ao invés de Maio (quando hoje >= dia de fechamento)
+- [x] Corrigir identificação do ciclo ativo na procedure updateCurrentTotalAmount
+- [x] Validar que lançamento é criado/atualizado no mês correto (próximo ciclo)
