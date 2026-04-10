@@ -1109,102 +1109,26 @@ Retorne apenas JSON válido.`,
   }),
 
   dashboard: router({
-    getPreferences: protectedProcedure.query(async ({ ctx }) => {
-      const prefs = await db.getDashboardPreferences(ctx.user.id);
-      if (!prefs) {
-        return {
-          widgetOrder: ['saldoInicial', 'entradas', 'saidas', 'fimDoMes', 'saldoAtual', 'saldoMinimo'],
-          hiddenWidgets: [],
-        };
+    calculateCurrentPeriod: protectedProcedure.query(async ({ ctx }) => {
+      const user = await db.getUserById(ctx.user.id);
+      if (!user) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Usuário não encontrado' });
       }
+
+      const closingDay = user.creditCardClosingDay || 1;
+      const period = db.calculateBillingPeriod(closingDay);
+      const dates = db.getBillingPeriodDates(closingDay, period.month, period.year);
+
       return {
-        widgetOrder: JSON.parse(prefs.widgetOrder),
-        hiddenWidgets: JSON.parse(prefs.hiddenWidgets),
+        month: period.month,
+        year: period.year,
+        closingDay,
+        startDate: dates.start,
+        endDate: dates.end,
       };
-    }),
-
-    updatePreferences: protectedProcedure
-      .input(z.object({
-        widgetOrder: z.array(z.string()),
-        hiddenWidgets: z.array(z.string()),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        await db.saveDashboardPreferences(ctx.user.id, input);
-        return { success: true };
-      }),
-
-    savePreferences: protectedProcedure
-      .input(z.object({
-        widgetOrder: z.array(z.string()),
-        hiddenWidgets: z.array(z.string()),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        await db.saveDashboardPreferences(ctx.user.id, input);
-        return { success: true };
-      }),
-
-    generateSuggestions: protectedProcedure.query(async ({ ctx }) => {
-      const transactions = await db.getUserTransactions(ctx.user.id);
-      const now = new Date();
-      const currentMonth = now.getUTCMonth();
-      const currentYear = now.getUTCFullYear();
-      const monthStart = Date.UTC(currentYear, currentMonth, 1, 0, 0, 0, 0);
-      const monthEnd = Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
-      const monthTransactions = transactions.filter(t => t.date >= monthStart && t.date <= monthEnd);
-      const expenses = monthTransactions.filter(t => t.nature === 'Saída');
-      const income = monthTransactions.filter(t => t.nature === 'Entrada');
-      const totalExpenses = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
-      const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0);
-      
-      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const burnRate = totalExpenses / daysInMonth;
-      const avgExpense = expenses.length > 0 ? totalExpenses / expenses.length : 0;
-      const balance = totalIncome - totalExpenses;
-      const expenseRatio = totalIncome > 0 ? (totalExpenses / totalIncome * 100) : 0;
-      
-      const categoryAnalysis = monthTransactions.reduce((acc: any, t) => {
-        const cat = t.categoryName || 'Sem categoria';
-        if (!acc[cat]) acc[cat] = { amount: 0, count: 0 };
-        acc[cat].amount += Number(t.amount);
-        acc[cat].count += 1;
-        return acc;
-      }, {});
-      
-      const investmentTransactions = transactions.filter(t => 
-        t.description?.toLowerCase().includes('aporte') ||
-        t.description?.toLowerCase().includes('investimento')
-      );
-      const totalInvestments = investmentTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-      
-      const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
-      const recentCardTransactions = transactions.filter(t => t.date >= twoWeeksAgo && t.description?.toLowerCase().includes('cartão'));
-      const olderCardTransactions = transactions.filter(t => t.date < twoWeeksAgo && t.date >= monthStart && t.description?.toLowerCase().includes('cartão'));
-      const recentCardSpend = recentCardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-      const olderCardSpend = olderCardTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-      const cardTrend = olderCardSpend > 0 ? ((recentCardSpend - olderCardSpend) / olderCardSpend * 100) : 0;
-      
-      try {
-        const response = await invokeLLM({
-          messages: [
-            { role: 'system', content: 'Você é um consultor financeiro. Gere EXATAMENTE 3 sugestões curtas (máx 15 palavras cada). Sem introdução, sem explicações. Apenas bullets diretos e acionáveis.' },
-            { role: 'user', content: `Renda: R$ ${totalIncome.toFixed(2)} | Despesas: R$ ${totalExpenses.toFixed(2)} | Saldo: R$ ${balance.toFixed(2)} | Burn Rate: R$ ${burnRate.toFixed(2)}/dia | Ticket Médio: R$ ${avgExpense.toFixed(2)} | Gastos: ${expenseRatio.toFixed(1)}% | Investimentos: R$ ${totalInvestments.toFixed(2)} | Cartão: ${cardTrend > 0 ? '+' : ''}${cardTrend.toFixed(1)}%\n\nGere 3 bullets objetivos (máx 15 palavras cada). Responda APENAS com os 3 bullets, sem numeração, sem explicações.` },
-          ],
-        });
-        const content = response.choices[0]?.message?.content || '';
-        const contentStr = typeof content === 'string' ? content : '';
-        const suggestions = contentStr
-          .split('\n')
-          .map((line: string) => line.replace(/^[•\-*]\s*/, '').trim())
-          .filter((line: string) => line.length > 0 && line.length < 200)
-          .slice(0, 3);
-        return { suggestions };
-      } catch (error) {
-        return { suggestions: ['Analise seus gastos', 'Estabeleça metas mensais', 'Revise suas assinaturas'] };
-      }
     }),
   }),
 });
-
 
 // Função auxiliar para ajustar data em meses curtos (regra do dia 31)
 function adjustDateForShortMonths(originalDay: number, targetYear: number, targetMonth: number): number {

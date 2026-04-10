@@ -11,7 +11,6 @@ import {
   budgets,
   aiLearning,
   creditCards,
-  dashboardPreferences,
   type Category,
   type Transaction,
   type Subscription,
@@ -20,7 +19,6 @@ import {
   type Budget,
   type AiLearning,
   type CreditCard,
-  type DashboardPreferences,
   type InsertCategory,
   type InsertTransaction,
   type InsertSubscription,
@@ -29,7 +27,6 @@ import {
   type InsertBudget,
   type InsertAiLearning,
   type InsertCreditCard,
-  type InsertDashboardPreferences,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -116,6 +113,17 @@ export async function getUserByOpenId(openId: string) {
   }
 
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -826,40 +834,57 @@ export async function deleteCreditCard(id: number, userId: number) {
 }
 
 
-// ==================== DASHBOARD PREFERENCES ====================
+// ==================== PERIOD CALCULATION ====================
 
-export async function getDashboardPreferences(userId: number): Promise<DashboardPreferences | undefined> {
-  const db = await getDb();
-  if (!db) return undefined;
-  const [prefs] = await db
-    .select()
-    .from(dashboardPreferences)
-    .where(eq(dashboardPreferences.userId, userId))
-    .limit(1);
-  return prefs;
+/**
+ * Calcula o período de fatura baseado na data de fechamento do cartão
+ * Se hoje >= dia de fechamento, retorna o mês atual (fatura aberta)
+ * Se hoje < dia de fechamento, retorna o mês anterior (fatura anterior ainda aberta)
+ */
+export function calculateBillingPeriod(closingDay: number, referenceDate: Date = new Date()): { month: number; year: number } {
+  const today = referenceDate.getUTCDate();
+  const currentMonth = referenceDate.getUTCMonth() + 1; // 1-12
+  const currentYear = referenceDate.getUTCFullYear();
+
+  // Se hoje >= dia de fechamento, a fatura atual está aberta
+  if (today >= closingDay) {
+    return { month: currentMonth, year: currentYear };
+  }
+
+  // Se hoje < dia de fechamento, ainda estamos na fatura do mês anterior
+  let prevMonth = currentMonth - 1;
+  let prevYear = currentYear;
+
+  if (prevMonth < 1) {
+    prevMonth = 12;
+    prevYear--;
+  }
+
+  return { month: prevMonth, year: prevYear };
 }
 
-export async function saveDashboardPreferences(userId: number, data: {
-  widgetOrder: string[];
-  hiddenWidgets: string[];
-}): Promise<void> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  const existing = await getDashboardPreferences(userId);
-  
-  const prefsData = {
-    userId,
-    widgetOrder: JSON.stringify(data.widgetOrder),
-    hiddenWidgets: JSON.stringify(data.hiddenWidgets),
-  };
-  
-  if (existing) {
-    await db
-      .update(dashboardPreferences)
-      .set(prefsData)
-      .where(eq(dashboardPreferences.userId, userId));
-  } else {
-    await db.insert(dashboardPreferences).values(prefsData);
+/**
+ * Retorna o intervalo de datas para um período de fatura
+ * A fatura começa no dia de fechamento do mês anterior e termina no dia de fechamento do mês atual
+ */
+export function getBillingPeriodDates(closingDay: number, month: number, year: number): { start: number; end: number } {
+  // Ajustar para o dia de fechamento válido (alguns meses têm menos dias)
+  const lastDayOfPrevMonth = new Date(Date.UTC(year, month - 1, 0)).getUTCDate();
+  const validClosingDay = Math.min(closingDay, lastDayOfPrevMonth);
+
+  // Data de início: dia de fechamento do mês anterior
+  let startMonth = month - 1;
+  let startYear = year;
+  if (startMonth < 1) {
+    startMonth = 12;
+    startYear--;
   }
+  const start = Date.UTC(startYear, startMonth - 1, validClosingDay, 0, 0, 0, 0);
+
+  // Data de término: dia de fechamento do mês atual
+  const lastDayOfCurrentMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const validCurrentClosingDay = Math.min(closingDay, lastDayOfCurrentMonth);
+  const end = Date.UTC(year, month - 1, validCurrentClosingDay, 23, 59, 59, 999);
+
+  return { start, end };
 }

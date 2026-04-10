@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "d8977b4e-0b88-472b-96be-91e0d692d16e",
+  "id": "5b6e5136-3a74-4662-ad8d-13a6ddb69055",
   "prevId": "649fa93f-53f9-44c3-813e-ed70ad159dbf",
   "tables": {
     "ai_learning": {
@@ -381,75 +381,6 @@
         }
       },
       "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "dashboard_preferences": {
-      "name": "dashboard_preferences",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "widgetOrder": {
-          "name": "widgetOrder",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "hiddenWidgets": {
-          "name": "hiddenWidgets",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "dashboard_preferences_id": {
-          "name": "dashboard_preferences_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "dashboard_preferences_userId_unique": {
-          "name": "dashboard_preferences_userId_unique",
-          "columns": [
-            "userId"
-          ]
-        }
-      },
       "checkConstraint": {}
     },
     "installments": {
@@ -935,6 +866,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'user'"
+        },
+        "creditCardClosingDay": {
+          "name": "creditCardClosingDay",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
         },
         "createdAt": {
           "name": "createdAt",

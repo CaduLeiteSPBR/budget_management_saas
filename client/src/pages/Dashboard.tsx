@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -37,41 +37,17 @@ import OverviewDashboard from "@/components/OverviewDashboard";
 import TransactionsList from "@/components/TransactionsList";
 import TransactionForm from "@/components/TransactionForm";
 import CreditCardsTab from "@/components/CreditCardsTab";
-import { SuggestionsBox } from "@/components/SuggestionsBox";
-import { CustomizeDashboardModal } from "@/components/CustomizeDashboardModal";
 
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransactionId, setEditingTransactionId] = useState<number | undefined>();
-  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
-  const [hiddenWidgets, setHiddenWidgets] = useState<string[]>([]);
-  const [widgetOrder, setWidgetOrder] = useState<string[]>(['saldoInicial', 'entradas', 'saidas', 'fimDoMes', 'saldoAtual', 'saldoMinimo']);
   const logoutMutation = trpc.auth.logout.useMutation();
-  const getPreferencesQuery = trpc.dashboard.getPreferences.useQuery();
-
-  // Carregar preferências ao montar o componente
-  useEffect(() => {
-    if (getPreferencesQuery.data) {
-      const { widgetOrder: order, hiddenWidgets: hidden } = getPreferencesQuery.data;
-      if (order && order.length > 0) {
-        setWidgetOrder(order);
-      }
-      if (hidden) {
-        setHiddenWidgets(hidden);
-      }
-    }
-  }, [getPreferencesQuery.data]);
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
     window.location.href = "/";
-  };
-
-  const handlePreferencesSaved = (newHiddenWidgets: string[], newWidgetOrder: string[]) => {
-    setHiddenWidgets(newHiddenWidgets);
-    setWidgetOrder(newWidgetOrder);
   };
   
   // Estado do seletor de período
@@ -273,20 +249,10 @@ export default function Dashboard() {
                 </Button>
               </Link>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setShowCustomizeModal(true)}
-              >
-                <Settings className="w-4 h-4" />
-                <span className="hidden md:inline">Personalizar</span>
-              </Button>
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <LogOut className="w-4 h-4" />
+                    <Settings className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -435,169 +401,148 @@ export default function Dashboard() {
         
         {/* Stats Cards - 6 Widgets */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-          {widgetOrder.map((widgetId) => {
-            // Verificar se widget está oculto
-            if (hiddenWidgets.includes(widgetId)) return null;
+          {/* 1. Saldo Inicial */}
+          <Card className="glass border-border hover:border-primary/50 transition-all">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Inicial
+                </CardTitle>
+                <Wallet className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold tracking-tight">
+                {formatCurrency(initialBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Início do período
+              </p>
+            </CardContent>
+          </Card>
 
-            switch (widgetId) {
-              case 'saldoInicial':
-                return (
-                  <Card key={widgetId} className="glass border-border hover:border-primary/50 transition-all">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Saldo Inicial
-                        </CardTitle>
-                        <Wallet className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold tracking-tight">
-                        {formatCurrency(initialBalance)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Início do período
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              case 'entradas':
-                return (
-                  <Card key={widgetId} className="glass border-income hover:border-income transition-all glow-income">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-income uppercase tracking-wider">
-                          Entradas
-                        </CardTitle>
-                        <ArrowUpCircle className="w-4 h-4 text-income" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-income tracking-tight">
-                        {formatCurrency(periodIncome)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {periodTransactions.filter(t => t.nature === "Entrada").length} transações
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              case 'saidas':
-                return (
-                  <Card key={widgetId} className="glass border-expense hover:border-expense transition-all glow-expense">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-expense uppercase tracking-wider">
-                          Saídas
-                        </CardTitle>
-                        <ArrowDownCircle className="w-4 h-4 text-expense" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-expense tracking-tight">
-                        {formatCurrency(periodExpense)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {periodTransactions.filter(t => t.nature === "Saída").length} transações
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              case 'saldoMinimo':
-                return (
-                  <Card key={widgetId} className={`glass transition-all ${
-                    minimumBalance < 0 
-                      ? 'border-red-500 border-2 animate-pulse' 
-                      : 'border-border hover:border-primary/50'
-                  }`}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Saldo Mínimo
-                        </CardTitle>
-                        {minimumBalance < 0 ? (
-                          <TriangleAlert className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className={`text-2xl font-bold tracking-tight ${
-                        minimumBalance < 0 ? 'text-red-500' : ''
-                      }`}>
-                        {formatCurrency(minimumBalance)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {minimumBalanceDate
-                          ? `Em ${new Date(minimumBalanceDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}`
-                          : 'A partir de hoje'
-                        }
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              case 'saldoAtual':
-                return (
-                  <Card key={widgetId} className={`glass transition-all ${
-                    currentBalance < 0 
-                      ? 'border-red-500 border-2 animate-pulse' 
-                      : 'border-border hover:border-primary/50'
-                  }`}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Saldo Atual
-                        </CardTitle>
-                        {currentBalance < 0 ? (
-                          <TriangleAlert className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <Wallet className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className={`text-2xl font-bold tracking-tight ${
-                        currentBalance < 0 ? 'text-red-500' : ''
-                      }`}>
-                        {formatCurrency(currentBalance)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Saldo real até hoje
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              case 'fimDoMes':
-                return (
-                  <Card key={widgetId} className="glass border-border hover:border-primary/50 transition-all">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Fim do Mês
-                        </CardTitle>
-                        <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className={`text-2xl font-bold tracking-tight ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
-                        {formatCurrency(endOfPeriodBalance)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Projeção com lançamentos
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              default:
-                return null;
-            }
-          })}
-        </div>
+          {/* 2. Entradas do Mês */}
+          <Card className="glass border-income hover:border-income transition-all glow-income">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-income uppercase tracking-wider">
+                  Entradas
+                </CardTitle>
+                <ArrowUpCircle className="w-4 h-4 text-income" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-income tracking-tight">
+                {formatCurrency(periodIncome)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {periodTransactions.filter(t => t.nature === "Entrada").length} transações
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Quadro de Sugestões */}
-        <div className="mb-8">
-          <SuggestionsBox />
+          {/* 3. Saídas do Mês */}
+          <Card className="glass border-expense hover:border-expense transition-all glow-expense">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-expense uppercase tracking-wider">
+                  Saídas
+                </CardTitle>
+                <ArrowDownCircle className="w-4 h-4 text-expense" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-expense tracking-tight">
+                {formatCurrency(periodExpense)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {periodTransactions.filter(t => t.nature === "Saída").length} transações
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 4. Saldo Mínimo */}
+          <Card className={`glass transition-all ${
+            minimumBalance < 0 
+              ? 'border-red-500 border-2 animate-pulse' 
+              : 'border-border hover:border-primary/50'
+          }`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Mínimo
+                </CardTitle>
+                {minimumBalance < 0 ? (
+                  <TriangleAlert className="w-4 h-4 text-red-500" />
+                ) : (
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold tracking-tight ${
+                minimumBalance < 0 ? 'text-red-500' : ''
+              }`}>
+                {formatCurrency(minimumBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {minimumBalanceDate
+                  ? `Em ${new Date(minimumBalanceDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}`
+                  : 'A partir de hoje'
+                }
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 5. Saldo Atual */}
+          <Card className={`glass transition-all ${
+            currentBalance < 0 
+              ? 'border-red-500 border-2 animate-pulse' 
+              : 'border-border hover:border-primary/50'
+          }`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Saldo Atual
+                </CardTitle>
+                {currentBalance < 0 ? (
+                  <TriangleAlert className="w-4 h-4 text-red-500" />
+                ) : (
+                  <Wallet className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold tracking-tight ${
+                currentBalance < 0 ? 'text-red-500' : ''
+              }`}>
+                {formatCurrency(currentBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Saldo real até hoje
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* 6. Saldo no Fim do Mês */}
+          <Card className="glass border-border hover:border-primary/50 transition-all">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Fim do Mês
+                </CardTitle>
+                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold tracking-tight ${endOfPeriodBalance >= 0 ? 'text-income' : 'text-expense'}`}>
+                {formatCurrency(endOfPeriodBalance)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Projeção com lançamentos
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
           <TabsList className="glass-strong">
@@ -666,13 +611,6 @@ export default function Dashboard() {
 
         </Tabs>
       </main>
-
-      {/* Modal de Personalização */}
-      <CustomizeDashboardModal
-        open={showCustomizeModal}
-        onOpenChange={setShowCustomizeModal}
-        onPreferencesSaved={handlePreferencesSaved}
-      />
     </div>
   );
 }

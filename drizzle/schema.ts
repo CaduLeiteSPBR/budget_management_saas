@@ -10,6 +10,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  creditCardClosingDay: int("creditCardClosingDay").default(1).notNull(), // Dia de fechamento do cartão (1-31)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -185,20 +186,3 @@ export const creditCards = mysqlTable("credit_cards", {
 
 export type CreditCard = typeof creditCards.$inferSelect;
 export type InsertCreditCard = typeof creditCards.$inferInsert;
-
-
-/**
- * Preferências do Dashboard do usuário
- * Armazena ordem e visibilidade dos widgets
- */
-export const dashboardPreferences = mysqlTable("dashboard_preferences", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().unique(),
-  widgetOrder: text("widgetOrder").notNull(), // JSON array de widget IDs em ordem
-  hiddenWidgets: text("hiddenWidgets").notNull(), // JSON array de widget IDs ocultos
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type DashboardPreferences = typeof dashboardPreferences.$inferSelect;
-export type InsertDashboardPreferences = typeof dashboardPreferences.$inferInsert;
