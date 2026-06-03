@@ -830,3 +830,10 @@
 - [x] Garantir que `daysSinceClosing` seja pelo menos 1 no dia de fechamento
 - [x] Aplicar correção tanto no frontend quanto no backend
 - [x] Validar que projeção agora é calculada corretamente
+
+
+## Feature: Destaque Visual de Lançamentos Passados
+- [x] Implementar lógica para detectar lançamentos do mês atual anteriores a hoje
+- [x] Aplicar cor de fundo sutil (modo escuro: bg-slate-800/50, modo claro: bg-slate-100/60)
+- [x] Testar visibilidade em ambos os modos
+- [x] Validar que apenas lançamentos passados recebem destaque

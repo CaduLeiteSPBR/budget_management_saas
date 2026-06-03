@@ -437,8 +437,25 @@ export default function TransactionsList({ onEdit, selectedMonths, selectedYear 
 
                     const rowBgClass = dateGroupIndex % 2 === 0 ? "" : "bg-muted/30";
                     
+                    // Verificar se é o mês atual e se a transação é do passado
+                    const today = new Date();
+                    const currentMonth = today.getUTCMonth() + 1;
+                    const currentYear = today.getUTCFullYear();
+                    const transactionDate = new Date(transaction.date);
+                    const txMonth = transactionDate.getUTCMonth() + 1;
+                    const txYear = transactionDate.getUTCFullYear();
+                    const txDay = transactionDate.getUTCDate();
+                    const todayDay = today.getUTCDate();
+                    
+                    const isCurrentMonth = txMonth === currentMonth && txYear === currentYear;
+                    const isPastTransaction = isCurrentMonth && txDay < todayDay;
+                    
+
+                    
+                    const pastBgClass = isPastTransaction ? "bg-slate-100/60 dark:bg-slate-800/50" : "";
+                    
                     return (
-                    <TableRow key={transaction.id} className={rowBgClass}>
+                    <TableRow key={transaction.id} className={`${rowBgClass} ${pastBgClass}`}>
                       <TableCell className="font-medium">
                         {formatDate(transaction.date)}
                       </TableCell>
